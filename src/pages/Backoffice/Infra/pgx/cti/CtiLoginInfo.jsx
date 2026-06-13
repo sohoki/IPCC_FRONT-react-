@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+ï»¿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const CtiLoginFormModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/cti/components/CtiLoginFormModal.jsx'));
 
@@ -55,17 +55,17 @@ const CtiLoginInfo = () => {
 
     const handleDelete = useCallback(async (loginId, centerId, mediaId) => {
         const first = await Swal.fire({
-            icon: 'question', title: 'LoginId ?? œ',
-            html: `<b>${loginId}</b> ë¥??? ?? œ ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?„ë‹ˆ??,
+            icon: 'question', title: 'LoginId ??ï¿½ï¿½',
+            html: `<b>${loginId}</b> ï¿½??? ??ï¿½ï¿½ ?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
+            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
         const second = await Swal.fire({
-            icon: 'warning', title: 'LoginId ?? œ ?•ì¸',
-            html: `<b>${loginId}</b> ë¥??? ?? œ?˜ì‹œë©??œìŠ¤?œì— ?í–¥???ˆì„ ???ˆìŠµ?ˆë‹¤.<br>?•ë§ë¡??? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?„ë‹ˆ??,
+            icon: 'warning', title: 'LoginId ??ï¿½ï¿½ ?ï¿½ì¸',
+            html: `<b>${loginId}</b> ï¿½??? ??ï¿½ï¿½?ï¿½ì‹œï¿½??ï¿½ìŠ¤?ï¿½ì— ?ï¿½í–¥???ï¿½ì„ ???ï¿½ìŠµ?ï¿½ë‹¤.<br>?ï¿½ë§ï¿½???ï¿½ï¿½?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
+            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!second.isConfirmed) return;
@@ -79,32 +79,32 @@ const CtiLoginInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?? œ?˜ì—ˆ?µë‹ˆ??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??ï¿½ï¿½?ï¿½ì—ˆ?ï¿½ë‹ˆ??' });
                 handleSearch(1);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '?? œ???¤íŒ¨?ˆìŠµ?ˆë‹¤.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??ï¿½ï¿½???ï¿½íŒ¨?ï¿½ìŠµ?ï¿½ë‹¤.' });
                 handleSearch(1);
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ï¿½??ï¿½ë¥˜ê°€ ë°œìƒ?ï¿½ìŠµ?ï¿½ë‹¤.' });
             handleSearch(1);
         }
     }, [handleSearch]);
 
     const columnDefs = useMemo(() => [
-        { headerName: 'ë¡œê·¸?¸ID', field: 'loginId', width: 150 },
+        { headerName: 'ë¡œê·¸?ï¿½ID', field: 'loginId', width: 150 },
         { headerName: 'ì§€??,     field: 'centerName', flex: 1 },
         { headerName: 'ë¯¸ë””??,   field: 'mediaName', flex: 1 },
         { headerName: 'ê°ì‹œ',     field: 'monitorFlag', width: 90 },
-        { headerName: '?ì„±??,   field: 'createDate', width: 150 },
+        { headerName: '?ï¿½ì„±??,   field: 'createDate', width: 150 },
         {
-            headerName: '?? œ', width: 70, sortable: false, filter: false,
+            headerName: '??ï¿½ï¿½', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button
                     className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete(p.data?.loginId, p.data?.centerId, p.data?.mediaId)}
                 >
-                    ?? œ
+                    ??ï¿½ï¿½
                 </button>
             ),
         },
@@ -113,11 +113,11 @@ const CtiLoginInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">CTI ë¡œê·¸??ê´€ë¦?/div>
+                <div className="content-header__title">CTI ë¡œê·¸??ê´€ï¿½?/div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?¸í”„??ê´€ë¦?/li>
-                        <li className="breadcrumb-item">CTI ë¡œê·¸??ê´€ë¦?/li>
+                        <li className="breadcrumb-item">?ï¿½í”„??ê´€ï¿½?/li>
+                        <li className="breadcrumb-item">CTI ë¡œê·¸??ê´€ï¿½?/li>
                     </ol>
                 </div>
             </div>
@@ -130,13 +130,13 @@ const CtiLoginInfo = () => {
                             value={tempParams.searchCondition}
                             onChange={handleInputChange}
                         >
-                            <option value="">? íƒ</option>
+                            <option value="">?ï¿½íƒ</option>
                             <option value="loginId">LoginId</option>
                         </select>
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="ê²€?‰ì–´ë¥??…ë ¥?˜ì„¸??
+                            placeholder="ê²€?ï¿½ì–´ï¿½??ï¿½ë ¥?ï¿½ì„¸??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -159,16 +159,16 @@ const CtiLoginInfo = () => {
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            ê°œë³„ ?±ë¡
+                            ê°œë³„ ?ï¿½ë¡
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -177,8 +177,8 @@ const CtiLoginInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?°ì´?°ê? ?†ìŠµ?ˆë‹¤.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ì¤?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?ï¿½ì´?ï¿½ï¿½? ?ï¿½ìŠµ?ï¿½ë‹¤.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ï¿½?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

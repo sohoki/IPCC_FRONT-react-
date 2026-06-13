@@ -1,18 +1,18 @@
-import React, { useState, useCallback, useRef } from 'react';
+﻿import React, { useState, useCallback, useRef } from 'react';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const INITIAL_SEARCH = { searchCondition: '', searchKeyword: '' };
 
 /**
- * ?�로그램 ?�택 ?�업
+ * ?�로그램 ?�택 ?�업
  * Props:
- *   open     ???�시 ?��?
- *   onClose  ???�기 콜백
- *   onSelect ??(row) => void  ???�택 콜백
+ *   open     ???�시 ?��?
+ *   onClose  ???�기 콜백
+ *   onSelect ??(row) => void  ???�택 콜백
  */
 const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
     const [pageUnit] = useState(20);
@@ -49,11 +49,11 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
     };
 
     const columnDefs = [
-        { headerName: '?�로그램코드', field: 'progrmFileNm', width: 180 },
-        { headerName: '?��?�?,       field: 'progrmKoreannm', flex: 1 },
-        { headerName: '?�?�경�?,     field: 'progrmStrePath', flex: 1 },
+        { headerName: '?�로그램코드', field: 'progrmFileNm', width: 180 },
+        { headerName: '?��?�?,       field: 'progrmKoreannm', flex: 1 },
+        { headerName: '?�?�경�?,     field: 'progrmStrePath', flex: 1 },
         {
-            headerName: '?�택',
+            headerName: '?�택',
             width: 80,
             sortable: false,
             filter: false,
@@ -64,7 +64,7 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                     style={{ padding: '2px 10px', fontSize: 12 }}
                     onClick={() => { onSelect(p.data); onClose(); }}
                 >
-                    ?�택
+                    ?�택
                 </button>
             ),
         },
@@ -84,14 +84,14 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                 display: 'flex', flexDirection: 'column',
                 maxHeight: '80vh', overflow: 'hidden',
             }}>
-                {/* ?�더 */}
+                {/* ?�더 */}
                 <div style={{
                     padding: '16px 20px 12px', borderBottom: '1px solid #f0f4f8',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     flexShrink: 0,
                 }}>
                     <span style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
-                        ?�로그램 검??                    </span>
+                        ?�로그램 검??                    </span>
                     <button
                         type="button"
                         style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8', lineHeight: 1 }}
@@ -99,7 +99,7 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                     >×</button>
                 </div>
 
-                {/* 검??�?*/}
+                {/* 검??�?*/}
                 <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f4f8', display: 'flex', gap: 8, flexShrink: 0 }}>
                     <select
                         name="searchCondition"
@@ -108,16 +108,16 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         value={tempParams.searchCondition}
                         onChange={handleInputChange}
                     >
-                        <option value="">?�택</option>
+                        <option value="">?�택</option>
                         <option value="progrmFileNm">코드</option>
-                        <option value="progrmKoreannm">?��?�?/option>
+                        <option value="progrmKoreannm">?��?�?/option>
                     </select>
                     <input
                         ref={inputRef}
                         name="searchKeyword"
                         type="text"
                         className="form-control"
-                        placeholder="검?�어�??�력?�세??
+                        placeholder="검?�어�??�력?�세??
                         value={tempParams.searchKeyword}
                         onChange={handleInputChange}
                         onKeyDown={onKeyDown}
@@ -127,9 +127,9 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         검??                    </button>
                 </div>
 
-                {/* 그리????고정 ?�이 + odd/even 줄무??*/}
+                {/* 그리????고정 ?�이 + odd/even 줄무??*/}
                 <div style={{ padding: '0 16px 4px', flexShrink: 0 }}>
-                <div className="ag-theme-quartz" style={{ height: 420 }}>
+                <div className="ag-theme-material" style={{ height: 420 }}>
                     <style>{`
                         .pgm-grid .ag-row-odd  { background-color: #f8fafc; }
                         .pgm-grid .ag-row-even { background-color: #ffffff; }
@@ -137,10 +137,10 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         .pgm-grid .ag-row-selected { background-color: #dbeafe !important; }
                         .pgm-grid .ag-header { background: #f1f5f9; font-weight: 600; font-size: 13px; }
                     `}</style>
-                    <AgGridReact
+                    <AppAgGrid
                         className="pgm-grid"
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -148,17 +148,17 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         paginationPageSizeSelector={[10, 20, 50]}
                         cacheBlockSize={pageUnit}
                         rowHeight={38}
-                        overlayNoRowsTemplate="<span style='color:#94a3b8'>검??결과가 ?�습?�다.</span>"
-                        overlayLoadingTemplate="<span style='color:#94a3b8'>조회 �?..</span>"
+                        overlayNoRowsTemplate="<span style='color:#94a3b8'>검??결과가 ?�습?�다.</span>"
+                        overlayLoadingTemplate="<span style='color:#94a3b8'>조회 �?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>
                 </div>
 
-                {/* ?�단 */}
+                {/* ?�단 */}
                 <div style={{ padding: '12px 20px', borderTop: '1px solid #f0f4f8', display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
                     <button type="button" className="btn btn-outline-secondary" onClick={onClose}>
-                        ?�기
+                        ?�기
                     </button>
                 </div>
             </div>

@@ -21,7 +21,11 @@ export function useSidebar() {
     const location = useLocation();
 
     const [isOpenSideBar, setIsOpenSideBar] = useState(true);
-    const toggleSideBar = useCallback(() => setIsOpenSideBar((p) => !p), []);
+    const toggleSideBar = useCallback(() => {
+        setIsOpenSideBar((p) => !p);
+        // CSS transition(240ms) 종료 후 ag-grid sizeColumnsToFit 유발
+        setTimeout(() => window.dispatchEvent(new CustomEvent('sb:resized')), 260);
+    }, []);
 
     const [items,   setItems]   = useState([]);
     const [loading, setLoading] = useState(false);
@@ -49,12 +53,12 @@ export function useSidebar() {
         return Number.isFinite(parentNo) ? parentNo : null;
     }, [menuNoInt, items]);
 
-    // effective open parents: URL-active parent takes precedence over manual selection
-    // avoids setState-in-effect pattern
-    const openParents = useMemo(
-        () => (activeParentNo != null ? new Set([activeParentNo]) : manualOpenParents),
-        [activeParentNo, manualOpenParents]
-    );
+    // effective open parents: URL-active parent + manually clicked parents (union)
+    const openParents = useMemo(() => {
+        const set = new Set(manualOpenParents);
+        if (activeParentNo != null) set.add(activeParentNo);
+        return set;
+    }, [activeParentNo, manualOpenParents]);
 
     // split items into level-2 parents and their level-3 children
     const { parents, childrenByParent } = useMemo(() => {

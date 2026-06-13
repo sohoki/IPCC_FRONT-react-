@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { themeQuartz } from 'ag-grid-community';
+﻿import React, { useState, useEffect } from 'react';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
+import { gridTheme } from '@/constants/agGridTheme.js';
 import UseSwitch from '@/components/Common/IosSwitch.jsx';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import API_URL from '@/constants/URL.jsx';
@@ -130,11 +130,11 @@ const CodeDetailCellRenderer = (props) => {
                 상세 코드 목록
             </div>
             <div style={{ width: '100%', boxSizing: 'border-box', height: '220px' }}>
-                <AgGridReact
+                <AppAgGrid
                     rowData={rowData}
                     columnDefs={SUB_COL_DEFS}
                     defaultColDef={SUB_DEFAULT_COL_DEF}
-                    theme={themeQuartz}
+                    theme={gridTheme}
                     headerHeight={32}
                     rowHeight={30}
                     context={context}

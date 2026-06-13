@@ -1,4 +1,4 @@
-
+﻿
 
 const INITIAL_VENDER_FORM = {
     mode : '',
@@ -99,10 +99,10 @@ const VenderInfo = () =>{
                     </div>
                 </div>
                 <div className="ol-12 content-table content-table__main">
-                    <div className="ag-theme-alpine" style={{ height: 640, width: '100%' }}>
+                    <div className="ag-theme-material" style={{ height: 640, width: '100%' }}>
                             <AgGridReact
                                 columnDefs={columnDefs}
-                                theme={themeQuartz}
+                                theme={gridTheme}
                                 defaultColDef={defaultColDef}
                                 rowModelType="infinite"
                                 pagination={true}

@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useCallback, useEffect, lazy } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useCommonCodeData } from '@/hooks/use-combo-data.js';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const ServerFormModal = lazy(() => import('@/pages/Backoffice/Infra/Equipment/components/ServerFormModal.jsx'));
 
@@ -250,10 +250,10 @@ const ServerInfo = () => {
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-alpine" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}

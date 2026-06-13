@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+ï»¿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const PbxAgentFormModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/components/PbxAgentFormModal.jsx'));
 const PbxAgentPbxSearchModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/components/PbxAgentPbxSearchModal.jsx'));
@@ -69,22 +69,22 @@ const PbxAgentInfo = () => {
     const handleDelete = useCallback(async (loginId) => {
         const first = await Swal.fire({
             icon: 'question',
-            title: 'Agent ?? œ',
-            html: `<b>${loginId}</b> ë¥??? ?? œ ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+            title: 'Agent ??ï¿½ï¿½',
+            html: `<b>${loginId}</b> ï¿½??? ??ï¿½ï¿½ ?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„ë‹ˆ??,
+            cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
         const second = await Swal.fire({
             icon: 'warning',
-            title: 'Agent ?? œ ?•ì¸',
-            html: `<b>${loginId}</b> ë¥??? ?? œ?˜ì‹œë©??œìŠ¤?œì— ?í–¥???ˆì„ ???ˆìŠµ?ˆë‹¤.<br>?•ë§ë¡??? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+            title: 'Agent ??ï¿½ï¿½ ?ï¿½ì¸',
+            html: `<b>${loginId}</b> ï¿½??? ??ï¿½ï¿½?ï¿½ì‹œï¿½??ï¿½ìŠ¤?ï¿½ì— ?ï¿½í–¥???ï¿½ì„ ???ï¿½ìŠµ?ï¿½ë‹¤.<br>?ï¿½ë§ï¿½???ï¿½ï¿½?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„ë‹ˆ??,
+            cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!second.isConfirmed) return;
@@ -97,28 +97,28 @@ const PbxAgentInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: '?? œ', text: json?.MESSAGE || '?? œ?˜ì—ˆ?µë‹ˆ??' });
+                await Swal.fire({ icon: 'success', title: '??ï¿½ï¿½', text: json?.MESSAGE || '??ï¿½ï¿½?ï¿½ì—ˆ?ï¿½ë‹ˆ??' });
                 handleSearch(1);
             } else {
-                await Swal.fire({ icon: 'error', title: '?¤ë¥˜', text: json?.MESSAGE || '?? œ???¤íŒ¨?ˆìŠµ?ˆë‹¤.' });
+                await Swal.fire({ icon: 'error', title: '?ï¿½ë¥˜', text: json?.MESSAGE || '??ï¿½ï¿½???ï¿½íŒ¨?ï¿½ìŠµ?ï¿½ë‹¤.' });
                 handleSearch(1);
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?¤ë¥˜', text: e?.message || 'ì²˜ë¦¬ ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.' });
+            await Swal.fire({ icon: 'error', title: '?ï¿½ë¥˜', text: e?.message || 'ì²˜ë¦¬ ï¿½??ï¿½ë¥˜ê°€ ë°œìƒ?ï¿½ìŠµ?ï¿½ë‹¤.' });
             handleSearch(1);
         }
     }, [handleSearch]);
 
     const columnDefs = useMemo(() => [
-        { headerName: 'ë¡œê·¸?¸ID', field: 'loginId', width: 130 },
-        { headerName: '?´ë¦„', field: 'name', width: 120 },
-        { headerName: '?œë‚˜ë¦¬ì˜¤', field: 'sn', width: 120 },
+        { headerName: 'ë¡œê·¸?ï¿½ID', field: 'loginId', width: 130 },
+        { headerName: '?ï¿½ë¦„', field: 'name', width: 120 },
+        { headerName: '?ï¿½ë‚˜ë¦¬ì˜¤', field: 'sn', width: 120 },
         { headerName: 'Index', field: 'snIndex', width: 100 },
-        { headerName: '?¤í‚¬Level', field: 'sr', width: 100 },
-        { headerName: '?¤í‚¬Index', field: 'srIndex', width: 100 },
-        { headerName: 'ìµœì¢…?˜ì •??, field: 'agentUpdate', flex: 1 },
+        { headerName: '?ï¿½í‚¬Level', field: 'sr', width: 100 },
+        { headerName: '?ï¿½í‚¬Index', field: 'srIndex', width: 100 },
+        { headerName: 'ìµœì¢…?ï¿½ì •??, field: 'agentUpdate', flex: 1 },
         {
-            headerName: '?˜ì •',
+            headerName: '?ï¿½ì •',
             width: 70,
             sortable: false,
             filter: false,
@@ -127,12 +127,12 @@ const PbxAgentInfo = () => {
                     className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenFormModal(p.data?.loginId)}
                 >
-                    ?˜ì •
+                    ?ï¿½ì •
                 </button>
             ),
         },
         {
-            headerName: '?? œ',
+            headerName: '??ï¿½ï¿½',
             width: 70,
             sortable: false,
             filter: false,
@@ -141,7 +141,7 @@ const PbxAgentInfo = () => {
                     className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete(p.data?.loginId)}
                 >
-                    ?? œ
+                    ??ï¿½ï¿½
                 </button>
             ),
         },
@@ -150,11 +150,11 @@ const PbxAgentInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">?ì´?„íŠ¸ ?„í™©</div>
+                <div className="content-header__title">?ï¿½ì´?ï¿½íŠ¸ ?ï¿½í™©</div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?¸í”„??ê´€ë¦?/li>
-                        <li className="breadcrumb-item">?ì´?„íŠ¸ ?„í™©</li>
+                        <li className="breadcrumb-item">?ï¿½í”„??ê´€ï¿½?/li>
+                        <li className="breadcrumb-item">?ï¿½ì´?ï¿½íŠ¸ ?ï¿½í™©</li>
                     </ol>
                 </div>
             </div>
@@ -168,14 +168,14 @@ const PbxAgentInfo = () => {
                             value={tempParams.searchCondition}
                             onChange={handleInputChange}
                         >
-                            <option value="">? íƒ</option>
-                            <option value="name">?´ë¦„</option>
+                            <option value="">?ï¿½íƒ</option>
+                            <option value="name">?ï¿½ë¦„</option>
                             <option value="loginId">LoginId</option>
                         </select>
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="ê²€?‰ì–´ë¥??…ë ¥?˜ì„¸??
+                            placeholder="ê²€?ï¿½ì–´ï¿½??ï¿½ë ¥?ï¿½ì„¸??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -201,22 +201,22 @@ const PbxAgentInfo = () => {
                             EXCEL DELETE
                         </button>
                         <button type="button" className="btn btn-secondary" onClick={() => setPbxSearchModalOpen(true)}>
-                            ?ì´?„íŠ¸ ì¡°íšŒ
+                            ?ï¿½ì´?ï¿½íŠ¸ ì¡°íšŒ
                         </button>
                         <button type="button" className="btn btn-primary btn-default__blue" onClick={() => handleOpenFormModal()}>
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            ê°œë³„ ?±ë¡
+                            ê°œë³„ ?ï¿½ë¡
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -225,8 +225,8 @@ const PbxAgentInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?°ì´?°ê? ?†ìŠµ?ˆë‹¤.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ì¤?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?ï¿½ì´?ï¿½ï¿½? ?ï¿½ìŠµ?ï¿½ë‹¤.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ï¿½?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

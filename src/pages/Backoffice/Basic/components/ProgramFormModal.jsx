@@ -148,11 +148,6 @@ const ProgramModal = ({
                     </div>
                 </div>
             </div>
-            {/* 스타일(원하면 CSS로 이동) */}
-            <style>{`
-                .modal-backdrop-custom{ position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1040; }
-                .modal-custom{ position:fixed; inset:0; z-index:1050; display:flex; align-items:center; justify-content:center; }
-            `}</style>
         </>
     );
 };

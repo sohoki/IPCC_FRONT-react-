@@ -208,16 +208,20 @@ body[data-sb] header {
 .sb-root:not(.sb-open) .sb-icon { margin-right: 0; }
 
 /* ── 메인 콘텐츠 오프셋 (body[data-sb] 기반) ─────────────────────────────── */
+/* width + margin-left 동시 전환: flex item 의 실제 width가 바뀌어 AG Grid ResizeObserver 정상 감지 */
 body[data-sb] section {
     margin-top: var(--sb-header-h);   /* section이 헤더 아래에 위치 */
 }
 body[data-sb] .main-contents,
 body[data-sb] section > *:not(.sb-root) {
+    width: calc(100% - var(--sb-width-mini));
     margin-left: var(--sb-width-mini);
-    transition: margin-left var(--sb-transition);
+    transition: width var(--sb-transition), margin-left var(--sb-transition);
+    box-sizing: border-box;
 }
 body[data-sb="open"] .main-contents,
 body[data-sb="open"] section > *:not(.sb-root) {
+    width: calc(100% - var(--sb-width));
     margin-left: var(--sb-width);
 }
 

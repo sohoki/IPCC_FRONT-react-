@@ -1,12 +1,12 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+﻿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useCommonCodeData } from '@/hooks/use-combo-data.js';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const VocFormModal        = lazy(() => import('./components/VocFormModal.jsx'));
 const VocProcessListModal = lazy(() => import('./components/VocProcessListModal.jsx'));
@@ -61,17 +61,17 @@ const VocInfo = () => {
 
     const handleDelete = useCallback(async (vocSeq) => {
         const first = await Swal.fire({
-            icon: 'question', title: '?�애 처리 ??��',
-            html: `<b>${vocSeq}</b> �??? ??�� ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'question', title: '?�애 처리 ??��',
+            html: `<b>${vocSeq}</b> �??? ??�� ?�시겠습?�까?`,
+            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
             focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
         const second = await Swal.fire({
-            icon: 'warning', title: '?�애 처리 ??�� ?�인',
-            html: `<b>${vocSeq}</b> ??��?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'warning', title: '?�애 처리 ??�� ?�인',
+            html: `<b>${vocSeq}</b> ??��?�시겠습?�까?`,
+            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
             focusCancel: true,
         });
         if (!second.isConfirmed) return;
@@ -83,54 +83,54 @@ const VocInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??��?�었?�니??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??��?�었?�니??' });
                 handleSearch(1);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??��???�패?�습?�다.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??��???�패?�습?�다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
         }
     }, [handleSearch]);
 
     const columnDefs = useMemo(() => [
-        { headerName: '?�치',      field: 'vocLocation',   flex: 1 },
+        { headerName: '?�치',      field: 'vocLocation',   flex: 1 },
         { headerName: 'VOC 구분',  field: 'vocGubunTxt',   width: 110 },
-        { headerName: '처리 ?�황', field: 'vocProcessTxt', width: 110 },
-        { headerName: '?�청?�자',  field: 'vocReqRegdate', width: 130 },
-        { headerName: '?�청??,    field: 'vocReqNm',      width: 100 },
-        { headerName: '?�당??,    field: 'vocResNm',      width: 100 },
-        { headerName: '처리?�자',  field: 'vocResRegdate', width: 130 },
+        { headerName: '처리 ?�황', field: 'vocProcessTxt', width: 110 },
+        { headerName: '?�청?�자',  field: 'vocReqRegdate', width: 130 },
+        { headerName: '?�청??,    field: 'vocReqNm',      width: 100 },
+        { headerName: '?�당??,    field: 'vocResNm',      width: 100 },
+        { headerName: '처리?�자',  field: 'vocResRegdate', width: 130 },
         {
-            headerName: '처리?�황', width: 80, sortable: false, filter: false,
+            headerName: '처리?�황', width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-sm btn-outline-secondary"
                     onClick={() => { setProcessVocSeq(p.data?.vocSeq); setProcessListOpen(true); }}
-                >처리?�황</button>
+                >처리?�황</button>
             ),
         },
         {
-            headerName: '?�체?�황', width: 80, sortable: false, filter: false,
+            headerName: '?�체?�황', width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-sm btn-outline-secondary"
                     onClick={() => { setHistoryVocSeq(p.data?.vocSeq); setHistoryOpen(true); }}
-                >?�체?�황</button>
+                >?�체?�황</button>
             ),
         },
         {
-            headerName: '?�정', width: 70, sortable: false, filter: false,
+            headerName: '?�정', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => { setVocModalData({ vocSeq: p.data?.vocSeq, rowData: p.data }); setVocFormOpen(true); }}
-                >?�정</button>
+                >?�정</button>
             ),
         },
         {
-            headerName: '??��', width: 70, sortable: false, filter: false,
+            headerName: '??��', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete(p.data?.vocSeq)}
-                >??��</button>
+                >??��</button>
             ),
         },
     ], [handleDelete]);
@@ -138,11 +138,11 @@ const VocInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">?�애 ?�황</div>
+                <div className="content-header__title">?�애 ?�황</div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?�비??/li>
-                        <li className="breadcrumb-item">?�애 ?�황</li>
+                        <li className="breadcrumb-item">?�비??/li>
+                        <li className="breadcrumb-item">?�애 ?�황</li>
                     </ol>
                 </div>
             </div>
@@ -155,7 +155,7 @@ const VocInfo = () => {
                             value={tempParams.searchVocGubun}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�체 ?�애구분</option>
+                            <option value="">?�체 ?�애구분</option>
                             {vocGubunOptions.map(o => <option key={o.code} value={o.code}>{o.codeNm}</option>)}
                         </select>
                         <select
@@ -164,12 +164,12 @@ const VocInfo = () => {
                             value={tempParams.searchVocProcess}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�체 처리?�황</option>
+                            <option value="">?�체 처리?�황</option>
                             {vocProcessOptions.map(o => <option key={o.code} value={o.code}>{o.codeNm}</option>)}
                         </select>
                         <input
                             type="text" name="searchKeyword"
-                            placeholder="검?�어�??�력?�세??
+                            placeholder="검?�어�??�력?�세??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -194,16 +194,16 @@ const VocInfo = () => {
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            ?�애 ?�록
+                            ?�애 ?�록
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -212,8 +212,8 @@ const VocInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�이?��? ?�습?�다.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 �?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�이?��? ?�습?�다.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 �?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

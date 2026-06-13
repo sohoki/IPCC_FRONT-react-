@@ -109,3 +109,28 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ── AG Grid header overrides ───────────────────────────────────────────── */
+.ag-theme-material .ag-header-cell-text {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ag-theme-material .ag-header-cell {
+  transition: background-color 0.15s ease;
+}
+
+.ag-theme-material .ag-sort-indicator-icon,
+.ag-theme-material .ag-header-icon {
+  color: #A5B4FC; /* indigo-300 — 아이콘을 헤더 배경 위에서 잘 보이게 */
+}
+
+.ag-theme-material .ag-header-cell-menu-button:hover .ag-icon,
+.ag-theme-material .ag-header-cell-menu-button:hover {
+  color: #fff;
+}
+
+.ag-theme-material .ag-pinned-left-header,
+.ag-theme-material .ag-pinned-right-header {
+  background-color: #1E293B;
+}

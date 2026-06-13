@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
-import { AgGridReact } from 'ag-grid-react';
-import { themeQuartz } from 'ag-grid-community';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
+import { gridTheme } from '@/constants/agGridTheme.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 
 const PART_COL_DEFS = [
     { headerName: '부??구분', field: 'codeNm',   flex: 1 },
-    { headerName: '부?�코??,  field: 'alertPart', flex: 1 },
+    { headerName: '부?�코??,  field: 'alertPart', flex: 1 },
     {
-        headerName: '?�정', width: 70, sortable: false, filter: false,
+        headerName: '?�정', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary btn-modify"
@@ -17,11 +17,11 @@ const PART_COL_DEFS = [
                     e.preventDefault();
                     p.context?.onOpenPartEdit(p.data, p.data?.__alertSeq);
                 }}
-            >?�정</button>
+            >?�정</button>
         ),
     },
     {
-        headerName: '??��', width: 70, sortable: false, filter: false,
+        headerName: '??��', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-danger"
@@ -29,7 +29,7 @@ const PART_COL_DEFS = [
                     e.preventDefault();
                     p.context?.onDeletePart(p.data?.alertPartSeq, p.data?.__alertSeq);
                 }}
-            >??��</button>
+            >??��</button>
         ),
     },
 ];
@@ -37,8 +37,8 @@ const PART_COL_DEFS = [
 const PART_DEFAULT_COL_DEF = { resizable: true, sortable: false, filter: false, flex: 1 };
 
 /**
- * 부???�브 그리???�더??
- * context ?�신:
+ * 부???�브 그리???�더??
+ * context ?�신:
  *   context.onOpenPartEdit(partData, alertSeq)
  *   context.onDeletePart(alertPartSeq, alertSeq)
  *   context.refreshRows(alertSeq)
@@ -70,15 +70,15 @@ const AlertPartDetailRenderer = (props) => {
                 부??목록
             </div>
             <div style={{ width: '100%', boxSizing: 'border-box', height: '200px' }}>
-                <AgGridReact
+                <AppAgGrid
                     rowData={rowData}
                     columnDefs={PART_COL_DEFS}
                     defaultColDef={PART_DEFAULT_COL_DEF}
-                    theme={themeQuartz}
+                    theme={gridTheme}
                     headerHeight={32}
                     rowHeight={30}
                     context={context}
-                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�록??부?��? ?�습?�다.</span>"
+                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�록??부?��? ?�습?�다.</span>"
                 />
             </div>
         </div>

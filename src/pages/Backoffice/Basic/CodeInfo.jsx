@@ -46,7 +46,7 @@ const INITIAL_SEARCH_FORM = {
     searchKeyword: '',
 }
 
-const SYSTEM_PARAMS = { systemUseyn: 'Y', systemMenuUse: 'Y' };
+const SYSTEM_PARAMS = { systemUseyn: 'Y' };
 const SYSTEM_MAPPING  = { id: 'systemCode',      text: 'systemName'};
 const SEARCH_MENU = { pageIndex: '1', pageUnit: '1000', searchSystemCode : 'IPCC'};
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+﻿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useCommonDelete } from '@/hooks/use-common-delete.js';
@@ -9,8 +9,8 @@ import CODE from '@/constants/CODE.jsx';
 import URL from '@/constants/URL.jsx';
 import UseSwitch from '@/components/Common/IosSwitch.jsx';
 import Swal from '@/lib/swal.js';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const SystemFormModal = lazy(() => import('@/pages/Backoffice/System/components/SystemFormModal.jsx'));
 const SystemQueueModal = lazy(() => import('@/pages/Backoffice/System/components/SystemQueueModal.jsx'));
@@ -286,10 +286,10 @@ const SystemInfo = () => {
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}

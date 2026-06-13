@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+ï»¿import React, { useState, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
-import { AgGridReact } from 'ag-grid-react';
-import { themeQuartz } from 'ag-grid-community';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
+import { gridTheme } from '@/constants/agGridTheme.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 
-// ?€?€ OID ?œë¸Œ ê·¸ë¦¬??ì»¬ëŸ¼ (ëª¨ë“ˆ ?ˆë²¨) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+// ?ï¿½?ï¿½ OID ?ï¿½ë¸Œ ê·¸ë¦¬??ì»¬ëŸ¼ (ëª¨ë“ˆ ?ï¿½ë²¨) ?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½?ï¿½
 const OID_COL_DEFS = [
     { headerName: 'Oid Number',  field: 'oidNumber',      flex: 1 },
-    { headerName: '?´ë¦„',         field: 'oidName',        flex: 1 },
-    { headerName: 'ë°˜í™˜ê°?,       field: 'codeNm',         width: 120 },
-    { headerName: '?˜ì •??,       field: 'lastUpdusrId',   width: 110 },
-    { headerName: '?˜ì •?¼ìž',     field: 'lastUpdtPnttm',  width: 130 },
+    { headerName: '?ï¿½ë¦„',         field: 'oidName',        flex: 1 },
+    { headerName: 'ë°˜í™˜ï¿½?,       field: 'codeNm',         width: 120 },
+    { headerName: '?ï¿½ì •??,       field: 'lastUpdusrId',   width: 110 },
+    { headerName: '?ï¿½ì •?ï¿½ìž',     field: 'lastUpdtPnttm',  width: 130 },
     {
         headerName: 'ì²´í¬', width: 90, sortable: false, filter: false,
         cellRenderer: (p) => (
@@ -19,12 +19,12 @@ const OID_COL_DEFS = [
                 className="btn btn-sm btn-outline-secondary"
                 onClick={(e) => { e.preventDefault(); p.context?.onOidView(p.data?.oidSeq); }}
             >
-                SNMP?•ì¸
+                SNMP?ï¿½ì¸
             </button>
         ),
     },
     {
-        headerName: '?˜ì •', width: 70, sortable: false, filter: false,
+        headerName: '?ï¿½ì •', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary btn-modify"
@@ -33,7 +33,7 @@ const OID_COL_DEFS = [
                     p.context?.onOpenOidEdit(p.data, p.data?.__serviceSeq);
                 }}
             >
-                ?˜ì •
+                ?ï¿½ì •
             </button>
         ),
     },
@@ -42,8 +42,8 @@ const OID_COL_DEFS = [
 const OID_DEFAULT_COL_DEF = { resizable: true, sortable: false, filter: false, flex: 1 };
 
 /**
- * ?œë¹„??OID ?œë¸Œ ê·¸ë¦¬???Œë”??
- * context ?˜ì‹ :
+ * ?ï¿½ë¹„??OID ?ï¿½ë¸Œ ê·¸ë¦¬???ï¿½ë”??
+ * context ?ï¿½ì‹ :
  *   context.fetchOids({ serviceSeq })
  *   context.onOidView(oidSeq)
  *   context.onOpenOidEdit(oidData, serviceSeq)
@@ -76,15 +76,15 @@ const SystemServiceOidDetailRenderer = (props) => {
                 OID ëª©ë¡
             </div>
             <div style={{ width: '100%', boxSizing: 'border-box', height: '220px' }}>
-                <AgGridReact
+                <AppAgGrid
                     rowData={rowData}
                     columnDefs={OID_COL_DEFS}
                     defaultColDef={OID_DEFAULT_COL_DEF}
-                    theme={themeQuartz}
+                    theme={gridTheme}
                     headerHeight={32}
                     rowHeight={30}
                     context={context}
-                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?±ë¡??OIDê°€ ?†ìŠµ?ˆë‹¤.</span>"
+                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?ï¿½ë¡??OIDê°€ ?ï¿½ìŠµ?ï¿½ë‹¤.</span>"
                 />
             </div>
         </div>

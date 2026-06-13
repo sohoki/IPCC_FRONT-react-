@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+ο»Ώimport React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const PbxSmsModelFormModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/components/PbxSmsModelFormModal.jsx'));
 
@@ -60,10 +60,10 @@ const PbxSmsModelInfo = () => {
         setFormModalOpen(true);
     }, []);
 
-    // ? νƒ??SMS MODEL ?¤μ •?Όλ΅ Avaya SMS ?€ ?µμ‹ ?μ—¬ ?°μ΄??μ΅°ν
+    // ?οΏ½νƒ??SMS MODEL ?οΏ½μ •?οΏ½λ΅ Avaya SMS ?οΏ½ ?οΏ½μ‹ ?οΏ½μ—¬ ?οΏ½μ΄??μ΅°ν
     const handleAvayaQuery = useCallback(async (rowData) => {
         if (rowData?.smsUseyn !== 'Y') {
-            await Swal.fire({ icon: 'warning', text: '?¬μ© ?ν•¨ ?νƒ??SMS MODEL ?…λ‹??' });
+            await Swal.fire({ icon: 'warning', text: '?οΏ½μ© ?οΏ½ν•¨ ?οΏ½νƒ??SMS MODEL ?οΏ½λ‹??' });
             return;
         }
         try {
@@ -83,35 +83,35 @@ const PbxSmsModelInfo = () => {
                         pretty.replace(/&/g, '&amp;').replace(/</g, '&lt;')
                     }</pre>`,
                     width: 800,
-                    confirmButtonText: '?•μΈ',
+                    confirmButtonText: '?οΏ½μΈ',
                 });
             } else {
-                await Swal.fire({ icon: 'error', text: json?.resultMessage || 'Avaya μ΅°ν???¤ν¨?μµ?λ‹¤.' });
+                await Swal.fire({ icon: 'error', text: json?.resultMessage || 'Avaya μ΅°ν???οΏ½ν¨?οΏ½μµ?οΏ½λ‹¤.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'μ²λ¦¬ μ¤??¤λ¥κ°€ λ°μƒ?μµ?λ‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'μ²λ¦¬ οΏ½??οΏ½λ¥κ°€ λ°μƒ?οΏ½μµ?οΏ½λ‹¤.' });
         }
     }, []);
 
     const handleDelete = useCallback(async (notiSeq) => {
         const first = await Swal.fire({
             icon: 'question',
-            title: 'Sms Model ?? ',
-            html: `<b>${notiSeq}</b> λ¥??? ??  ?μ‹κ² μµ?κΉ?`,
+            title: 'Sms Model ??οΏ½οΏ½',
+            html: `<b>${notiSeq}</b> οΏ½??? ??οΏ½οΏ½ ?οΏ½μ‹κ² μµ?οΏ½κΉ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„λ‹??,
+            cancelButtonText: '?οΏ½λ‹??,
             focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
         const second = await Swal.fire({
             icon: 'warning',
-            title: 'Sms Model ??  ?•μΈ',
-            html: `<b>${notiSeq}</b> λ¥??? ?? ?μ‹λ©??μ¤?μ— ?ν–¥???μ„ ???μµ?λ‹¤.<br>?•λ§λ΅??? ?μ‹κ² μµ?κΉ?`,
+            title: 'Sms Model ??οΏ½οΏ½ ?οΏ½μΈ',
+            html: `<b>${notiSeq}</b> οΏ½??? ??οΏ½οΏ½?οΏ½μ‹οΏ½??οΏ½μ¤?οΏ½μ— ?οΏ½ν–¥???οΏ½μ„ ???οΏ½μµ?οΏ½λ‹¤.<br>?οΏ½λ§οΏ½???οΏ½οΏ½?οΏ½μ‹κ² μµ?οΏ½κΉ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„λ‹??,
+            cancelButtonText: '?οΏ½λ‹??,
             focusCancel: true,
         });
         if (!second.isConfirmed) return;
@@ -124,23 +124,23 @@ const PbxSmsModelInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.message || json?.MESSAGE || '?? ?μ—?µλ‹??' });
+                await Swal.fire({ icon: 'success', text: json?.message || json?.MESSAGE || '??οΏ½οΏ½?οΏ½μ—?οΏ½λ‹??' });
                 handleSearch(1);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.message || json?.MESSAGE || '?? ???¤ν¨?μµ?λ‹¤.' });
+                await Swal.fire({ icon: 'error', text: json?.message || json?.MESSAGE || '??οΏ½οΏ½???οΏ½ν¨?οΏ½μµ?οΏ½λ‹¤.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'μ²λ¦¬ μ¤??¤λ¥κ°€ λ°μƒ?μµ?λ‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'μ²λ¦¬ οΏ½??οΏ½λ¥κ°€ λ°μƒ?οΏ½μµ?οΏ½λ‹¤.' });
         }
     }, [handleSearch]);
 
     const columnDefs = useMemo(() => [
         { headerName: 'sms_models',      field: 'smsModel',      flex: 1 },
-        { headerName: 'sms λª?,           field: 'smsName',       flex: 1 },
-        { headerName: '?΄μ μ§€??,         field: 'smsOperation',  flex: 1 },
-        { headerName: 'sms ?¬μ© κµ¬λ¶„',    field: 'smsGubun',      width: 120 },
-        { headerName: '?¬μ©? λ¬΄',          field: 'smsUseyn',      width: 90 },
-        { headerName: '?μ„±??,            field: 'frstRegistPnttm', width: 150 },
+        { headerName: 'sms οΏ½?,           field: 'smsName',       flex: 1 },
+        { headerName: '?οΏ½μ μ§€??,         field: 'smsOperation',  flex: 1 },
+        { headerName: 'sms ?οΏ½μ© κµ¬λ¶„',    field: 'smsGubun',      width: 120 },
+        { headerName: '?οΏ½μ©?οΏ½λ¬΄',          field: 'smsUseyn',      width: 90 },
+        { headerName: '?οΏ½μ„±??,            field: 'frstRegistPnttm', width: 150 },
         {
             headerName: 'Avaya μ΅°ν', width: 100, sortable: false, filter: false,
             cellRenderer: (p) => (
@@ -154,24 +154,24 @@ const PbxSmsModelInfo = () => {
             ),
         },
         {
-            headerName: '?μ •', width: 70, sortable: false, filter: false,
+            headerName: '?οΏ½μ •', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button
                     className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenFormModal(p.data)}
                 >
-                    ?μ •
+                    ?οΏ½μ •
                 </button>
             ),
         },
         {
-            headerName: '?? ', width: 70, sortable: false, filter: false,
+            headerName: '??οΏ½οΏ½', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button
                     className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete(p.data?.notiSeq)}
                 >
-                    ?? 
+                    ??οΏ½οΏ½
                 </button>
             ),
         },
@@ -183,7 +183,7 @@ const PbxSmsModelInfo = () => {
                 <div className="content-header__title">SMS Service</div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?Έν”„??κ΄€λ¦?/li>
+                        <li className="breadcrumb-item">?οΏ½ν”„??κ΄€οΏ½?/li>
                         <li className="breadcrumb-item">SMS Service</li>
                     </ol>
                 </div>
@@ -194,7 +194,7 @@ const PbxSmsModelInfo = () => {
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="κ²€?‰μ–΄λ¥??…λ ¥?μ„Έ??
+                            placeholder="κ²€?οΏ½μ–΄οΏ½??οΏ½λ ¥?οΏ½μ„Έ??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -217,16 +217,16 @@ const PbxSmsModelInfo = () => {
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            SMS MODEL ?±λ΅
+                            SMS MODEL ?οΏ½λ΅
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -235,8 +235,8 @@ const PbxSmsModelInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?°μ΄?°κ? ?†μµ?λ‹¤.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>μ΅°ν μ¤?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?οΏ½μ΄?οΏ½οΏ½? ?οΏ½μµ?οΏ½λ‹¤.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>μ΅°ν οΏ½?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+ï»¿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const IvrFormModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/ivr/components/IvrFormModal.jsx'));
 const IvrHolyModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/ivr/components/IvrHolyModal.jsx'));
@@ -89,11 +89,11 @@ const IvrConfigInfo = () => {
     const handleSend = useCallback(async (ivrCode) => {
         const ok = await Swal.fire({
             icon: 'question',
-            title: 'IVR ?„ì†¡',
-            html: `<b>${ivrCode}</b> IVR ?¤ì •???„ì†¡?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+            title: 'IVR ?ï¿½ì†¡',
+            html: `<b>${ivrCode}</b> IVR ?ï¿½ì •???ï¿½ì†¡?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„ë‹ˆ??,
+            cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -105,34 +105,34 @@ const IvrConfigInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?„ì†¡?˜ì—ˆ?µë‹ˆ??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?ï¿½ì†¡?ï¿½ì—ˆ?ï¿½ë‹ˆ??' });
             } else {
-                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?„ì†¡???¤íŒ¨?ˆìŠµ?ˆë‹¤.' });
+                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?ï¿½ì†¡???ï¿½íŒ¨?ï¿½ìŠµ?ï¿½ë‹¤.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ï¿½??ï¿½ë¥˜ê°€ ë°œìƒ?ï¿½ìŠµ?ï¿½ë‹¤.' });
         }
     }, []);
 
     const handleDelete = useCallback(async (ivrCode) => {
         const first = await Swal.fire({
             icon: 'question',
-            title: 'IVR ì½”ë“œ ?? œ',
-            html: `<b>${ivrCode}</b> ë¥??? ?? œ ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+            title: 'IVR ì½”ë“œ ??ï¿½ï¿½',
+            html: `<b>${ivrCode}</b> ï¿½??? ??ï¿½ï¿½ ?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„ë‹ˆ??,
+            cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
         const second = await Swal.fire({
             icon: 'warning',
-            title: 'IVR ì½”ë“œ ?? œ ?•ì¸',
-            html: `<b>${ivrCode}</b> ë¥??? ?? œ?˜ì‹œë©??œìŠ¤?œì— ?í–¥???ˆì„ ???ˆìŠµ?ˆë‹¤.<br>?•ë§ë¡??? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+            title: 'IVR ì½”ë“œ ??ï¿½ï¿½ ?ï¿½ì¸',
+            html: `<b>${ivrCode}</b> ï¿½??? ??ï¿½ï¿½?ï¿½ì‹œï¿½??ï¿½ìŠ¤?ï¿½ì— ?ï¿½í–¥???ï¿½ì„ ???ï¿½ìŠµ?ï¿½ë‹¤.<br>?ï¿½ë§ï¿½???ï¿½ï¿½?ï¿½ì‹œê² ìŠµ?ï¿½ê¹Œ?`,
             showCancelButton: true,
             confirmButtonText: '??,
-            cancelButtonText: '?„ë‹ˆ??,
+            cancelButtonText: '?ï¿½ë‹ˆ??,
             focusCancel: true,
         });
         if (!second.isConfirmed) return;
@@ -146,23 +146,23 @@ const IvrConfigInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?? œ?˜ì—ˆ?µë‹ˆ??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??ï¿½ï¿½?ï¿½ì—ˆ?ï¿½ë‹ˆ??' });
                 handleSearch(1);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '?? œ???¤íŒ¨?ˆìŠµ?ˆë‹¤.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??ï¿½ï¿½???ï¿½íŒ¨?ï¿½ìŠµ?ï¿½ë‹¤.' });
                 handleSearch(1);
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ï¿½??ï¿½ë¥˜ê°€ ë°œìƒ?ï¿½ìŠµ?ï¿½ë‹¤.' });
             handleSearch(1);
         }
     }, [handleSearch]);
 
     const columnDefs = useMemo(() => [
-        { headerName: 'ê¸°ê?ëª?, field: 'codeNm', flex: 1 },
-        { headerName: 'IVRëª?, field: 'ivrName', flex: 1 },
+        { headerName: 'ê¸°ï¿½?ï¿½?, field: 'codeNm', flex: 1 },
+        { headerName: 'IVRï¿½?, field: 'ivrName', flex: 1 },
         {
-            headerName: 'DARS?¬ë?', field: 'ivrDars', width: 100,
+            headerName: 'DARS?ï¿½ï¿½?', field: 'ivrDars', width: 100,
             cellRenderer: (p) => (
                 <button className="btn btn-link btn-sm p-0"
                     onClick={() => handleOpenCallbackModal(p.data)}
@@ -170,57 +170,57 @@ const IvrConfigInfo = () => {
             ),
         },
         {
-            headerName: 'Callback?¬ë?', field: 'ivrCbk', width: 110,
+            headerName: 'Callback?ï¿½ï¿½?', field: 'ivrCbk', width: 110,
             cellRenderer: (p) => (
                 <button className="btn btn-link btn-sm p-0"
                     onClick={() => handleOpenCallbackModal(p.data)}
                 >{p.value}</button>
             ),
         },
-        { headerName: '?¬ìš©? ë¬´', field: 'ivrUseyn', width: 90 },
-        { headerName: 'ë©˜íŠ¸?¬ìš©?¬ë?', field: 'ivrMentUseyn', width: 110 },
-        { headerName: 'ë©˜íŠ¸?œì‘??, field: 'notiSday', width: 110 },
+        { headerName: '?ï¿½ìš©?ï¿½ë¬´', field: 'ivrUseyn', width: 90 },
+        { headerName: 'ë©˜íŠ¸?ï¿½ìš©?ï¿½ï¿½?', field: 'ivrMentUseyn', width: 110 },
+        { headerName: 'ë©˜íŠ¸?ï¿½ì‘??, field: 'notiSday', width: 110 },
         { headerName: 'ë©˜íŠ¸ì¢…ë£Œ??, field: 'notiEday', width: 110 },
         { headerName: 'ë¹„ê³ ', field: 'ivrMeno', flex: 1 },
-        { headerName: 'ìµœì¢… ?˜ì •??, field: 'createDate', width: 130 },
+        { headerName: 'ìµœì¢… ?ï¿½ì •??, field: 'createDate', width: 130 },
         {
-            headerName: '?´ì¼ê´€ë¦?, width: 90, sortable: false, filter: false,
+            headerName: '?ï¿½ì¼ê´€ï¿½?, width: 90, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={() => { setHolyIvrCode(p.data?.ivrCode); setHolyModalOpen(true); }}
-                >?´ì¼ê´€ë¦?/button>
+                >?ï¿½ì¼ê´€ï¿½?/button>
             ),
         },
         {
-            headerName: '?…ë¬´?œê°„', width: 90, sortable: false, filter: false,
+            headerName: '?ï¿½ë¬´?ï¿½ê°„', width: 90, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={() => { setWorkIvrCode(p.data?.ivrCode); setWorkModalOpen(true); }}
-                >?…ë¬´?œê°„</button>
+                >?ï¿½ë¬´?ï¿½ê°„</button>
             ),
         },
         {
-            headerName: '?˜ì •', width: 70, sortable: false, filter: false,
+            headerName: '?ï¿½ì •', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenFormModal(p.data)}
-                >?˜ì •</button>
+                >?ï¿½ì •</button>
             ),
         },
         {
-            headerName: '?„ì†¡', width: 70, sortable: false, filter: false,
+            headerName: '?ï¿½ì†¡', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-primary btn-sm"
                     onClick={() => handleSend(p.data?.ivrCode)}
-                >?„ì†¡</button>
+                >?ï¿½ì†¡</button>
             ),
         },
         {
-            headerName: '?? œ', width: 70, sortable: false, filter: false,
+            headerName: '??ï¿½ï¿½', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete(p.data?.ivrCode)}
-                >?? œ</button>
+                >??ï¿½ï¿½</button>
             ),
         },
     ], [handleOpenFormModal, handleOpenCallbackModal, handleSend, handleDelete]);
@@ -228,11 +228,11 @@ const IvrConfigInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">IVR ?¤ì • ê´€ë¦?/div>
+                <div className="content-header__title">IVR ?ï¿½ì • ê´€ï¿½?/div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?¸í”„??ê´€ë¦?/li>
-                        <li className="breadcrumb-item">IVR ?¤ì • ê´€ë¦?/li>
+                        <li className="breadcrumb-item">?ï¿½í”„??ê´€ï¿½?/li>
+                        <li className="breadcrumb-item">IVR ?ï¿½ì • ê´€ï¿½?/li>
                     </ol>
                 </div>
             </div>
@@ -246,14 +246,14 @@ const IvrConfigInfo = () => {
                             value={tempParams.searchCondition}
                             onChange={handleInputChange}
                         >
-                            <option value="0">?„ì²´</option>
-                            <option value="ivrName">?´ë¦„</option>
-                            <option value="ivrInsttNm">ê¸°ê?ëª?/option>
+                            <option value="0">?ï¿½ì²´</option>
+                            <option value="ivrName">?ï¿½ë¦„</option>
+                            <option value="ivrInsttNm">ê¸°ï¿½?ï¿½?/option>
                         </select>
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="ê²€?‰ì–´ë¥??…ë ¥?˜ì„¸??
+                            placeholder="ê²€?ï¿½ì–´ï¿½??ï¿½ë ¥?ï¿½ì„¸??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -276,16 +276,16 @@ const IvrConfigInfo = () => {
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            ê°œë³„ ?±ë¡
+                            ê°œë³„ ?ï¿½ë¡
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -294,8 +294,8 @@ const IvrConfigInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?°ì´?°ê? ?†ìŠµ?ˆë‹¤.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ì¤?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?ï¿½ì´?ï¿½ï¿½? ?ï¿½ìŠµ?ï¿½ë‹¤.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>ì¡°íšŒ ï¿½?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

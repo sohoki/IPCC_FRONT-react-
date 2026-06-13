@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, lazy } from 'react';
+﻿import React, { useState, useMemo, useCallback, lazy } from 'react';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
@@ -9,8 +9,8 @@ import { useResetForm } from '@/hooks/use-form.jsx';
 import { alert } from '@/lib/alert.js';
 import CODE from '@/constants/CODE.jsx';
 import URL from '@/constants/URL.jsx';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
 const BuildFormModal = lazy(() => import('@/pages/Backoffice/Facility/components/BuildFormModal.jsx'));
 
@@ -128,11 +128,11 @@ const BuildInfo = () => {
             });
             const json = res?.data;
             if (json?.resultCodeInfo !== 'SUCCESS') {
-                await Swal.fire({ icon: 'warning', title: '경고', text: json?.resultMessage || '?�태 변경에 ?�패?�습?�다.' });
+                await Swal.fire({ icon: 'warning', title: '경고', text: json?.resultMessage || '?�태 변경에 ?�패?�습?�다.' });
                 refreshGrid();
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
             refreshGrid();
         }
     }, [refreshGrid]);
@@ -141,11 +141,11 @@ const BuildInfo = () => {
         form,
         type: 'multipart',
         checkField: [
-            { inputId: 'centerNm', inputType: CODE.TEXT, message: '지?�명' },
-            { inputId: 'insttCode', inputType: CODE.TEXT, message: '기�?' },
+            { inputId: 'centerNm', inputType: CODE.TEXT, message: '지?�명' },
+            { inputId: 'insttCode', inputType: CODE.TEXT, message: '기�?' },
         ],
         uploadField: ['centerImgFile'],
-        confirmMessage: `${form.centerNm} 지???�보�?,
+        confirmMessage: `${form.centerNm} 지???�보�?,
         gridApiRef,
         setModalOpen,
         URL: URL.CENTER_UPDATE,
@@ -154,7 +154,7 @@ const BuildInfo = () => {
 
     const handleSubmit = useCallback(async () => {
         if (form.centerFloor && form.centerFloorEnd && !form.floorInfo) {
-            await alert.warning('?�용 층수�?1�??�상 ?�택??주세??', '?�력 ?�인');
+            await alert.warning('?�용 층수�?1�??�상 ?�택??주세??', '?�력 ?�인');
             return;
         }
         handleSubmitInner();
@@ -162,19 +162,19 @@ const BuildInfo = () => {
 
     const columnDefs = useMemo(() => [
         {
-            headerName: '?�경?�진',
+            headerName: '?�경?�진',
             field: 'centerImg',
             width: 110,
             cellRenderer: (p) => p.value
-                ? <img src={`/upload/${p.value}`} style={{ width: 80, height: 55, objectFit: 'cover', borderRadius: 4 }} alt="?�경" />
-                : <span className="text-muted small">?�음</span>,
+                ? <img src={`/upload/${p.value}`} style={{ width: 80, height: 55, objectFit: 'cover', borderRadius: 4 }} alt="?�경" />
+                : <span className="text-muted small">?�음</span>,
         },
-        { headerName: '기�?', field: 'allInsttNm', width: 150 },
-        { headerName: '지?�명', field: 'centerNm', flex: 1 },
-        { headerName: '?�락�?, field: 'centerTel', width: 130 },
+        { headerName: '기�?', field: 'allInsttNm', width: 150 },
+        { headerName: '지?�명', field: 'centerNm', flex: 1 },
+        { headerName: '?�락�?, field: 'centerTel', width: 130 },
         { headerName: 'FAX', field: 'centerFax', width: 130 },
         {
-            headerName: '?�인?��?',
+            headerName: '?�인?��?',
             field: 'adminApprovalYn',
             width: 120,
             cellRenderer: (p) => (
@@ -188,45 +188,45 @@ const BuildInfo = () => {
                     className="form-select form-select-sm"
                     style={{ height: 28, padding: '0 4px' }}
                 >
-                    <option value="Y">?�인</option>
+                    <option value="Y">?�인</option>
                     <option value="N">미승??/option>
                 </select>
             ),
         },
         {
-            headerName: '?�용?�무',
+            headerName: '?�용?�무',
             field: 'centerUseYn',
             width: 100,
             cellRenderer: (p) => (
                 <span className={`badge rounded-pill ${p.value === 'Y' ? 'bg-success' : 'bg-secondary'} px-3 py-2`}
                     style={{ fontSize: '0.82rem' }}>
-                    {p.value === 'Y' ? '?�용' : '미사??}
+                    {p.value === 'Y' ? '?�용' : '미사??}
                 </span>
             ),
         },
-        { headerName: '최종?�정??, field: 'centerUpdateUserId', width: 120 },
-        { headerName: '최종?�정??, field: 'centerUpdateDate', width: 140 },
+        { headerName: '최종?�정??, field: 'centerUpdateUserId', width: 120 },
+        { headerName: '최종?�정??, field: 'centerUpdateDate', width: 140 },
         {
-            headerName: '?�정',
+            headerName: '?�정',
             width: 70,
             sortable: false,
             filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenModal(p.data)}>
-                    ?�정
+                    ?�정
                 </button>
             ),
         },
         {
-            headerName: '??��',
+            headerName: '??��',
             width: 70,
             sortable: false,
             filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete({ code: p.data?.centerId, name: p.data?.centerNm })}>
-                    ??��
+                    ??��
                 </button>
             ),
         },
@@ -235,11 +235,11 @@ const BuildInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">지??관�?/div>
+                <div className="content-header__title">지??관�?/div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?�설 관�?/li>
-                        <li className="breadcrumb-item">지??관�?/li>
+                        <li className="breadcrumb-item">?�설 관�?/li>
+                        <li className="breadcrumb-item">지??관�?/li>
                     </ol>
                 </div>
             </div>
@@ -253,7 +253,7 @@ const BuildInfo = () => {
                             value={tempParams.searchInsttCode}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�체 기�?</option>
+                            <option value="">?�체 기�?</option>
                             {insttOptions.map(o => (
                                 <option key={o.code} value={o.code}>{o.codeNm}</option>
                             ))}
@@ -265,14 +265,14 @@ const BuildInfo = () => {
                             value={tempParams.searchCondition}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�택</option>
-                            <option value="centerNm">?�름</option>
-                            <option value="centerId">?�이??/option>
+                            <option value="">?�택</option>
+                            <option value="centerNm">?�름</option>
+                            <option value="centerId">?�이??/option>
                         </select>
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="검?�어�??�력?�세??
+                            placeholder="검?�어�??�력?�세??
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -295,16 +295,16 @@ const BuildInfo = () => {
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            지???�록
+                            지???�록
                         </button>
                     </div>
                 </div>
             </div>
             <div className="col-12 content-table content-table__main">
-                <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                    <AgGridReact
+                <div className="ag-theme-material" style={{ width: '100%' }}>
+                    <AppAgGrid
                         columnDefs={columnDefs}
-                        theme={themeQuartz}
+                        theme={gridTheme}
                         defaultColDef={defaultColDef}
                         rowModelType="infinite"
                         pagination={true}
@@ -313,8 +313,8 @@ const BuildInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�이?��? ?�습?�다.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 �?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�이?��? ?�습?�다.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 �?..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

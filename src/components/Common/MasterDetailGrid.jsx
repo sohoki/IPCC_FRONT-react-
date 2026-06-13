@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { themeQuartz } from 'ag-grid-community';
-import { AgGridReact } from 'ag-grid-react';
+﻿import React, { useMemo } from 'react';
+import { gridTheme } from '@/constants/agGridTheme.js';
+import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 import { createGlobalStyle } from 'styled-components';
 import {
     MasterDetailModule,
@@ -59,15 +59,15 @@ const MasterDetailGrid = ({
     return (
         <>
             <GlobalDetailStyle />
-            <div className="ag-theme-quartz" style={{ width: '100%' }}>
-                <AgGridReact
+            <div className="ag-theme-material" style={{ width: '100%' }}>
+                <AppAgGrid
                     getRowId={getRowId}
                     masterDetail={true}
                     pagination={true}
                     paginationPageSize={pageSize}
                     paginationPageSizeSelector={[10, 20, 50, 100]}
                     columnDefs={columnDefs}
-                    theme={themeQuartz}
+                    theme={gridTheme}
                     defaultColDef={defaultColDef}
                     rowData={rowData}
                     isRowMaster={isRowMaster}

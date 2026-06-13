@@ -97,7 +97,7 @@ const INITIAL_MENU_FORM = {
     idCheck: 'N',
 };
 
-const SYSTEM_PARAMS = { systemUseyn: 'Y', systemMenuUse: 'Y' };
+const SYSTEM_PARAMS = { systemUseyn: 'Y' };
 const SYSTEM_MAPPING  = { id: 'systemCode',      text: 'systemName'};
 const SEARCH_MENU = { pageIndex: '1', pageUnit: '1000', searchSystemCode : 'IPCC'};
 
@@ -395,7 +395,7 @@ const MenuInfo = () => {
                             value={tempParams.searchSystemCode || ''}
                             onChange={(e) => handleSearchChange({ searchSystemCode: e.target.value })}
                             placeholder={isLoadingSystem ? '로딩 중...' : '시스템을 선택하세요'}
-                            style={{ height: 32, fontSize: 15, fontWeight: 600 }}
+                            style={{ height: 28, fontSize: 12, fontWeight: 600 }}
                         />
                     </div>
 
