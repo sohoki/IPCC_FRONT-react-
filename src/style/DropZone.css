@@ -1,0 +1,82 @@
+/* 기본 드롭존 박스 */
+.dropzone-box {
+    width: 100%;
+    min-height: 120px;
+    border: 2px dashed #d9d9d9;
+    border-radius: 8px;
+    background-color: #fafafa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 20px;
+    text-align: center;
+
+    position: relative; /* ✅ input 겹침 제어를 위해 필수 */
+}
+
+/* ✅ dropzone input은 보이지 않게 전체를 덮기 */
+.dropzone-box input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* 마우스를 올렸을 때(Hover) */
+.dropzone-box:hover {
+    border-color: #40a9ff;
+    background-color: #f0f7ff;
+}
+
+/* 파일을 끌어다 놓는 중일 때 */
+.dropzone-box.active {
+    border-color: #1890ff;
+    background-color: #e6f7ff;
+    border-style: solid;
+}
+
+/* 파일이 이미 선택되었을 때 */
+.dropzone-box.has-file {
+    border-color: #52c41a;
+    background-color: #f6ffed;
+}
+
+/* ✅ placeholder 컨텐츠 래퍼 */
+.placeholder-content {
+    position: relative;
+    z-index: 2;          /* ✅ input 위에 보이게 */
+    pointer-events: none; /* ✅ 클릭은 input으로만 */
+}
+
+/* 텍스트 스타일 */
+.placeholder-content .placeholder {
+    color: #8c8c8c;
+    background-color: #000;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* 파일 정보 표시 */
+.file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2; /* ✅ input 위 */
+}
+
+.file-info i {
+    font-size: 24px;
+    color: #1d8f1d;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #262626;
+}

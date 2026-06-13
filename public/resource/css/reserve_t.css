@@ -1,0 +1,1079 @@
+html, body{width:100%;height: auto;-webkit-overflow-scrolling: touch;}
+a:focus, button:focus {outline: none;}
+button {border: none; outline: none;cursor:pointer; box-sizing: border-box;}
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #c2c9d1;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    border-radius:8px
+}
+::-webkit-scrollbar-track {
+    background-color: #d7d9dc;
+    box-shadow: inset 0px 0px 5px white;
+}
+::-ms-clear {
+    display: none;
+}
+.font-size-12 {font-size: 12px;}
+.font-size-14 {font-size: 14px;}
+.font-size-16 {font-size: 16px;}
+.font-size-18 {font-size: 18px;}
+.font-size-20 {font-size: 20px;}
+
+:root {
+    /* Primary Colors - 메인 브랜드 컬러 */
+    --primary-color: #4F46E5;
+    --primary-hover: #4338CA;
+
+    /* Text Colors - 텍스트 컬러 */
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-tertiary: #6B7280;
+    --text-light: #9CA3AF;
+    --text-white: #FFFFFF;
+
+    /* Background Colors - 배경 컬러 */
+    --bg-white: #FFFFFF;
+    --bg-gray-50: #F9FAFB;
+    --bg-gray-100: #F3F4F6;
+    --bg-gray-200: #E5E7EB;
+    --bg-gray-300: #D1D5DB;
+    --bg-purple-100: #F5F3FF;
+    --bg-purple-200: #E5E1FF;
+    --bg-red-100: #FEF2F2;
+    --bg-red-200: #FEE2E2;
+
+    /* Border Colors - 테두리 컬러 */
+    --border-light: #E5E7EB;
+    --border-medium: #D1D5DB;
+    --border-dark: #6B7280;
+    --border-purple: #E5E1FF;
+    --border-red: #FEE2E2;
+
+    /* Status Colors - 상태 컬러 */
+    --success-color: #10B981;
+    --warning-color: #F59E0B;
+    --error-color: #EF4444;
+    --info-color: #3B82F6;
+
+    /* Shadow Colors - 그림자 컬러 */
+    --shadow-light: rgba(0, 0, 0, 0.05);
+    --shadow-medium: rgba(0, 0, 0, 0.1);
+    --shadow-dark: rgba(0, 0, 0, 0.15);
+
+    /* Additional Grays - 추가 회색톤 */
+    --gray-500: #6B7280;
+    --gray-600: #485563;
+    --gray-700: #374151;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+
+    /* Border Radius - 테두리 둥글기 */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+    --radius-full: 99px;
+}
+
+header, section {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+header {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    height: 48px;
+    background-color: var(--bg-white);
+    border-bottom: 1px solid var(--border-light);
+}
+.btn-back {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    padding: 0;
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.title-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 24px;
+    text-align: center;
+    width: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 0 40px;
+}
+
+section {
+    padding: 72px 0 24px;
+}
+.container {
+    max-width: 600px;
+    padding: 0 16px;
+}
+.container-divider {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-gray-100);
+    margin: 24px 0;
+}
+
+.btn-action__main {
+    width: 100%;
+    height: 45px;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: var(--text-white);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 24px;
+    margin-top: 24px;
+}
+.btn-action__main:hover {
+    background-color: var(--primary-hover);
+}
+.btn-action__main:active {
+    background-color: var(--primary-color);
+}
+.btn-action__main:disabled {
+    background-color: var(--bg-gray-200);
+    color: var(--text-tertiary);
+    cursor: default;
+}
+
+/* --------- 쿠폰 (예약) 리스트 --------- */
+.coupon-total {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+}
+.coupon-list-box {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.coupon-item-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 8px var(--shadow-light);
+    padding: 8px 12px 8px;
+}
+.coupon-item-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 4px 0;
+    cursor: pointer;
+}
+.coupon-item-header-content {
+    flex: 1;
+}
+.coupon-item-status {
+    border-radius: 4px;
+    padding: 4px 6px 4px 16px;
+    margin-right: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    background-color: var(--bg-gray-100);
+    color: var(--text-tertiary);
+    position: relative;
+}
+.coupon-item-status.blue {
+    background-color: #f3f6ff;
+    color: #2e5fc9;
+}
+.coupon-item-status.green {
+    background-color: #f4fff3;
+    color: #3ca624;
+}
+.coupon-item-status.red {
+    background-color: var(--bg-red-100);
+    color: var(--error-color);
+}
+.coupon-item-status:before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 100%;
+    background-color: currentColor;
+    position: absolute;
+    top: 50%;
+    left: 7px;
+    transform: translate(0, -50%);
+    opacity: .8;
+}
+.coupon-summary {
+    margin-top: 8px;
+    color: var(--text-light);
+    font-size: 13px;
+    font-weight: 400;
+}
+.coupon-summary span {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+.coupon-item-header-append {
+    flex-shrink: 0;
+    transition: .3s;
+}
+.coupon-item-header-append img {
+    height: 18px;
+}
+.coupon-item-header[aria-expanded="true"] .coupon-item-header-append {
+    transform: rotate(180deg);
+}
+.coupon-item {
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 0 0;
+    margin: 8px 0 0;
+}
+.coupon-item-title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 24px;
+}
+.coupon-item-barcode {
+    text-align: center;
+    overflow: hidden;
+}
+.coupon-item-barcode-wrap {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+}
+.coupon-item-number {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding-top: 4px;
+}
+.coupon-item-action button {
+    margin: 0;
+    height: 36px;
+    font-size: 14px;
+}
+.reservation-list-box {
+    margin-top: -8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.reservation-item {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 8px var(--shadow-light);
+    padding: 8px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.reservation-item:nth-child(1) {
+    margin-top: 12px;
+}
+.reservation-item-hotel {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    color: var(--text-primary);
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.reservation-item-order {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    display: inline-block;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-gray-100);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--info-color);
+    line-height: 20px;
+}
+.reservation-item-date,
+.reservation-item-status,
+.reservation-item-number {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 0 4px;
+}
+.reservation-item-date span,
+.reservation-item-status span,
+.reservation-item-number span {
+    flex-shrink: 0;
+    display: inline-block;
+    width: 80px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 16px;
+}
+.reservation-item-date div,
+.reservation-item-status div,
+.reservation-item-number div {
+    font-weight: 500;
+    text-align: right;
+}
+.reservation-item-date .main-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+.reservation-item-date .sub-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-light);
+}
+.reservation-item-action {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.reservation-item-action button {
+    height: 30px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    border-radius: var(--radius-sm);
+}
+.btn-action__secondary {
+    width: 40%;
+    background-color: var(--gray-500);
+    color: var(--text-white);
+}
+.btn-action__primary {
+    width: 60%;
+    background-color: var(--info-color);
+    color: var(--text-white);
+}
+.btn-action__primary:disabled {
+    width: 100%;
+    background-color: var(--bg-gray-200);
+    color: var(--text-tertiary);
+    cursor: default;
+}
+
+/* --------- 호텔 예약 폼 --------- */
+.title-box {
+    margin-bottom: 16px;
+}
+.title-product {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 24px;
+    margin-bottom: 4px;
+}
+.title-information {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    line-height: 20px;
+}
+.coupon-info-table-box {
+    background-color: var(--bg-gray-100);
+    border-radius: var(--radius-lg);
+    padding: 8px 8px;
+    margin-bottom: 24px;
+}
+.coupon-info-table {
+    width: 100%;
+}
+.coupon-info-table th {
+    width: 70px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding: 4px;
+    vertical-align: top;
+}
+.coupon-info-table td {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 20px;
+    padding: 4px;
+}
+
+.reservation-form-header {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.reservation-form-header p {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    line-height: 24px;
+}
+.reservation-form-header hr {
+    width: 100%;
+    border-style: dashed;
+    border-color: var(--border-medium);
+    opacity: 1;
+}
+.btn-action__delete {
+    margin-left: auto;
+    border: 1px solid var(--border-red);
+    background-color: var(--bg-red-100);
+    color: var(--error-color);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+}
+.btn-action__delete:hover {
+    background-color: var(--bg-red-200);
+}
+.btn-action__delete:active {
+    background-color: var(--bg-red-100);
+}
+.reservation-form-add {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin: 12px 0;
+}
+.reservation-form-add p {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 24px;
+}
+.reservation-form-add hr {
+    flex: 1;
+    border-color: var(--border-purple);
+    opacity: 1;
+}
+.btn-action__add {
+    border: 1px solid var(--border-purple);
+    background-color: var(--bg-purple-100);
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 4px 12px;
+    border-radius: var(--radius-md);
+}
+.btn-action__add:hover {
+    background-color: var(--bg-purple-200);
+}
+.btn-action__add:active {
+    background-color: var(--bg-purple-100);
+}
+.reservation-form-table {
+    width: 100%;
+}
+.reservation-form-table th {
+    width: 90px;
+    vertical-align: top;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding: 12px 0 8px;
+}
+.reservation-form-table td {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 20px;
+    padding: 8px 0;
+}
+.reservation-form-table strong {
+    font-size: 0.9em;
+}
+.reservation-form-table span.required {
+    color: var(--error-color);
+}
+.reservation-form-table .date-info {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    line-height: 18px;
+    margin-top: 4px;
+    padding: 0 8px;
+}
+.reservation-form-table .date-info.warning {
+    color: var(--error-color);
+}
+.reservation-form-table select,
+.reservation-form-table input {
+    width: 100%;
+    border-radius: var(--radius-full);
+    padding: 8px 12px;
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-medium);
+    color: var(--text-tertiary);
+    font-size: 14px;
+    outline: 0;
+}
+.reservation-form-table input:focus {
+    color: var(--text-tertiary);
+}
+.reservation-form-table select:disabled,
+.reservation-form-table input:disabled {
+    background-color: var(--bg-white);
+}
+.reservation-form-table select option[value="0"],
+.reservation-form-table select option:disabled {
+    color: #83868B;
+}
+.reservation-form-table select.active,
+.reservation-form-table input.active,
+.reservation-form-table select option {
+    color: var(--text-primary);
+    border-color: var(--border-medium) !important;
+}
+.option-checkbox-container {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-medium);
+    padding: 8px 8px;
+    color: var(--text-tertiary);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.option-checkbox-label {
+    background-color: var(--bg-gray-50);
+    border: 1px solid var(--bg-gray-50);
+    color: var(--text-secondary);
+    padding: 6px 8px;
+    border-radius: var(--radius-md);
+    white-space: break-spaces;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.option-checkbox-label input[type="checkbox"]:checked + span,
+.option-checkbox-label:has(input[type="checkbox"]:checked) {
+    background-color: var(--bg-purple-100);
+    color: var(--primary-color);
+    border-color: var(--border-purple);
+    font-weight: 500;
+}
+.option-checkbox-label:has(input[type="checkbox"]:disabled) {
+    background-color: var(--bg-gray-100);
+    color: var(--text-tertiary);
+    font-weight: 500;
+    opacity: 0.5;
+    cursor: default;
+}
+.option-checkbox-label input[type="checkbox"] {
+    width: 0;
+    height: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.no-option-message {
+    padding: 2px 4px;
+    color: var(--text-tertiary);
+}
+.reservation-form-table input.form-control-date {
+    padding-right: 30px;
+    cursor: default;
+    background: url(../img/ic_btn_calendar.svg) no-repeat right 12px center / 16px;
+}
+.reservation-form-table input::placeholder {
+    color: var(--text-primary);
+}
+
+.cost-table-box {
+    background-color: var(--bg-gray-100);
+    border-radius: var(--radius-sm);
+    padding: 12px 12px;
+    margin-top: 24px;
+}
+.cost-table-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    line-height: 24px;
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+.cost-table {
+    width: 100%;
+}
+.cost-table th {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 18px;
+    padding: 4px 4px;
+}
+.cost-table td {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 18px;
+    padding: 4px 4px;
+}
+.cost-table tr.total-cost th,
+.cost-table tr.total-cost td {
+    white-space: nowrap;
+    padding-top: 4px;
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+.checkbox-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin: 24px 0 0;
+}
+.checkbox-box input {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--primary-color);
+}
+.checkbox-box label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    line-height: 20px;
+}
+.checkbox-box input:checked+label {
+    color: var(--text-primary);
+}
+
+.information-table-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 24px;
+    margin-bottom: 8px;
+}
+.information-table-box {
+    background-color: var(--bg-gray-50);
+    border-radius: var(--radius-lg);
+    padding: 8px 12px;
+    margin-bottom: 24px;
+}
+.information-table {
+    width: 100%;
+}
+.information-table th,
+.information-table td {
+    height: 45px;
+    border-bottom: 1px solid var(--border-light);
+}
+.information-table tr:last-child th,
+.information-table tr:last-child td {
+    border-bottom: none;
+}
+.information-table th {
+    width: 100px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding: 4px;
+}
+.information-table td {
+    text-align: right;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 20px;
+    padding: 4px;
+}
+.information-table tr.available-days td {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+.information-content {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 20px;
+}
+.notice-box {
+    padding: 16px 16px;
+    background-color: #feecec;
+    border: 1px solid #e4b9b9;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+.url-box {
+    padding: 12px 16px;
+    background-color: #effeec;
+    border: 1px solid #8BC34A;
+    color: #165218;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+}
+.url-box:hover,
+.url-box:focus {
+    text-decoration: underline;
+}
+
+.hotel-information-box+.hotel-information-box {
+    margin-top: 8px;
+}
+.hotel-information-header {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding: 12px 16px;
+    background-color: var(--bg-gray-100);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+.hotel-information-body {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 20px;
+    padding: 12px 12px 20px;
+}
+.hotel-information-header img {
+    transition: transform 0.3s ease-in-out;
+}
+.hotel-information-header[aria-expanded="true"] img {
+    transform: rotate(-180deg);
+}
+
+/* --------- 팝업 디자인 --------- */
+.modal-body {
+    padding: 20px 12px;
+}
+.modal-title p {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 24px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+.modal-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 20px;
+    text-align: center;
+}
+.modal-table {
+    width: 100%;
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 16px;
+}
+.modal-table th {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 20px;
+    padding: 4px 8px;
+    background-color: var(--bg-gray-100);
+    border-bottom: 1px solid var(--border-light);
+}
+.modal-table td {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 20px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-light);
+}
+.modal-table tr:last-child th,
+.modal-table tr:last-child td {
+    border-bottom: none;
+}
+.modal-footer {
+    --bs-modal-footer-gap: 6px;
+    --bs-modal-padding: 6px;
+}
+.modal-footer button {
+    width: auto;
+    min-width: 120px;
+    height: 36px;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+}
+.modal-footer button.btn-action__secondary,
+.modal-footer button.btn-action__lightblue {
+    min-width: 80px;
+    background-color: var(--bg-purple-200);
+    color: var(--primary-color);
+}
+.modal-footer button.btn-action__secondary:hover,
+.modal-footer button.btn-action__lightblue:hover {
+    background-color: var(--bg-purple-200);
+}
+.modal-footer button.btn-action__secondary:active,
+.modal-footer button.btn-action__lightblue:active {
+    background-color: var(--bg-purple-100);
+}
+.modal-footer button.btn-action__primary,
+.modal-footer button.btn-action__blue {
+    margin-left: 3px;
+    background-color: var(--primary-color);
+}
+.modal-footer button.btn-action__primary:hover,
+.modal-footer button.btn-action__blue:hover {
+    background-color: var(--primary-hover);
+}
+.modal-footer button.btn-action__primary:active,
+.modal-footer button.btn-action__blue:active {
+    background-color: var(--primary-color);
+}
+/* confirm */
+.confirm-content .modal-header {
+    border-bottom: none;
+    justify-content: center;
+    padding: 16px 12px 0;
+}
+.confirm-content .modal-header .modal-title__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 24px;
+    text-align: center;
+}
+.confirm-content .modal-body {
+    padding: 20px 12px;
+}
+.confirm-content .modal-table td {
+    color: var(--text-tertiary);
+}
+.confirm-content .modal-table th {
+    width: 100px;
+}
+.confirm-content .modal-text {
+    font-weight: 500;
+    padding: 8px 4px;
+    color: var(--text-primary);
+}
+/* toast */
+.toast-body.toast-text {
+    padding: 12px 12px;
+    font-size: 14px;
+}
+
+/* --------- 달력 디자인 --------- */
+.datepicker th.datepicker-switch {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+.datepicker th.prev,
+.datepicker th.next {
+    font-size: 16px;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    color: var(--text-secondary);
+}
+.datepicker-years span.year,
+.datepicker-months span.month {
+    font-size: 14px;
+    height: 46px;
+    line-height: 46px;
+}
+.datepicker-years span.year.active,
+.datepicker-months span.month.active {
+    background: var(--bg-purple-200) !important;
+    border: 1px solid var(--border-purple) !important;
+    color: var(--primary-color) !important;
+    border-radius: var(--radius-sm) !important;
+    text-shadow: none !important;
+    font-weight: 600 !important;
+}
+.datepicker-days table {
+    font-size: 14px;
+    border-spacing: 4px;
+}
+.datepicker-days th,
+.datepicker-days td {
+    width: 30px;
+    height: 30px;
+}
+.datepicker-days th.dow {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    height: 24px;
+    padding: 4px 0;
+}
+.datepicker-days td.day.today,
+.datepicker-days td.day.today:hover,
+.datepicker-days td.day.today:focus {
+    background: var(--bg-purple-200) !important;
+    border: 1px solid var(--border-purple) !important;
+    color: var(--primary-color) !important;
+    border-radius: var(--radius-sm) !important;
+}
+.datepicker-days td.day.active,
+.datepicker-days td.day.active:hover,
+.datepicker-days td.day.active:focus {
+    background: var(--primary-color) !important;
+    border: 1px solid var(--primary-color) !important;
+    color: var(--text-white) !important;
+    border-radius: var(--radius-sm) !important;
+}
+.datepicker-days td.day.old,
+.datepicker-days td.day.new {
+    font-size: 12px;
+    opacity: 0.5;
+}
+/* ------------------------------ daterangepicker */
+.daterangepicker .drp-calendar:not(.single) {
+    padding-top: 0 !important;
+}
+.daterangepicker .calendar-table {
+    font-size: 14px;
+}
+.daterangepicker .calendar-table thead th {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    height: 24px;
+    padding: 4px 0;
+}
+.daterangepicker .calendar-table thead th.month {
+    font-weight: bold;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+.daterangepicker .calendar-table td {
+    min-width: 30px;
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+}
+.daterangepicker td.off {
+    opacity: 0.4;
+    font-size: 12px;
+    color: var(--text-light);
+}
+.daterangepicker td.available:not(.active, .in-range):hover {
+    background: var(--bg-gray-200) !important;
+    color: var(--text-secondary) !important;
+}
+.daterangepicker td.today {
+    background: var(--bg-purple-100) !important;
+    color: var(--primary-color) !important;
+}
+.daterangepicker td.in-range {
+    background: var(--bg-purple-200) !important;
+    color: var(--text-primary) !important;
+}
+.daterangepicker td.active {
+    background: var(--primary-color) !important;
+    color: var(--text-white) !important;
+}
+.daterangepicker .drp-buttons {
+    font-family: inherit;
+}
+.daterangepicker .drp-buttons .drp-selected {
+    display: none;
+}
+.daterangepicker .drp-buttons .btn {
+    border: none;
+    padding: 6px 8px 4px;
+}
+.daterangepicker .drp-buttons .btn.applyBtn {
+    min-width: 80px;
+    background-color: var(--primary-color);
+    color: var(--text-white);
+}
+.daterangepicker .drp-buttons .btn.applyBtn:hover,
+.daterangepicker .drp-buttons .btn.applyBtn:active {
+    background-color: var(--primary-hover);
+}
+.daterangepicker .drp-buttons .btn.cancelBtn {
+    min-width: 60px;
+    font-weight: 500;
+    background-color: var(--bg-gray-100);
+    color: var(--text-secondary);
+}
+.daterangepicker .drp-buttons .btn.cancelBtn:hover,
+.daterangepicker .drp-buttons .btn.cancelBtn:active {
+    background-color: var(--bg-gray-200);
+}
+/* alert */
+.swal2-icon {
+    width: 36px;
+    height: 36px;
+    margin: 12px auto;
+    color: #91a8d6 !important;
+    border-color: currentColor !important;
+}
+.swal2-icon .swal2-icon-content {
+    font-size: 30px;
+}
+.swal2-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 4px;
+}
+.swal2-html-container {
+    font-size: 14px;
+    font-weight: 500;
+}
+.swal2-styled {
+    padding: 8px 20px;
+}
+.swal2-styled.swal2-confirm {
+    background-color: var(--gray-700);
+    color: var(--text-white);
+}
+.swal2-styled:focus {
+    box-shadow: none;
+}

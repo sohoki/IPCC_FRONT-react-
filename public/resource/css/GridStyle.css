@@ -1,0 +1,36 @@
+/* GridStyles.css */
+
+/* 1. 컨테이너 크기 설정 (필수!) */
+.content-table__main {
+    height: 500px; /* 높이가 없으면 그리드가 보이지 않습니다 */
+    width: 100%;
+}
+
+/* 2. Quartz 테마 색상 및 디자인 커스텀 */
+.ag-theme-quartz {
+    /* 기본 폰트 및 배경 */
+    --ag-font-family: 'Pretendard', -apple-system, sans-serif;
+    --ag-background-color: #ffffff;
+    
+    /* 헤더 스타일 */
+    --ag-header-background-color: #f8f9fa;
+    --ag-header-foreground-color: #333333;
+    --ag-header-cell-hover-background-color: #ececec;
+    
+    /* 선택 및 호버 효과 */
+    --ag-selected-row-background-color: rgba(0, 123, 255, 0.1);
+    --ag-row-hover-color: #f1f3f5;
+    
+    /* 경계선 스타일 */
+    --ag-border-color: #dee2e6;
+    --ag-border-radius: 8px; /* 그리드 모서리 둥글게 */
+}
+
+/* 3. 작성하신 오버레이 템플릿 스타일링 */
+.ag-overlay-loading-center {
+    border: none !important;
+    background: #ffffffaa !important;
+    padding: 15px 30px !important;
+    font-weight: 600;
+    color: #007bff;
+}

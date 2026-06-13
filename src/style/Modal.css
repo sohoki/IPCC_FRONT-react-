@@ -1,0 +1,24 @@
+/* Modal.css */
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.modal-custom {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* 모달 내부 콘텐츠만 클릭 가능하도록 설정 시 유용 */
+}
+
+.modal-content-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  pointer-events: auto; /* 콘텐츠 영역은 클릭 가능 */
+}

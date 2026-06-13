@@ -1,0 +1,206 @@
+/* ── 중앙 정렬 래퍼 ── */
+.login-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: calc(100vh - 120px);
+}
+
+/* ── 로그인 카드 ── */
+.login-box {
+  width: 480px;
+  padding: 48px 40px;
+  background-color: #fff;
+  border-radius: 24px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.login-box > img[alt="Logo"] {
+  display: block;
+  height: 44px;
+  width: auto;
+  margin: 0 auto 36px;
+}
+
+.login-box form {
+  width: 100%;
+}
+
+/* ── 입력창 ── */
+.login-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f3f4f6;
+  border-radius: 10px;
+  padding: 4px 45px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.login-input:focus-within {
+  border-color: #93c5fd;
+  background-color: #fff;
+}
+
+.login-input img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  filter: brightness(0.5);
+}
+
+.login-input .form-control {
+  background: transparent;
+  border: none;
+  color: #111827;
+  font-size: 13px;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.login-input .form-control::placeholder {
+  color: #9ca3af;
+}
+
+.login-input .form-control:focus {
+  background: transparent;
+  color: #111827;
+  box-shadow: none;
+}
+
+/* ── ID 저장 ── */
+.save-id {
+  margin-bottom: 0;
+}
+
+.save-id-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: #374151;
+}
+
+.save-id-label input {
+  display: none;
+}
+
+.custom-checkbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #d1d5db;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.save-id-label input:checked + .custom-checkbox {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.save-id-label input:checked + .custom-checkbox::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.save-id-label .text {
+  font-weight: 500;
+}
+
+/* ── 로그인 버튼 ── */
+.btn-login {
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-login:not(:disabled) {
+  background-color: #2563eb;
+  color: #fff;
+}
+
+.btn-login:not(:disabled):hover {
+  background-color: #1d4ed8;
+  color: #fff;
+}
+
+.btn-login:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ── 아이디 / 비밀번호 찾기 ── */
+.login-find-wrap {
+  display: flex;
+  align-items: stretch;
+  background-color: #1f2937;
+  border-radius: 16px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.login-find-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 14px;
+  padding: 14px 0;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+}
+
+.login-find-btn:hover {
+  background-color: #374151;
+  color: #fff;
+}
+
+.login-find-divider {
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.15);
+  margin: 10px 0;
+  flex-shrink: 0;
+}
+
+/* ── 인증 페이지 헤더 ── */
+.auth-header {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 60px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #fff;
+}
+
+.auth-header-logo {
+  height: 32px;
+  width: auto;
+}

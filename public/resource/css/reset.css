@@ -1,0 +1,17 @@
+/*layout*/
+@charset "utf-8";
+/*webfont*/
+@import url("pretendard.css"); 
+
+/* All */
+
+header,footer,section,article,aside,nav,menu,hgroup,figure,figcaption{ display:block; margin:0; padding:0}
+html,body{ height:100%; margin:0; padding:0; background: #fff; line-height:normal;}
+body,html,table,input,textarea,select,button{font-family:'Pretendard',sans-serif;font-size: 12px; color:#000;font-weight: 400; word-wrap: break-all; letter-spacing: -0.4px;}
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td
+{margin:0; padding:0; border:0; border-collapse:separate; border-spacing:0; font-style:inherit; text-decoration:none; list-style:none; letter-spacing:-0.36px; box-sizing: border-box;}
+img,object{ border:0}
+img{ height:auto}
+article, aside, hgroup, header, footer, figure, figcaption, nav, section,time, mark, canvas, video, audio, details, summary {
+     display:block;
+}

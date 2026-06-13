@@ -1,0 +1,235 @@
+/* ── MUI Drawer 스타일 사이드바 ─────────────────────────────────────────── */
+
+:root {
+    --sb-width:        240px;
+    --sb-width-mini:    64px;
+    --sb-header-h:      64px;   /* 전역 헤더 높이 — header { height: 64px } 과 일치 */
+    --sb-bg:          #1a1a2e;
+    --sb-bg-hover:    rgba(255,255,255,.07);
+    --sb-bg-active:   rgba(99,179,237,.15);
+    --sb-accent:      #63b3ed;
+    --sb-text:        rgba(255,255,255,.75);
+    --sb-text-muted:  rgba(255,255,255,.4);
+    --sb-divider:     rgba(255,255,255,.08);
+    --sb-radius:      8px;
+    --sb-transition:  240ms cubic-bezier(.4,0,.2,1);
+}
+
+/* ── 헤더 고정 — 스크롤 시 흰 여백 방지 ────────────────────────────────── */
+body[data-sb] header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1300;   /* 사이드바(1100)보다 위 */
+}
+
+/* ── 래퍼 ───────────────────────────────────────────────────────────────── */
+.sb-root {
+    position: fixed;
+    top: var(--sb-header-h);   /* 헤더 아래에서 시작 */
+    left: 0;
+    height: calc(100vh - var(--sb-header-h));
+    width: var(--sb-width-mini);
+    background: var(--sb-bg);
+    display: flex;
+    flex-direction: column;
+    transition: width var(--sb-transition);
+    z-index: 1100;             /* 헤더(z-index 높음)보다 낮게 */
+    overflow: hidden;
+    box-shadow: 2px 0 12px rgba(0,0,0,.35);
+    flex-shrink: 0;
+}
+.sb-root.sb-open { width: var(--sb-width); }
+
+/* ── 토글 버튼 ──────────────────────────────────────────────────────────── */
+.sb-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 56px;
+    min-height: 56px;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--sb-text);
+    transition: background var(--sb-transition), color var(--sb-transition);
+    flex-shrink: 0;
+}
+.sb-toggle:hover { background: var(--sb-bg-hover); color: #fff; }
+.sb-toggle svg { width: 22px; height: 22px; transition: transform var(--sb-transition); }
+.sb-open .sb-toggle svg { transform: rotate(180deg); }
+
+/* ── 구분선 ─────────────────────────────────────────────────────────────── */
+.sb-divider {
+    height: 1px;
+    background: var(--sb-divider);
+    margin: 0 12px;
+    flex-shrink: 0;
+}
+
+/* ── 스크롤 영역 ────────────────────────────────────────────────────────── */
+.sb-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.15) transparent;
+}
+.sb-nav::-webkit-scrollbar { width: 4px; }
+.sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+
+/* ── 1단 메뉴 버튼 ──────────────────────────────────────────────────────── */
+.sb-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    padding: 0 0 0 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--sb-text);
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: .01em;
+    text-align: left;
+    white-space: nowrap;
+    transition: background var(--sb-transition), color var(--sb-transition);
+    position: relative;
+    border-radius: 0;
+    overflow: hidden;
+}
+.sb-item:hover     { background: var(--sb-bg-hover); color: #fff; }
+.sb-item.sb-active { background: var(--sb-bg-active); color: var(--sb-accent); }
+
+/* active 왼쪽 accent 바 */
+.sb-item.sb-active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 8px;
+    width: 3px;
+    background: var(--sb-accent);
+    border-radius: 0 2px 2px 0;
+}
+
+/* ── 아이콘 래퍼 ────────────────────────────────────────────────────────── */
+.sb-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 10px;
+    border-radius: 6px;
+    transition: background var(--sb-transition);
+}
+.sb-item.sb-active .sb-icon { background: rgba(99,179,237,.15); }
+.sb-icon img  { width: 18px; height: 18px; object-fit: contain; }
+.sb-icon svg  { width: 18px; height: 18px; }
+
+/* ── 메뉴명 ─────────────────────────────────────────────────────────────── */
+.sb-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 1;
+    transition: opacity var(--sb-transition), transform var(--sb-transition);
+}
+.sb-root:not(.sb-open) .sb-label {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-8px);
+}
+
+/* ── 화살표 ─────────────────────────────────────────────────────────────── */
+.sb-arrow {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    color: var(--sb-text-muted);
+    transition: transform var(--sb-transition), opacity var(--sb-transition);
+    opacity: 1;
+}
+.sb-root:not(.sb-open) .sb-arrow { opacity: 0; }
+.sb-item[aria-expanded="true"] .sb-arrow { transform: rotate(180deg); }
+
+/* ── 2단 메뉴 컨테이너 ──────────────────────────────────────────────────── */
+.sb-sub {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height var(--sb-transition);
+}
+.sb-sub.sb-sub-open { max-height: 600px; }
+
+/* ── 2단 메뉴 아이템 ────────────────────────────────────────────────────── */
+.sb-sub-item {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 16px 0 58px;
+    color: var(--sb-text);
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background var(--sb-transition), color var(--sb-transition);
+    position: relative;
+}
+.sb-sub-item::before {
+    content: '';
+    position: absolute;
+    left: 36px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sb-text-muted);
+    transition: background var(--sb-transition), transform var(--sb-transition);
+    transform: scale(.7);
+}
+.sb-sub-item:hover {
+    background: var(--sb-bg-hover);
+    color: #fff;
+}
+.sb-sub-item:hover::before { background: var(--sb-accent); transform: scale(1); }
+.sb-sub-item.sb-sub-active {
+    color: var(--sb-accent);
+    background: var(--sb-bg-active);
+}
+.sb-sub-item.sb-sub-active::before {
+    background: var(--sb-accent);
+    transform: scale(1);
+}
+
+/* ── 미니 모드: 1단 메뉴 툴팁 ──────────────────────────────────────────── */
+.sb-root:not(.sb-open) .sb-item { justify-content: center; padding: 0; }
+.sb-root:not(.sb-open) .sb-icon { margin-right: 0; }
+
+/* ── 메인 콘텐츠 오프셋 (body[data-sb] 기반) ─────────────────────────────── */
+body[data-sb] section {
+    margin-top: var(--sb-header-h);   /* section이 헤더 아래에 위치 */
+}
+body[data-sb] .main-contents,
+body[data-sb] section > *:not(.sb-root) {
+    margin-left: var(--sb-width-mini);
+    transition: margin-left var(--sb-transition);
+}
+body[data-sb="open"] .main-contents,
+body[data-sb="open"] section > *:not(.sb-root) {
+    margin-left: var(--sb-width);
+}
+
+/* ── content-header 상단 여백 최소화 — 사이드바 루트 위치에 맞춤 ──────────── */
+body[data-sb] .main-contents {
+    padding-top: 16px;
+}
+body[data-sb] .content-header {
+    padding-top: 0;
+    padding-bottom: 12px;
+}
+body[data-sb] .content-header__title {
+    font-size: 22px;
+    margin-bottom: 4px;
+}
