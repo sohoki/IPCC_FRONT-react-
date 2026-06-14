@@ -8,11 +8,11 @@ import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 const INITIAL_SEARCH = { searchCondition: '', searchKeyword: '' };
 
 /**
- * ?�로그램 ?�택 ?�업
+ * 프로그램 선택 모달
  * Props:
- *   open     ???�시 ?��?
- *   onClose  ???�기 콜백
- *   onSelect ??(row) => void  ???�택 콜백
+ *   open    프로그램 선택 모달 오픈 여부
+ *   onClose    프로그램 선택 모달 닫기 콜백
+ *   onSelect ??(row) => void  프로그램 선택 콜백
  */
 const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
     const [pageUnit] = useState(20);
@@ -49,11 +49,11 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
     };
 
     const columnDefs = [
-        { headerName: '?�로그램코드', field: 'progrmFileNm', width: 180 },
-        { headerName: '?��?�?,       field: 'progrmKoreannm', flex: 1 },
-        { headerName: '?�?�경�?,     field: 'progrmStrePath', flex: 1 },
+        { headerName: '파일명', field: 'progrmFileNm', width: 180 },
+        { headerName: '한글명', field: 'progrmKoreannm', flex: 1 },
+        { headerName: '경로', field: 'progrmStrePath', flex: 1 },
         {
-            headerName: '?�택',
+            headerName: '선택',
             width: 80,
             sortable: false,
             filter: false,
@@ -64,7 +64,7 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                     style={{ padding: '2px 10px', fontSize: 12 }}
                     onClick={() => { onSelect(p.data); onClose(); }}
                 >
-                    ?�택
+                    선택
                 </button>
             ),
         },
@@ -84,14 +84,15 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                 display: 'flex', flexDirection: 'column',
                 maxHeight: '80vh', overflow: 'hidden',
             }}>
-                {/* ?�더 */}
+                {/* 헤더 */}
                 <div style={{
                     padding: '16px 20px 12px', borderBottom: '1px solid #f0f4f8',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     flexShrink: 0,
                 }}>
                     <span style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
-                        ?�로그램 검??                    </span>
+                        프로그램 검색
+                    </span>
                     <button
                         type="button"
                         style={{ border: 'none', background: 'none', fontSize: 20, cursor: 'pointer', color: '#94a3b8', lineHeight: 1 }}
@@ -99,7 +100,7 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                     >×</button>
                 </div>
 
-                {/* 검??�?*/}
+                {/* 검색 */}
                 <div style={{ padding: '12px 20px', borderBottom: '1px solid #f0f4f8', display: 'flex', gap: 8, flexShrink: 0 }}>
                     <select
                         name="searchCondition"
@@ -108,26 +109,26 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         value={tempParams.searchCondition}
                         onChange={handleInputChange}
                     >
-                        <option value="">?�택</option>
+                        <option value="">선택</option>
                         <option value="progrmFileNm">코드</option>
-                        <option value="progrmKoreannm">?��?�?/option>
+                        <option value="progrmKoreannm">한글명</option>
                     </select>
                     <input
                         ref={inputRef}
                         name="searchKeyword"
                         type="text"
                         className="form-control"
-                        placeholder="검?�어�??�력?�세??
+                        placeholder="검색어를 입력하세요"
                         value={tempParams.searchKeyword}
                         onChange={handleInputChange}
                         onKeyDown={onKeyDown}
                     />
                     <button type="button" className="btn btn-outline-dark btn-outline__gray" onClick={onSearch}
                         style={{ whiteSpace: 'nowrap' }}>
-                        검??                    </button>
+                        검색                    </button>
                 </div>
 
-                {/* 그리????고정 ?�이 + odd/even 줄무??*/}
+                {/* 그리드 */}
                 <div style={{ padding: '0 16px 4px', flexShrink: 0 }}>
                 <div className="ag-theme-material" style={{ height: 420 }}>
                     <style>{`
@@ -148,17 +149,17 @@ const ProgramChoiceModal = ({ open, onClose, onSelect }) => {
                         paginationPageSizeSelector={[10, 20, 50]}
                         cacheBlockSize={pageUnit}
                         rowHeight={38}
-                        overlayNoRowsTemplate="<span style='color:#94a3b8'>검??결과가 ?�습?�다.</span>"
-                        overlayLoadingTemplate="<span style='color:#94a3b8'>조회 �?..</span>"
+                        overlayNoRowsTemplate="<span style='color:#94a3b8'>검색 결과가 없습니다.</span>"
+                        overlayLoadingTemplate="<span style='color:#94a3b8'>조회 중...</span>"
                         onGridReady={onGridReady}
                     />
                 </div>
                 </div>
 
-                {/* ?�단 */}
+                {/* 하단 */}
                 <div style={{ padding: '12px 20px', borderTop: '1px solid #f0f4f8', display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
                     <button type="button" className="btn btn-outline-secondary" onClick={onClose}>
-                        ?�기
+                        닫기
                     </button>
                 </div>
             </div>

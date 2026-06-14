@@ -66,8 +66,8 @@ const Profile = ({
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={(e) => {
                                 // 데이터는 있지만 이미지 경로가 깨졌을 때(404 등) 글자 UI로 대체하는 예외 처리
-                                e.target.style.display = 'none'; // ?��?지 ?�기�?
-                                e.target.parentNode.innerText = (managerName || '?�름').substring(0, 2); // 부모 div에 글자 주입
+                                e.target.style.display = 'none'; // 이미지 숨기기
+                                e.target.parentNode.innerText = (managerName || '이름').substring(0, 2); // 부모 div에 글자 주입
                             }}
                         />
                     ):(

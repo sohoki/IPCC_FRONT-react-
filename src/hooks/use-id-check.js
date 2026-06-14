@@ -67,7 +67,11 @@ export const useIdCheck = (checkUrl, message) => {
 
             return isSuccess;
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '중복 체크 중 오류가 발생했습니다.' });
+            // fnAjaxFetch에서 이미 Swal을 띄운 HandledError는 재처리하지 않는다.
+            // (재처리하면 첫 Swal이 닫히면서 /error 리다이렉트가 즉시 실행됨)
+            if (e?.name !== 'HandledError') {
+                await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '중복 체크 중 오류가 발생했습니다.' });
+            }
             return false;
         }
     }, [checkUrl, message]);

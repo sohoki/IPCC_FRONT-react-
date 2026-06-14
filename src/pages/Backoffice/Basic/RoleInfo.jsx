@@ -74,7 +74,7 @@ const RoleInfo = () => {
     //검색 조건 
     const searchRef = useRef(null);
    // 검색 상태
-    const [systemCode, setSystemCode] = useState('IPCC'); // ?�요??select 추�?
+    const [systemCode, setSystemCode] = useState('IPCC'); // 필요시 select 추가
     const [pageUnit] = useState(20);
 
 // 목록 상태
@@ -179,7 +179,7 @@ const RoleInfo = () => {
         if (e.key === 'Enter') onSearch(1);
     }, [onSearch]);
 
-    / 권한 저장    
+    // 권한 저장    
 	const { handleSubmit : handleRoleSave } = useCommonSubmit({
         form: roleForm,
         type: 'json',
@@ -329,8 +329,6 @@ const RoleInfo = () => {
             showCancelButton: true,
             confirmButtonText: '예',
             cancelButtonText: '아니오',
-            reverseButtons: true,
-            focusCancel: true,
         });
         if (!ok.isConfirmed) return;
 
@@ -390,13 +388,13 @@ const RoleInfo = () => {
         }
     };
 
-    // 컬럼 ?�의 -----------------------------
+    // 컬럼 정의 -----------------------------
     const columnDefs = useMemo(() => [
         { headerName: "권한코드",     field: "roleId",      cellStyle: { textAlign: 'left' }, key: true },
         { headerName: "시스템명",       field: "systemName",    cellStyle: { textAlign: 'left' }, flex: 1 },
         { headerName: "권한명",       field: "roleName",    cellStyle: { textAlign: 'left' }, flex: 1 },
         { headerName: "상세설명",     field: "roleDc",      cellStyle: { textAlign: 'left' }, flex: 1.2 },
-        { headerName: "사용유무",     field: "roleUseyn",   cellStyle: { textAlign: 'center' }, width: 90,
+        { headerName: "사용유무",     field: "roleUseyn",   cellStyle: { textAlign: 'center' }, width: 110,
             cellRenderer: (params) => {
                 const handleChange = async (payload) => {
                     const newValue = payload.roleUseyn;
@@ -420,7 +418,7 @@ const RoleInfo = () => {
                 );
             }
         },
-        { headerName: "생성일자",     field: "frstRegistPnttm", cellStyle: { textAlign: 'left' } },
+        { headerName: "생성일자",     field: "frstRegistPnttm", cellStyle: { textAlign: 'left' } ,width: 120,},
         {
             headerName: '메뉴설정여부', field: "chkMenu",
             width: 130, sortable: false, filter: false,

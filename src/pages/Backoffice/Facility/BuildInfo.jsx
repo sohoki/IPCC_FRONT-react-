@@ -114,7 +114,7 @@ const BuildInfo = () => {
     const { handleDelete } = useCommonDelete({
         gridApiRef,
         URL: URL.CENTER_DELETE,
-        MESSAGE: '지??,
+        MESSAGE: '지점',
         reloadFunction: onSearch,
     });
 
@@ -128,11 +128,11 @@ const BuildInfo = () => {
             });
             const json = res?.data;
             if (json?.resultCodeInfo !== 'SUCCESS') {
-                await Swal.fire({ icon: 'warning', title: '경고', text: json?.resultMessage || '?�태 변경에 ?�패?�습?�다.' });
+                await Swal.fire({ icon: 'warning', title: '경고', text: json?.resultMessage || '상태 변경에 실패했습니다.' });
                 refreshGrid();
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
             refreshGrid();
         }
     }, [refreshGrid]);
@@ -141,11 +141,11 @@ const BuildInfo = () => {
         form,
         type: 'multipart',
         checkField: [
-            { inputId: 'centerNm', inputType: CODE.TEXT, message: '지?�명' },
-            { inputId: 'insttCode', inputType: CODE.TEXT, message: '기�?' },
+            { inputId: 'centerNm', inputType: CODE.TEXT, message: '지점명' },
+            { inputId: 'insttCode', inputType: CODE.TEXT, message: '기관명' },
         ],
         uploadField: ['centerImgFile'],
-        confirmMessage: `${form.centerNm} 지???�보�?,
+        confirmMessage: `${form.centerNm} 지점 정보를`,
         gridApiRef,
         setModalOpen,
         URL: URL.CENTER_UPDATE,
@@ -154,7 +154,7 @@ const BuildInfo = () => {
 
     const handleSubmit = useCallback(async () => {
         if (form.centerFloor && form.centerFloorEnd && !form.floorInfo) {
-            await alert.warning('?�용 층수�?1�??�상 ?�택??주세??', '?�력 ?�인');
+            await alert.warning('사용 층수를 1개 이상 선택해 주세요', '입력 확인');
             return;
         }
         handleSubmitInner();
@@ -162,19 +162,19 @@ const BuildInfo = () => {
 
     const columnDefs = useMemo(() => [
         {
-            headerName: '?�경?�진',
+            headerName: '배경사진',
             field: 'centerImg',
             width: 110,
             cellRenderer: (p) => p.value
-                ? <img src={`/upload/${p.value}`} style={{ width: 80, height: 55, objectFit: 'cover', borderRadius: 4 }} alt="?�경" />
-                : <span className="text-muted small">?�음</span>,
+                ? <img src={`/upload/${p.value}`} style={{ width: 80, height: 55, objectFit: 'cover', borderRadius: 4 }} alt="배경" />
+                : <span className="text-muted small">없음</span>,
         },
-        { headerName: '기�?', field: 'allInsttNm', width: 150 },
-        { headerName: '지?�명', field: 'centerNm', flex: 1 },
-        { headerName: '?�락�?, field: 'centerTel', width: 130 },
+        { headerName: '기관명', field: 'allInsttNm', width: 150 },
+        { headerName: '지점명', field: 'centerNm', flex: 1 },
+        { headerName: '연락처', field: 'centerTel', width: 130 },
         { headerName: 'FAX', field: 'centerFax', width: 130 },
         {
-            headerName: '?�인?��?',
+            headerName: '승인여부',
             field: 'adminApprovalYn',
             width: 120,
             cellRenderer: (p) => (
@@ -188,45 +188,45 @@ const BuildInfo = () => {
                     className="form-select form-select-sm"
                     style={{ height: 28, padding: '0 4px' }}
                 >
-                    <option value="Y">?�인</option>
-                    <option value="N">미승??/option>
+                    <option value="Y">승인</option>
+                    <option value="N">미승인</option>
                 </select>
             ),
         },
         {
-            headerName: '?�용?�무',
+            headerName: '사용여부',
             field: 'centerUseYn',
             width: 100,
             cellRenderer: (p) => (
                 <span className={`badge rounded-pill ${p.value === 'Y' ? 'bg-success' : 'bg-secondary'} px-3 py-2`}
                     style={{ fontSize: '0.82rem' }}>
-                    {p.value === 'Y' ? '?�용' : '미사??}
+                    {p.value === 'Y' ? '사용' : '미사용'}
                 </span>
             ),
         },
-        { headerName: '최종?�정??, field: 'centerUpdateUserId', width: 120 },
-        { headerName: '최종?�정??, field: 'centerUpdateDate', width: 140 },
+        { headerName: '최종수정자', field: 'centerUpdateUserId', width: 120 },
+        { headerName: '최종수정일', field: 'centerUpdateDate', width: 140 },
         {
-            headerName: '?�정',
+            headerName: '수정',
             width: 70,
             sortable: false,
             filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenModal(p.data)}>
-                    ?�정
+                    수정
                 </button>
             ),
         },
         {
-            headerName: '??��',
+            headerName: '삭제',
             width: 70,
             sortable: false,
             filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleDelete({ code: p.data?.centerId, name: p.data?.centerNm })}>
-                    ??��
+                    삭제
                 </button>
             ),
         },
@@ -235,11 +235,11 @@ const BuildInfo = () => {
     return (
         <div className="row g-0 main-contents">
             <div className="col-12 content-header">
-                <div className="content-header__title">지??관�?/div>
+                <div className="content-header__title">지점 관리</div>
                 <div className="content-header__breadcrumb">
                     <ol className="breadcrumb">
-                        <li className="breadcrumb-item">?�설 관�?/li>
-                        <li className="breadcrumb-item">지??관�?/li>
+                        <li className="breadcrumb-item">시설 관리</li>
+                        <li className="breadcrumb-item">지점 관리</li>
                     </ol>
                 </div>
             </div>
@@ -253,7 +253,7 @@ const BuildInfo = () => {
                             value={tempParams.searchInsttCode}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�체 기�?</option>
+                            <option value="">전체 기관명</option>
                             {insttOptions.map(o => (
                                 <option key={o.code} value={o.code}>{o.codeNm}</option>
                             ))}
@@ -265,14 +265,14 @@ const BuildInfo = () => {
                             value={tempParams.searchCondition}
                             onChange={handleInputChange}
                         >
-                            <option value="">?�택</option>
-                            <option value="centerNm">?�름</option>
-                            <option value="centerId">?�이??/option>
+                            <option value="">선택</option>
+                            <option value="centerNm">이름</option>
+                            <option value="centerId">아이디</option>
                         </select>
                         <input
                             type="text"
                             name="searchKeyword"
-                            placeholder="검?�어�??�력?�세??
+                            placeholder="검색어를 입력하세요"
                             value={tempParams.searchKeyword}
                             onChange={handleInputChange}
                             onKeyDown={onSearchKeyDown}
@@ -283,19 +283,19 @@ const BuildInfo = () => {
                             <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10.7 5C12.0791 5 13.4018 5.58699 14.377 6.63183C15.3521 7.67668 15.9 9.09379 15.9 10.5714C15.9 11.9514 15.428 13.22 14.652 14.1971L14.868 14.4286H15.5L19.5 18.7143L18.3 20L14.3 15.7143V15.0371L14.084 14.8057C13.172 15.6371 11.988 16.1429 10.7 16.1429C9.32087 16.1429 7.99823 15.5559 7.02304 14.511C6.04786 13.4662 5.5 12.0491 5.5 10.5714C5.5 9.09379 6.04786 7.67668 7.02304 6.63183C7.99823 5.58699 9.32087 5 10.7 5ZM10.7 6.71429C8.7 6.71429 7.1 8.42857 7.1 10.5714C7.1 12.7143 8.7 14.4286 10.7 14.4286C12.7 14.4286 14.3 12.7143 14.3 10.5714C14.3 8.42857 12.7 6.71429 10.7 6.71429Z" fill="currentColor"/>
                             </svg>
-                            검??                        </button>
+                            검색                        </button>
                         <button type="button" className="btn btn-outline-dark btn-outline__gray" onClick={() => handleReset()}>
                             <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M19 8L15 12L19 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C13.1046 16 14.1046 15.5523 14.8284 14.8284" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C14.4853 3 16.7353 4.00736 18.364 5.63604" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                             </svg>
-                            검??초기??                        </button>
+                            검색초기화                        </button>
                         <button type="button" className="btn btn-primary btn-default__blue" onClick={() => handleOpenModal()}>
                             <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                             </svg>
-                            지???�록
+                            지점 등록
                         </button>
                     </div>
                 </div>
@@ -313,8 +313,8 @@ const BuildInfo = () => {
                         cacheBlockSize={pageUnit}
                         maxBlocksInCache={2}
                         domLayout="autoHeight"
-                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�이?��? ?�습?�다.</span>"
-                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 �?..</span>"
+                        overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>데이터가 없습니다.</span>"
+                        overlayLoadingTemplate="<span class='ag-overlay-loading-center'>조회 중..</span>"
                         onGridReady={onGridReady}
                     />
                 </div>

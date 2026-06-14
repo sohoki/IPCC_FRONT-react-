@@ -11,7 +11,7 @@ const CodeFormModal = ({
     onSubmit,
 }) => {
 
-    const { handleIdCheck } = useIdCheck(URL.VENDER_ID_CHECK, '?�이??);
+    const { handleIdCheck } = useIdCheck(URL.VENDER_ID_CHECK, '아이디');
 
     const onIdCheck = useCallback(async () => {
         await handleIdCheck(form.codeId, setForm);

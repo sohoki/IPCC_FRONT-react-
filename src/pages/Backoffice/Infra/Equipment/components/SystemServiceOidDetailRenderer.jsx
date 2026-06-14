@@ -5,13 +5,13 @@ import { gridTheme } from '@/constants/agGridTheme.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 
-// ?�?� OID ?�브 그리??컬럼 (모듈 ?�벨) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// 상세 OID 서브 그리드 컬럼 (모듈 레벨) ======================================
 const OID_COL_DEFS = [
     { headerName: 'Oid Number',  field: 'oidNumber',      flex: 1 },
-    { headerName: '?�름',         field: 'oidName',        flex: 1 },
-    { headerName: '반환�?,       field: 'codeNm',         width: 120 },
-    { headerName: '?�정??,       field: 'lastUpdusrId',   width: 110 },
-    { headerName: '?�정?�자',     field: 'lastUpdtPnttm',  width: 130 },
+    { headerName: '이름',         field: 'oidName',        flex: 1 },
+    { headerName: '반환값',       field: 'codeNm',         width: 120 },
+    { headerName: '수정자',       field: 'lastUpdusrId',   width: 110 },
+    { headerName: '수정일자',     field: 'lastUpdtPnttm',  width: 130 },
     {
         headerName: '체크', width: 90, sortable: false, filter: false,
         cellRenderer: (p) => (
@@ -19,12 +19,12 @@ const OID_COL_DEFS = [
                 className="btn btn-sm btn-outline-secondary"
                 onClick={(e) => { e.preventDefault(); p.context?.onOidView(p.data?.oidSeq); }}
             >
-                SNMP?�인
+                SNMP확인
             </button>
         ),
     },
     {
-        headerName: '?�정', width: 70, sortable: false, filter: false,
+        headerName: '수정', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary btn-modify"
@@ -33,7 +33,7 @@ const OID_COL_DEFS = [
                     p.context?.onOpenOidEdit(p.data, p.data?.__serviceSeq);
                 }}
             >
-                ?�정
+                수정
             </button>
         ),
     },
@@ -42,8 +42,8 @@ const OID_COL_DEFS = [
 const OID_DEFAULT_COL_DEF = { resizable: true, sortable: false, filter: false, flex: 1 };
 
 /**
- * ?�비??OID ?�브 그리???�더??
- * context ?�신:
+ * 서비스 OID 서브 그리드 렌더러
+ * context 수신:
  *   context.fetchOids({ serviceSeq })
  *   context.onOidView(oidSeq)
  *   context.onOpenOidEdit(oidData, serviceSeq)
@@ -84,7 +84,7 @@ const SystemServiceOidDetailRenderer = (props) => {
                     headerHeight={32}
                     rowHeight={30}
                     context={context}
-                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�록??OID가 ?�습?�다.</span>"
+                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>등록된 OID가 없습니다.</span>"
                 />
             </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import UseSwitch from '@/components/Common/IosSwitch.jsx';
@@ -107,15 +107,21 @@ const CodeDetailCellRenderer = (props) => {
     const { data, node, context } = props;
     const [rowData, setRowData] = useState([]);
 
+    // context 전체를 dep에 넣으면 관계없는 변경에도 재조회가 일어나므로 ref로 최신값 유지
+    const ctxRef = useRef(context);
+    useEffect(() => { ctxRef.current = context; });
+
     useEffect(() => {
         const codeId = data?.codeId;
+        const systemCode = data?.systemCode;
         const nodeId = node?.id;
-        if (!codeId || !context?.fetchDetail) return;
+        if (!codeId || !ctxRef.current?.fetchDetail) return;
 
-        context.fetchDetail({ codeId, systemCode: data?.systemCode, pageIndex: '1', pageUnit: '100' })
+        ctxRef.current.fetchDetail({ codeId, systemCode, pageIndex: '1', pageUnit: '100' })
             .then((list) => setRowData(list.map((r) => ({ ...r, codeId, __parentId: nodeId }))))
             .catch(() => setRowData([]));
-    }, [data?.codeId, node?.id, context]);
+    // context?.subRefresh?.[codeId] 카운터가 오르면 재조회 트리거
+    }, [data?.codeId, data?.systemCode, node?.id, context?.subRefresh?.[data?.codeId]]);
 
     return (
         <div style={{ width: '100%', backgroundColor: '#fff', padding: 0, boxSizing: 'border-box' }}>

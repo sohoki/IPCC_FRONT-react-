@@ -12,7 +12,7 @@ const AgentExcelModal = ({ open, onClose, onSuccess }) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // xlsx ?�이브러리�? window.XLSX ?�는 import�??�용 가?�해????        
+        // xlsx 라이브러리를 window.XLSX 또는 import로 사용 가능한지 확인
         try {
             const XLSX = window.XLSX || (await import('xlsx'));
             const reader = new FileReader();

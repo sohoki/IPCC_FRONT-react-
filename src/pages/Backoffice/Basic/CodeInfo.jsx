@@ -87,6 +87,9 @@ const CodeInfo = () => {
     const [pageUnit] = useState(20);
     const [rowData, setRowData] = useState([]);
 
+    // 서브 그리드 재조회 트리거 — codeId별 카운터
+    const [subRefresh, setSubRefresh] = useState({});
+
     // ── 분류코드 모달 ──
     const [codeForm, setCodeForm] = useState(INITIAL_CODE_FORM);
     const [codeModalOpen, setCodeModalOpen] = useState(false);
@@ -158,18 +161,10 @@ const CodeInfo = () => {
     useEffect(() => { fetchDetailCodeRef.current = fetchDetailCodeStable; }, [fetchDetailCodeStable]);
 
     // ── 서브 그리드 리프레시 ──
-    const refreshDetailRows = useCallback(async ({ parentRowId, codeId, systemCode }) => {
-        const gridApi = gridApiRef.current;
-        if (!gridApi) return;
-        const info = gridApi.getDetailGridInfo(`detail_${parentRowId}`);
-        if (!info) return;
-        try {
-            info.api.setGridOption('loading', true);
-            const rows = await fetchDetailCodeRef.current({ codeId, systemCode });
-            info.api.setGridOption('rowData', rows.map((r) => ({ ...r, codeId, __parentId: parentRowId })));
-        } finally {
-            info.api.setGridOption('loading', false);
-        }
+    // subRefresh[codeId] 카운터를 올리면 CodeDetailCellRenderer의 useEffect가 감지해
+    // 내부 state로 직접 재조회한다. (info.api.setGridOption 방식은 React 렌더에 덮어쓰여 무효화됨)
+    const refreshDetailRows = useCallback(({ codeId }) => {
+        setSubRefresh(prev => ({ ...prev, [codeId]: (prev[codeId] || 0) + 1 }));
     }, []);
 
     // ── 분류코드 사용유무 API ──
@@ -232,8 +227,8 @@ const CodeInfo = () => {
         setModalOpen: setCodeDetailModalOpen,
         URL: API_URL.CODE_DETAIL_UPDATE,
         reloadFunction: 'none',
-        callback: async () => {
-            await refreshDetailRows({ parentRowId: detailForm.codeId, codeId: detailForm.codeId, systemCode: detailForm.systemCode });
+        callback: () => {
+            refreshDetailRows({ codeId: detailForm.codeId });
         },
     });
 
@@ -283,7 +278,7 @@ const CodeInfo = () => {
             width: 100, cellStyle: { textAlign: 'center' },
             cellRenderer: MainUseAtCell,
         },
-        { headerName: '수정자',   field: 'lastUpdusrId',  cellStyle: { textAlign: 'left' }, width: 100 },
+        { headerName: '수정자',   field: 'lastUpdusrId',  cellStyle: { textAlign: 'left' }, width: 90 },
         {
             headerName: '수정일자', field: 'lastUpdtPnttm',
             cellStyle: { textAlign: 'left' },
@@ -293,7 +288,7 @@ const CodeInfo = () => {
             },
         },
         {
-            headerName: '세부코드등록', cellStyle: { textAlign: 'center' }, width: 110,
+            headerName: '세부코드등록', cellStyle: { textAlign: 'center' }, width: 120,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={(e) => { e.preventDefault(); openDetailCodeMoal(p.data?.codeId, '', p.data); }}
@@ -301,7 +296,7 @@ const CodeInfo = () => {
             ),
         },
         {
-            headerName: '수정', cellStyle: { textAlign: 'center' }, width: 70, sortable: false, filter: false,
+            headerName: '수정', cellStyle: { textAlign: 'center' }, width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={(e) => { e.preventDefault(); openCodeMoal(p.data?.codeId, p.data); }}
@@ -309,7 +304,7 @@ const CodeInfo = () => {
             ),
         },
         {
-            headerName: '삭제', cellStyle: { textAlign: 'center' }, width: 70, sortable: false, filter: false,
+            headerName: '삭제', cellStyle: { textAlign: 'center' }, width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray js-code-delete"
                     onClick={(e) => { e.preventDefault(); 
@@ -334,7 +329,8 @@ const CodeInfo = () => {
         onDelete: handleCodeDelete,
         refreshRows: refreshDetailRows,
         updateUseAt,
-    }), [openDetailCodeMoal, handleCodeDelete, refreshDetailRows, updateUseAt]);
+        subRefresh,
+    }), [openDetailCodeMoal, handleCodeDelete, refreshDetailRows, updateUseAt, subRefresh]);
 
     const handleSearchChange = useCallback((e) => {
         const { name, value } = e.target;

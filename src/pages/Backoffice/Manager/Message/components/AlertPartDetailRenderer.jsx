@@ -6,10 +6,10 @@ import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 
 const PART_COL_DEFS = [
-    { headerName: '부??구분', field: 'codeNm',   flex: 1 },
-    { headerName: '부?�코??,  field: 'alertPart', flex: 1 },
+    { headerName: '부서 구분', field: 'codeNm',   flex: 1 },
+    { headerName: '부서코드',  field: 'alertPart', flex: 1 },
     {
-        headerName: '?�정', width: 70, sortable: false, filter: false,
+        headerName: '수정', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary btn-modify"
@@ -17,11 +17,11 @@ const PART_COL_DEFS = [
                     e.preventDefault();
                     p.context?.onOpenPartEdit(p.data, p.data?.__alertSeq);
                 }}
-            >?�정</button>
+            >수정</button>
         ),
     },
     {
-        headerName: '??��', width: 70, sortable: false, filter: false,
+        headerName: '삭제', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-danger"
@@ -29,7 +29,7 @@ const PART_COL_DEFS = [
                     e.preventDefault();
                     p.context?.onDeletePart(p.data?.alertPartSeq, p.data?.__alertSeq);
                 }}
-            >??��</button>
+            >삭제</button>
         ),
     },
 ];
@@ -37,8 +37,8 @@ const PART_COL_DEFS = [
 const PART_DEFAULT_COL_DEF = { resizable: true, sortable: false, filter: false, flex: 1 };
 
 /**
- * 부???�브 그리???�더??
- * context ?�신:
+ * 부서 서브 그리드 렌더러
+ * context 수신:
  *   context.onOpenPartEdit(partData, alertSeq)
  *   context.onDeletePart(alertPartSeq, alertSeq)
  *   context.refreshRows(alertSeq)
@@ -67,7 +67,7 @@ const AlertPartDetailRenderer = (props) => {
                 fontWeight: 'bold', padding: '6px 15px', fontSize: '13px',
                 backgroundColor: '#f8f9fa', borderBottom: '1px solid #dde2eb',
             }}>
-                부??목록
+                부서 목록
             </div>
             <div style={{ width: '100%', boxSizing: 'border-box', height: '200px' }}>
                 <AppAgGrid
@@ -78,7 +78,7 @@ const AlertPartDetailRenderer = (props) => {
                     headerHeight={32}
                     rowHeight={30}
                     context={context}
-                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�록??부?��? ?�습?�다.</span>"
+                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>등록된 부서가 없습니다.</span>"
                 />
             </div>
         </div>

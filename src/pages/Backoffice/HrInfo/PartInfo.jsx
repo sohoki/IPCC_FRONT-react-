@@ -198,16 +198,16 @@ const PartInfo = () => {
                 
                 if (depth === 0) {
                     return (
-                        <span style={{ fontWeight: 600, color: '#1e293b', display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <span style={{ color: '#3b82f6', fontSize: 10 }}>��</span>
+                        <span style={{ fontWeight: 600, color: 'var(--ipcc-text-primary)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <span style={{ color: '#3b82f6', fontSize: 10 }}>{'●'}</span>
                             {name}
                         </span>
                     );
                 }
                 return (
                     <span style={{ paddingLeft: (depth - 1) * 16, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <span style={{ color: '#94a3b8', flexShrink: 0, fontFamily: 'monospace', fontSize: 13, letterSpacing: -1 }}>����</span>
-                        <span style={{ color: '#334155' }}>{name}</span>
+                        <span style={{ color: 'var(--ipcc-text-placeholder)', flexShrink: 0, fontFamily: 'monospace', fontSize: 13, letterSpacing: -1 }}>{'└─'}</span>
+                        <span style={{ color: 'var(--ipcc-text-secondary)' }}>{name}</span>
                     </span>
                 );
             },
@@ -217,8 +217,34 @@ const PartInfo = () => {
         { headerName: '정렬', field: 'partOrder', cellStyle: { textAlign: 'center' }, width: 70 },
         { headerName: 'CTI부서', field: 'partEtc1', cellStyle: { textAlign: 'center' }, width: 100 },
         { headerName: 'CTI팀', field: 'partEtc2', cellStyle: { textAlign: 'center' }, width: 100 },
-        { headerName: '사용', field: 'partUseyn', cellStyle: { textAlign: 'center' }, width: 70 },
-        { headerName: '종료', field: 'partEndyn', cellStyle: { textAlign: 'center' }, width: 70 },
+        { headerName: '사용', field: 'partUseyn', cellStyle: { textAlign: 'center' }, width: 70,  
+            cellRenderer:(p)=>{
+                const useYn = p.data?.partUseyn || 'N';
+                const isUse = useYn === 'Y';
+                return (
+                    <span 
+                    className={`badge rounded-pill ${isUse ? 'bg-success' : 'bg-danger'} px-3 py-2`}
+                    style={{ fontSize: '0.85rem', fontWeight: '500' }}
+                    >
+                        {isUse ? '사용' : '사용안함'}
+                    </span>
+                );
+            }
+        },
+        { headerName: '종료', field: 'partEndyn', cellStyle: { textAlign: 'center' }, width: 70 ,
+            cellRenderer:(p)=>{
+                const endYn = p.data?.partEndyn || 'N';
+                const isEnd = endYn === 'Y';
+                return (
+                    <span 
+                    className={`badge rounded-pill ${isEnd ? 'bg-danger' : 'bg-success'} px-3 py-2`}
+                    style={{ fontSize: '0.85rem', fontWeight: '500' }}
+                    >
+                        {isEnd ? '종료' : '진행중'}
+                    </span>
+                );
+            }
+        },
         { headerName: '생성일', field: 'partCreateDe', cellStyle: { textAlign: 'center' }, width: 110 },
         {
             headerName: '인프라', width: 80, sortable: false, filter: false,

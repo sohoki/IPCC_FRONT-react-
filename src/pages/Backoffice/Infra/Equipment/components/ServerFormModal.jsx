@@ -77,8 +77,6 @@ const ServerFormModal = ({
             showCancelButton: true,
             confirmButtonText: '예',
             cancelButtonText: '아니오',
-            reverseButtons: true,
-            focusCancel: true,
         });
         if (!ok.isConfirmed) return;
 

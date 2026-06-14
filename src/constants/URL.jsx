@@ -241,5 +241,22 @@ const URL = {
     EMP_LIST: "/api/backoffice/uat/uia/manager/empList.do",
     CTI_GROUP_COMBO: "/api/interface/int/nex/emp/groupInfoCombo.do",
     CTI_TEAM_COMBO: "/api/interface/int/nex/emp/teamsCombo.do",
+    CTI_EMP_COMBO: "/api/interface/int/nex/emp/employeeCombo.do",
+    CTI_PERMIT_COMBO: "/api/interface/int/nex/emp/Permit.do",
+    // 상담사 관리
+    CONSULTANT_LIST: "/api/backoffice/uat/uia/contant/consultantList.do",
+    CONSULTANT_DETAIL: "/api/backoffice/uat/uia/contant/consultant",
+    CONSULTANT_UPDATE: "/api/backoffice/uat/uia/contant/update.do",
+    CONSULTANT_DELETE: "/api/backoffice/uat/uia/contant",
+    CONSULTANT_RETIRE: "/api/backoffice/uat/uia/contant/consultant/withdrow",
+    CONSULTANT_EXCEL_UPDATE: "/api/backoffice/uat/uia/contant/ctiExcelUpdate.do",
+    // SKILL 관리
+    SKILL_LIST: "/api/interface/int/nex/skillList.do",
+    SKILL_UPDATE: "/api/interface/int/nex/skillUpdate.do",
+    SKILL_DELETE: "/api/interface/int/nex/skillDelete.do",
+    SKILL_CHECK: "/api/interface/int/nex/skillCheck.do",
+    SKILL_EMP_LIST: "/api/interface/int/nex/skillEmployeesList.do",
+    SKILL_EMP_UPDATE: "/api/interface/int/nex/skillEmployeesUpdate.do",
+    SKILL_EMP_DELETE: "/api/interface/int/nex/skillEmployeesDelete.do",
 }
 export default URL;

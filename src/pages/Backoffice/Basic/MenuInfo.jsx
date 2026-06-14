@@ -11,6 +11,9 @@ import { useCommonCodeData, useCustomReqDataCombo } from '@/hooks/use-combo-data
 import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import { useIdCheck } from '@/hooks/use-id-check.js';
 import {CommonSelect} from '@/components/Common/Select.jsx';
+import { useFileUpload } from '@/hooks/use-file-upload.js';
+import UseSwitch from '@/components/Common/IosSwitch.jsx';
+import '@/style/DropZone.css';
 
 
 const ProgramSelectModal = React.lazy(() => import('./components/ProgramChoiceModal.jsx'));
@@ -86,6 +89,7 @@ const INITIAL_MENU_FORM = {
     upperMenuNm: '',
     menuOrdr: '0',
     relateImage: null,
+    iconType: '',
     txt_menuClass: '',
     progrmFileNm: '',
     progrmKoreanNm: '',
@@ -108,7 +112,8 @@ const MenuInfo = () => {
     const [tempParams, setTempParams] = useState(SEARCH_MENU);
 
     const [programModalOpen, setProgramModalOpen] = useState(false);
-    const fileRef = useRef(null);
+    const [iconFile, setIconFile] = useState(null);
+    const [iconPreview, setIconPreview] = useState(null);
 
     const { options, isLoading } = useCommonCodeData(["PAGE_GUBUN"]);
 
@@ -143,6 +148,42 @@ const MenuInfo = () => {
     // loadTree는 stable 함수이므로 deps에서 의도적으로 제외 — 무한 루프 방지
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tempParams.searchSystemCode]);
+
+    // ===== ICON 유형 공통코드 =====
+    const { options: iconTypeOptions } = useCommonCodeData('ICON_TYPE');
+
+    const updateIcon = useCallback((payload) => {
+        const file = payload.relateImage;
+        setIconPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return file ? URL.createObjectURL(file) : null; });
+        setIconFile(file || null);
+        setForm((p) => ({ ...p, relateImage: file || null }));
+    }, []);
+
+    const { getRootProps: getIconRootProps, getInputProps: getIconInputProps, isDragActive: isIconDragActive, clearFile: clearIconFile } = useFileUpload({
+        fieldName: 'relateImage',
+        updateForm: updateIcon,
+        fileValue: iconFile,
+        accept: { 'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.ico', '.bmp'] },
+    });
+
+    const resetIcon = useCallback(() => {
+        setIconFile(null);
+        setIconPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+        setForm((p) => ({ ...p, relateImage: null }));
+    }, []);
+
+    const handleIconTypeChange = useCallback((e) => {
+        const newType = e.target.value;
+        setForm((p) => ({
+            ...p,
+            iconType: newType,
+            ...(newType !== 'ICON_TYPE_1' ? { relateImage: null } : { txt_menuClass: '' }),
+        }));
+        if (newType !== 'ICON_TYPE_1') {
+            setIconFile(null);
+            setIconPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
+        }
+    }, []);
 
     // ===== 트리 선택 =====
     const onSelect = useCallback((keys, info) => {
@@ -182,9 +223,10 @@ const MenuInfo = () => {
             txt_menuClass: ret.menuClass || '',
             usePrivacy: ret.menuPrivacy || 'N',
             relateImage: null,
+            iconType: ret.iconType || '',
         }));
-        if (fileRef.current) fileRef.current.value = '';
-    }, [treeData, setSelectedKey]);
+        resetIcon();
+    }, [treeData, setSelectedKey, resetIcon]);
 
     // ===== 컨텍스트 메뉴 =====
     const { menu, show, hide } = useContextMenu();
@@ -233,7 +275,7 @@ const MenuInfo = () => {
         setTreeData(updateTreeData(treeData));
         setExpandedKeys((prev) => [...new Set([...prev, node.key])]);
 
-        // ?�제 ?�드?�서 menuNo 최댓�?+ 1, menuOrdr 최댓�?+ 1 ?�동 계산
+        // 실제 노드에서 menuNo 최댓값 + 1, menuOrdr 최댓값 + 1 자동 계산
         const siblings = node.children || [];
         const siblingNos   = siblings.map(s => Number(s.data?.menuNo)).filter(n => Number.isFinite(n));
         const siblingOrdrs = siblings.map(s => Number(s.data?.menuOrdr)).filter(n => Number.isFinite(n));
@@ -252,9 +294,10 @@ const MenuInfo = () => {
             menuPageTarget: 'PAGE_GUBUN_4',
             usePrivacy: 'N',
             relateImage: null,
+            iconType: '',
         });
-        if (fileRef.current) fileRef.current.value = '';
-    }, [menu.node, hide, calcLevel, treeData, setTreeData, setExpandedKeys]);
+        resetIcon();
+    }, [menu.node, hide, calcLevel, treeData, setTreeData, setExpandedKeys, resetIcon]);
 
     // ===== 메뉴 삭제 =====
     const handleDeleteNode = useCallback(async () => {
@@ -308,7 +351,7 @@ const MenuInfo = () => {
         await handleIdCheck(form.menuNo, setForm, { systemCode: tempParams.searchSystemCode });
     }, [form.menuNo, setForm, handleIdCheck, tempParams.searchSystemCode]);
 
-    // ===== ?�??=====
+    // ===== 유효성 =====
     const dynamicCheckFields = useMemo(() => [
          { inputId: 'menuNo',    type: CODE.TEXT, message: '메뉴아이디' },
         { inputId: 'menuNm',    type: CODE.TEXT, message: '메뉴명' },
@@ -372,21 +415,21 @@ const MenuInfo = () => {
                         flexDirection: 'column',
                         minHeight: 0,
                         maxHeight: '760px',
-                        background: '#fff',
+                        background: 'var(--ipcc-card-bg)',
                         borderRadius: 10,
-                        border: '1px solid #e2e8f0',
-                        boxShadow: '0 2px 12px rgba(0,0,0,.07)',
+                        border: '1px solid var(--ipcc-card-border)',
+                        boxShadow: 'var(--ipcc-card-shadow)',
                         overflow: 'hidden',
                     }}
                 >
                     {/* 헤더: 시스템 선택 */}
                     <div style={{
                         padding: '14px 16px 10px',
-                        borderBottom: '1px solid #f0f4f8',
+                        borderBottom: '1px solid var(--ipcc-divider)',
                         flexShrink: 0,
-                        background: '#f8fafc',
+                        background: 'var(--ipcc-card-header-bg)',
                     }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', letterSpacing: '.05em', marginBottom: 8, textTransform: 'uppercase' }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--ipcc-text-muted)', letterSpacing: '.05em', marginBottom: 8, textTransform: 'uppercase' }}>
                             시스템 선택
                         </div>
                         <CommonSelect
@@ -405,46 +448,18 @@ const MenuInfo = () => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        borderBottom: '1px solid #f0f4f8',
+                        borderBottom: '1px solid var(--ipcc-divider)',
                         flexShrink: 0,
                     }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#334155', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ipcc-text-secondary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="#3b82f6"><path d="M4 6C4 4.9 4.9 4 6 4H10L12 6H18C19.1 6 20 6.9 20 8V18C20 19.1 19.1 20 18 20H6C4.9 20 4 19.1 4 18V6Z"/></svg>
                             메뉴 구조
                         </span>
-                        <span style={{ fontSize: 12, color: '#94a3b8' }}>우클릭으로 메뉴 관리</span>
+                        <span style={{ fontSize: 12, color: 'var(--ipcc-text-placeholder)' }}>우클릭으로 메뉴 관리</span>
                     </div>
 
-                    {/* 트리 본문 */}
+                    {/* 트리 본문 — rc-tree 스타일은 DarkMode.css .menu-tree 섹션 참고 */}
                     <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px 12px 12px' }}>
-                        <style>{`
-                            .menu-tree .rc-tree-node-content-wrapper {
-                                padding: 5px 8px;
-                                border-radius: 6px;
-                                transition: background .15s;
-                                font-size: 14px;
-                                font-weight: 500;
-                                color: #334155;
-                            }
-                            .menu-tree .rc-tree-node-content-wrapper:hover {
-                                background: #eff6ff !important;
-                                color: #1d4ed8;
-                            }
-                            .menu-tree .rc-tree-node-content-wrapper.rc-tree-node-selected {
-                                background: #dbeafe !important;
-                                color: #1d4ed8;
-                                font-weight: 700;
-                            }
-                            .menu-tree .rc-tree-title { font-size: 14px; }
-                            .menu-tree .rc-tree-switcher { color: #94a3b8; font-size: 13px; }
-                            .menu-tree .rc-tree-treenode { margin-bottom: 2px; }
-                            /* 1단 (루트) 폴더 크게 */
-                            .menu-tree > ul > .rc-tree-treenode > .rc-tree-node-content-wrapper .rc-tree-title {
-                                font-size: 15px;
-                                font-weight: 700;
-                                color: #1e293b;
-                            }
-                        `}</style>
                         <Tree
                             className="menu-tree"
                             treeData={treeData}
@@ -468,32 +483,28 @@ const MenuInfo = () => {
                         position: 'fixed',
                         top: menu.y,
                         left: menu.x,
-                        background: '#fff',
-                        border: '1px solid #e2e8f0',
+                        background: 'var(--ipcc-ctx-menu-bg)',
+                        border: '1px solid var(--ipcc-ctx-menu-border)',
                         borderRadius: 8,
                         zIndex: 2000,
-                        boxShadow: '0 8px 24px rgba(0,0,0,.12)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,.18)',
                         padding: '4px 0',
-                        width: 'fit-content',   /* 텍스트 길이에 맞게 */
+                        width: 'fit-content',
                         whiteSpace: 'nowrap',
                         transform: menu.y > window.innerHeight * 0.8 ? 'translateY(-100%)' : 'none',
                     }}>
                         <button
                             type="button"
-                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 30px 9px 14px', width: '100%', textAlign: 'left', border: 'none', background: 'none', fontSize: 13, color: '#334155', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f1f5f9'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            className="menu-ctx-btn"
                             onClick={handleCreateChild}
                         >
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="#3b82f6"><path d="M12 5v14M5 12h14" stroke="#3b82f6" strokeWidth="2.5" strokeLinecap="round"/></svg>
                             하위메뉴 생성
                         </button>
-                        <div style={{ height: 1, background: '#f1f5f9', margin: '2px 0' }} />
+                        <div style={{ height: 1, background: 'var(--ipcc-divider)', margin: '2px 0' }} />
                         <button
                             type="button"
-                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 30px 9px 14px', width: '100%', textAlign: 'left', border: 'none', background: 'none', fontSize: 13, color: '#ef4444', cursor: 'pointer', whiteSpace: 'nowrap' }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#fff1f2'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+                            className="menu-ctx-btn menu-ctx-btn--danger"
                             onClick={handleDeleteNode}
                         >
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
@@ -503,11 +514,11 @@ const MenuInfo = () => {
                 )}
 
                 {/* ── 우측: 폼 패널 ───────────────────────────────────── */}
-                <div className="col-7" style={{ background: '#fff', borderRadius: 10, border: '1px solid #e2e8f0', boxShadow: '0 2px 12px rgba(0,0,0,.07)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div className="col-7" style={{ background: 'var(--ipcc-card-bg)', borderRadius: 10, border: '1px solid var(--ipcc-card-border)', boxShadow: 'var(--ipcc-card-shadow)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                     {/* 폼 헤더 */}
-                    <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid #f0f4f8', background: '#f8fafc', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ padding: '14px 20px 12px', borderBottom: '1px solid var(--ipcc-divider)', background: 'var(--ipcc-card-header-bg)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill={form.mode === 'Ins' ? '#10b981' : '#3b82f6'}><path d={form.mode === 'Ins' ? 'M12 5v14M5 12h14' : 'M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7'} stroke={form.mode === 'Ins' ? '#10b981' : '#3b82f6'} strokeWidth="2.5" strokeLinecap="round" fill="none"/></svg>
-                        <span style={{ fontSize: 15, fontWeight: 700, color: '#1e293b' }}>{form.mode === 'Ins' ? '메뉴 등록' : '메뉴 수정'}</span>
+                        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ipcc-text-primary)' }}>{form.mode === 'Ins' ? '메뉴 등록' : '메뉴 수정'}</span>
                     </div>
                     <p id="detail_tit" className="content-table__title" style={{ display: 'none' }}>{form.mode === 'Ins' ? '메뉴 등록' : '메뉴 수정'}</p>
                     <div className="boardlist tableWrap">
@@ -578,34 +589,98 @@ const MenuInfo = () => {
                                                 </div>
                                             </td>
                                         </tr>
+                                        {/* ICON 유형 선택 */}
                                         <tr className="input-box">
-                                            <th>ICON</th>
+                                            <th>ICON 유형</th>
                                             <td>
-                                                <input
-                                                    type="file"
-                                                    name="relateImage"
-                                                    id="relateImage"
-                                                    className="form-control"
-                                                    ref={fileRef}
-                                                    onChange={(e) => setForm((p) => ({ ...p, relateImage: e.target.files?.[0] || null }))}
-                                                />
+                                                <select
+                                                    className="form-select"
+                                                    value={form.iconType}
+                                                    onChange={handleIconTypeChange}
+                                                >
+                                                    <option value="">선택</option>
+                                                    {iconTypeOptions.map((o) => (
+                                                        <option key={o.codeDetailId || o.code} value={o.codeDetailId || o.code}>
+                                                            {o.codeDetailNm || o.codeNm}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </td>
                                         </tr>
-                                        <tr className="input-box">
-                                            <th>MENU CLASS</th>
-                                            <td>
-                                                <div className="input-group">
-                                                    <input
-                                                        type="text"
-                                                        name="txt_menuClass"
-                                                        id="txt_menuClass"
-                                                        className="form-control"
-                                                        value={form.txt_menuClass}
-                                                        onChange={(e) => setForm((p) => ({ ...p, txt_menuClass: e.target.value }))}
-                                                    />
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        {/* ICON 파일 업로드 — ICON_TYPE_1 선택 시 */}
+                                        {form.iconType === 'ICON_TYPE_1' && (
+                                            <tr className="input-box">
+                                                <th>ICON</th>
+                                                <td>
+                                                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                                        {iconPreview && (
+                                                            <div style={{
+                                                                width: 48, height: 48, flexShrink: 0,
+                                                                border: '1px solid var(--ipcc-card-border)', borderRadius: 6,
+                                                                overflow: 'hidden', background: 'var(--ipcc-card-header-bg)',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            }}>
+                                                                <img
+                                                                    src={iconPreview}
+                                                                    alt="아이콘 미리보기"
+                                                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        <div style={{ flex: 1 }}>
+                                                            <div
+                                                                {...getIconRootProps()}
+                                                                className={`dropzone-box${isIconDragActive ? ' active' : ''}${iconFile ? ' has-file' : ''}`}
+                                                                style={{ minHeight: 64, padding: '10px 12px' }}
+                                                            >
+                                                                <input {...getIconInputProps()} />
+                                                                <div className="placeholder-content" style={{ textAlign: 'center' }}>
+                                                                    {iconFile ? (
+                                                                        <div style={{ fontSize: 12, color: 'var(--ipcc-text-muted)' }}>
+                                                                            <div style={{ fontWeight: 600, marginBottom: 2 }}>{iconFile.name}</div>
+                                                                            <div style={{ color: 'var(--ipcc-text-placeholder)' }}>{(iconFile.size / 1024).toFixed(1)} KB</div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <div style={{ fontSize: 12, color: 'var(--ipcc-text-placeholder)', lineHeight: 1.6 }}>
+                                                                            <div>파일을 클릭하거나 여기로 드래그하세요</div>
+                                                                            <div>JPG · PNG · GIF · SVG · ICO · BMP</div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            {iconFile && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-outline-danger btn-sm mt-1"
+                                                                    style={{ fontSize: 11 }}
+                                                                    onClick={(e) => clearIconFile(e)}
+                                                                >
+                                                                    파일 제거
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                        {/* MENU CLASS 입력 — ICON_TYPE_2 선택 시 */}
+                                        {form.iconType === 'ICON_TYPE_2' && (
+                                            <tr className="input-box">
+                                                <th>MENU CLASS</th>
+                                                <td>
+                                                    <div className="input-group">
+                                                        <input
+                                                            type="text"
+                                                            name="txt_menuClass"
+                                                            id="txt_menuClass"
+                                                            className="form-control"
+                                                            value={form.txt_menuClass}
+                                                            onChange={(e) => setForm((p) => ({ ...p, txt_menuClass: e.target.value }))}
+                                                        />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
                                         <tr className="input-box">
                                             <th>프로그램</th>
                                             <td>
@@ -670,27 +745,14 @@ const MenuInfo = () => {
                                         <tr className="input-box">
                                             <th>개인정보 여부</th>
                                             <td>
-                                                <div className="input-group gap-3 align-items-center">
-                                                    <label className="d-inline-flex align-items-center gap-1">
-                                                        <input
-                                                            type="radio"
-                                                            name="usePrivacy"
-                                                            value="Y"
-                                                            checked={form.usePrivacy === 'Y'}
-                                                            onChange={() => setForm((p) => ({ ...p, usePrivacy: 'Y' }))}
-                                                        />
-                                                        <span>개인정보</span>
-                                                    </label>
-                                                    <label className="d-inline-flex align-items-center gap-1 ms-2">
-                                                        <input
-                                                            type="radio"
-                                                            name="usePrivacy"
-                                                            value="N"
-                                                            checked={form.usePrivacy === 'N'}
-                                                            onChange={() => setForm((p) => ({ ...p, usePrivacy: 'N' }))}
-                                                        />
-                                                        <span>개인정보 아님</span>
-                                                    </label>
+                                                <div className="input-group align-items-center">
+                                                    <UseSwitch
+                                                        value={form.usePrivacy}
+                                                        name="usePrivacy"
+                                                        onChange={(payload) => setForm((p) => ({ ...p, ...payload }))}
+                                                        onText="개인정보"
+                                                        offText="아님"
+                                                    />
                                                 </div>
                                             </td>
                                         </tr>

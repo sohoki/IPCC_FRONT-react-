@@ -2,8 +2,21 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import API_URL from '@/constants/URL.jsx';
 import { CommonSelect } from '@/components/Common/Select.jsx';
+import { useRadioGroup } from '@/hooks/use-form.jsx';
+
 
 const PART_ORDER_OPTIONS = Array.from({ length: 10 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) }));
+
+
+const USE_AT_OPTIONS = [
+    { value: 'Y', text: '사용' },
+    { value: 'N', text: '사용안함' },
+];
+const END_AT_OPTIONS = [
+    { value: 'Y', text: '종료' },
+    { value: 'N', text: '운영중' },
+];
+
 
 /* ── 부서장 검색 모달 (PartFormModal 전용) ── */
 const UserSearchModal = ({ open, insttCode, onSelect, onClose }) => {
@@ -22,11 +35,9 @@ const UserSearchModal = ({ open, insttCode, onSelect, onClose }) => {
     }, [searchKeyword, insttCode]);
 
     useEffect(() => {
-        if (open) {
-            setSearchKeyword('');
-            setSelectedId(null);
-            fetchUsers();
-        }
+        if (!open) return;
+        queueMicrotask(() => { setSearchKeyword(''); setSelectedId(null); });
+        fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
@@ -111,7 +122,7 @@ const PartFormModal = ({
     const [ctiGroupOptions, setCtiGroupOptions] = useState([]);
     const [ctiTeamOptions, setCtiTeamOptions] = useState([]);
     const [isUserSearchOpen, setIsUserSearchOpen] = useState(false);
-
+    const { renderRadioGroup } = useRadioGroup(form, setForm);
 
     console.log('parentPartOptions', parentPartOptions);
     console.log('form', form);
@@ -129,7 +140,7 @@ const PartFormModal = ({
             .then((res) => {
                 const teams = res?.data?.result || [];
                 setCtiTeamOptions([
-                    { value: '', label: '?�택' },
+                    { value: '', label: '선택' },
                     ...teams.map((t) => ({ value: t.employeepartId, label: t.employeepartName })),
                 ]);
             }).catch(() => {});
@@ -146,7 +157,7 @@ const PartFormModal = ({
                     .then((grpRes) => {
                         const groups = grpRes?.data?.result || [];
                         setCtiGroupOptions([
-                            { value: '', label: '?�택' },
+                            { value: '', label: '선택' },
                             ...groups.map((g) => ({ value: g.employeegrpId, label: g.employeegrpName })),
                         ]);
                         if (selectedEtc1) loadCtiTeam(tenantId, selectedEtc1, selectedEtc2);
@@ -187,7 +198,7 @@ const PartFormModal = ({
                                 <div className="row input-box-wrap">
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">기�?<span className="text-danger">*</span></label>
+                                            <label className="form-label">기관<span className="text-danger">*</span></label>
                                             <CommonSelect
                                                 comboId="insttCode" 
                                                 comboName="insttCode"
@@ -308,43 +319,14 @@ const PartFormModal = ({
                                 </div>
 
                                  {/* 사용유무 + 종료유무 */}
-                                <div className="row input-box-wrap">
+                                 <div className="row input-box-wrap">
                                     <div className="col-6">
-                                        <div className="input-box">
-                                            <label className="form-label">사용 유무</label>
-                                            <div className="d-flex gap-3 align-items-center" style={{ height: 32 }}>
-                                                <label className="mb-0">
-                                                    <input type="radio" name="useAt" value="Y"
-                                                        checked={form.useAt === 'Y'}
-                                                        onChange={() => updateForm({ useAt: 'Y' })} />{' '}사용
-                                                </label>
-                                                <label className="mb-0">
-                                                    <input type="radio" name="useAt" value="N"
-                                                        checked={form.useAt === 'N'}
-                                                        onChange={() => updateForm({ useAt: 'N' })} />{' '}사용 안함
-                                                </label>
-                                            </div>
-                                        </div>
+                                        {renderRadioGroup({ label: '사용유무', name: 'useAt', options: USE_AT_OPTIONS, useSwitch: true })}
                                     </div>
                                     <div className="col-6">
-                                        <div className="input-box">
-                                            <label className="form-label">종료 유무</label>
-                                            <div className="d-flex gap-3 align-items-center" style={{ height: 32 }}>
-                                                <label className="mb-0">
-                                                    <input type="radio" name="useEndAt" value="N"
-                                                        checked={form.useEndAt === 'N'}
-                                                        onChange={() => updateForm({ useEndAt: 'N' })} />{' '}사용
-                                                </label>
-                                                <label className="mb-0">
-                                                    <input type="radio" name="useEndAt" value="Y"
-                                                        checked={form.useEndAt === 'Y'}
-                                                        onChange={() => updateForm({ useEndAt: 'Y' })} />{' '}종료
-                                                </label>
-                                            </div>
-                                        </div>
+                                        {renderRadioGroup({ label: '종료유무', name: 'endAt', options: END_AT_OPTIONS, useSwitch: true })}
                                     </div>
                                 </div>
-
                             </div>
                         </div>
 

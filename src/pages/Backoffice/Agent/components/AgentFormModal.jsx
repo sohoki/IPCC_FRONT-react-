@@ -256,7 +256,7 @@ const AgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                             value={insttCode}
                                                             onChange={e => setInsttCode(e.target.value)}
                                                         >
-                                                            <option value="">기�? ?�택</option>
+                                                            <option value="">기관 선택</option>
                                                             {insttOptions.map(o => (
                                                                 <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                             ))}
@@ -279,10 +279,10 @@ const AgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                             )}
                                         </div>
                                     </div>
-                                    {/* ?�름 */}
+                                    {/* 이름 */}
                                     <div className="col-6">
                                         <div className="input-box">
-                                            <label htmlFor="agentName" className="form-label">?�름</label>
+                                            <label htmlFor="agentName" className="form-label">이름</label>
                                             <input
                                                 id="agentName"
                                                 type="text"
@@ -293,10 +293,10 @@ const AgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                             />
                                         </div>
                                     </div>
-                                    {/* 비상 ?�킬 */}
+                                    {/* 비상 스킬 */}
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">비상 ?�킬</label>
+                                            <label className="form-label">비상 스킬</label>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table
                                                     className="content-table__sub"
@@ -308,7 +308,7 @@ const AgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                             <th>SN INDEX</th>
                                                             <th>SR</th>
                                                             <th>SR INDEX</th>
-                                                            <th style={{ width: 70 }}>??��</th>
+                                                            <th style={{ width: 70 }}>삭제</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>

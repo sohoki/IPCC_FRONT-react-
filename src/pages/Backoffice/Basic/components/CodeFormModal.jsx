@@ -13,11 +13,11 @@ const CodeFormModal = ({
     onSubmit,
 }) => {
 
-    const { handleIdCheck } = useIdCheck(URL.CODE_ID_CHECK, '분류코드를 입력해주세요.');
+    const { handleIdCheck } = useIdCheck(URL.CODE_ID_CHECK, '분류코드');
 
     const onIdCheck = useCallback(async () => {
-        await handleIdCheck(form.codeId, setForm);
-    }, [form.codeId, setForm, handleIdCheck]);
+        await handleIdCheck(form.codeId, setForm, { systemCode: form.systemCode });
+    }, [form.codeId, form.systemCode, setForm, handleIdCheck]);
 
  
     const updateForm = useCallback((payload) => {
@@ -28,8 +28,8 @@ const CodeFormModal = ({
     }, [setForm]);
 
     const handleCodeIdChange = useCallback((e) => {
-        const onlyEngNum = e.target.value.replace(/[^A-Za-z0-9]/g, "");
-        updateForm({ codeId: onlyEngNum });
+        const filtered = e.target.value.replace(/[^A-Za-z0-9_\-.]/g, "");
+        updateForm({ codeId: filtered });
     }, [updateForm]);
 
     if (!open) return null;
@@ -55,6 +55,25 @@ const CodeFormModal = ({
                         <div className="modal-body">
                             <div className="modal-body__content">
                                 <div className="row input-box-wrap">
+                                    <div className="col-6">
+                                        <div className="input-box">
+                                            <label htmlFor="roomName" className="form-label">
+                                            시스템코드 <span className="text-danger">*</span>
+                                            </label>
+                                            <div className="input-group">
+                                                <CommonSelect
+                                                    comboId="systemCode"
+                                                    comboName="systemCode"
+                                                    className="form-select"
+                                                    comboData={onData || []}
+                                                    readOnly={form.mode !== 'Ins'}
+                                                    disabled={form.mode !== 'Ins' ? true : false}
+                                                    value={form.systemCode || ''}
+                                                    onChange={(e) => updateForm({ systemCode: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className="col-6">
                                         <div className="input-box">
                                             <label htmlFor="roomName" className="form-label">
@@ -102,25 +121,7 @@ const CodeFormModal = ({
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="col-6">
-                                        <div className="input-box">
-                                            <label htmlFor="roomName" className="form-label">
-                                            시스템코드 <span className="text-danger">*</span>
-                                            </label>
-                                            <div className="input-group">
-                                                <CommonSelect
-                                                    comboId="systemCode"
-                                                    comboName="systemCode"
-                                                    className="form-select"
-                                                    comboData={onData || []}
-                                                    readOnly={form.mode !== 'Ins'}
-                                                    disabled={form.mode !== 'Ins' ? true : false}
-                                                    value={form.systemCode || ''}
-                                                    onChange={(e) => updateForm({ systemCode: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                                    
                                     <div className="col-6">
                                         <div className="input-box">
                                         <label htmlFor="useAt">사용</label>

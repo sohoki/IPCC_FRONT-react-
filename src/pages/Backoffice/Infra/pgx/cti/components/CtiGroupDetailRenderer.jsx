@@ -2,13 +2,13 @@
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 
-// ?�?� 그룹 ?�브 그리??컬럼 (모듈 ?�벨) ?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�?�
+// 상세 그룹 서브 그리드 컬럼 (모듈 레벨) ======================================
 const GROUP_COL_DEFS = [
     { headerName: '그룹 ID',   field: 'employeegrpId',   width: 120 },
-    { headerName: '그룹 �?,   field: 'employeegrpName', flex: 1 },
-    { headerName: '감시?��?',  field: 'monitorFlag',     width: 90 },
+    { headerName: '그룹 명',   field: 'employeegrpName', flex: 1 },
+    { headerName: '감시여부',  field: 'monitorFlag',     width: 90 },
     {
-        headerName: '?�?�록', width: 90, sortable: false, filter: false,
+        headerName: '파트목록', width: 90, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary"
@@ -20,11 +20,11 @@ const GROUP_COL_DEFS = [
                         p.data?.__centerId,
                     );
                 }}
-            >?�?�록</button>
+            >파트목록</button>
         ),
     },
     {
-        headerName: '?�정', width: 70, sortable: false, filter: false,
+        headerName: '수정', width: 70, sortable: false, filter: false,
         cellRenderer: (p) => (
             <button
                 className="btn btn-sm btn-outline-secondary btn-modify"
@@ -35,7 +35,7 @@ const GROUP_COL_DEFS = [
                         centerId: p.data?.__centerId,
                     });
                 }}
-            >?�정</button>
+            >수정</button>
         ),
     },
 ];
@@ -43,9 +43,9 @@ const GROUP_COL_DEFS = [
 const GROUP_DEFAULT_COL_DEF = { resizable: true, sortable: false, filter: false, flex: 1 };
 
 /**
- * CTI 그룹 ?�브 그리???�더??
- * MasterDetailGrid ??detailCellRenderer �??�용.
- * ?�요??콜백?� 부�?그리?�의 context prop ?�로 ?�신:
+ * CTI 그룹 서브 그리드 렌더러
+ * MasterDetailGrid 의 detailCellRenderer 로 사용.
+ * 필요한 콜백은 부모 그리드의 context prop 으로 수신:
  *   context.fetchGroups({ tenantId, centerId, pageUnit })
  *   context.onOpenGroupEdit(groupData, tenantData)
  *   context.onOpenPartList(employeegrpId, tenantId, centerId)
@@ -81,7 +81,7 @@ const CtiGroupDetailRenderer = (props) => {
                     headerHeight={32}
                     rowHeight={30}
                     context={context}
-                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>?�록??그룹???�습?�다.</span>"
+                    overlayNoRowsTemplate="<span class='ag-overlay-loading-center'>등록된 그룹이 없습니다.</span>"
                 />
             </div>
         </div>

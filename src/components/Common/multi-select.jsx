@@ -207,7 +207,7 @@ export const CustomMultiSelect = React.memo(({
     onChange,
     isMulti,
     isClearable = true,
-    placeholder = "?�택",
+    placeholder = "선택",
     closeMenuOnSelect = false,
     hideSelectedOptions = false,
     value = [],

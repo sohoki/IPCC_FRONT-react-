@@ -138,9 +138,9 @@ const InsttInfo = () => {
         totalCount,
     } = useGridInfinite({
         fetchApi: fetchData,
-        pageUnit, // ?�자
+        pageUnit, // 페이지 단위
         initialFilters: INITIAL_SEARCH_FORM,
-        enableSort: true, // ?�렬 기능 ?�성??
+        enableSort: true, // 정렬 기능 활성화
     });
 
     // 만약 hook이 제공하는 gridApiRef를 쓰기로 했다면, 외부 ref와 동기화(선택)
@@ -220,7 +220,7 @@ const InsttInfo = () => {
 
     const { handleReset } = useResetForm(setTempParams, INITIAL_SEARCH_FORM);
 
-    // 컬럼 ?�의 -----------------------------
+    // 컬럼 정의 -----------------------------
     const columnDefs = useMemo(() => 
     [
             { headerName: '기관코드', field: 'insttCode', width: 120, sortable: true, filter: true },

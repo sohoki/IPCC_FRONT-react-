@@ -99,7 +99,7 @@ const AgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">?�이?�트 ?�황</h2>
+                                <h2 className="modal-title__title">에이전트 현황</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>

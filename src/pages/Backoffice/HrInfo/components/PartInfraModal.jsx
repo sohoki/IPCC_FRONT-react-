@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import API_URL from '@/constants/URL.jsx';
 import Swal from '@/lib/swal.js';
+import { useRadioGroup } from '@/hooks/use-form.jsx';
+
+
 
 const INITIAL_INFRA_FORM = {
     mode: 'Ins',
@@ -13,11 +16,14 @@ const INITIAL_INFRA_FORM = {
     agentEndNumber: '',
     ctiStartNumber: '',
     ctiEndNumber: '',
+    useAt: 'Y',
+    endAt: 'N',
 };
 
 const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
     const [infraList, setInfraList] = useState([]);
     const [infraForm, setInfraForm] = useState(INITIAL_INFRA_FORM);
+
 
     const updateInfra = useCallback((payload) => {
         setInfraForm((prev) => ({ ...prev, ...payload }));
@@ -31,7 +37,9 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
     }, [partId, insttCode]);
 
     useEffect(() => {
-        if (open) { loadInfraList(); setInfraForm({ ...INITIAL_INFRA_FORM }); }
+        if (!open) return;
+        loadInfraList();
+        queueMicrotask(() => setInfraForm({ ...INITIAL_INFRA_FORM }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
@@ -56,6 +64,8 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
             ctiStartNumber: infraForm.ctiStartNumber,
             ctiEndNumber: infraForm.ctiEndNumber,
             stationMeno: infraForm.stationMeno,
+            useAt: infraForm.useAt,
+            endAt: infraForm.endAt,
         };
 
         const checkRes = await fnAjaxFetch({ url: API_URL.PART_AGENT_CHECK, method: 'POST', data: infraData });
@@ -94,6 +104,8 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
                 agentEndNumber: obj.agentEndNumber || '',
                 ctiStartNumber: obj.ctiStartNumber || '',
                 ctiEndNumber: obj.ctiEndNumber || '',
+                useAt: obj.useAt || 'Y',
+                endAt: obj.endAt || 'N',
             });
         }
     }, []);
@@ -115,7 +127,7 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
             <div className="modal-backdrop-custom" onClick={onClose} />
             <div className="modal-custom">
                 <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: 860, maxWidth: '95%', backgroundColor: '#fff' }}>
+                    style={{ width: 860, maxWidth: '95%', backgroundColor: 'var(--ipcc-card-bg)' }}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
@@ -163,6 +175,7 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
                                     </tbody>
                                 </table>
 
+                               
                                 {/* 추가/수정 폼 */}
                                 <div className="row g-2 align-items-end">
                                     <div className="col-3">
@@ -231,7 +244,7 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
 
                         <div className="modal-footer">
                             <div className="modal-footer__right">
-                                <button type="button" className="btn btn-action__lightblue" onClick={onClose}>닫기</button>
+                                <button type="button" className="btn btn-cancel" onClick={onClose}>닫기</button>
                             </div>
                         </div>
                     </div>

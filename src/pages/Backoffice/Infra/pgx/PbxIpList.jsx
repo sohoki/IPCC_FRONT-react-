@@ -64,7 +64,6 @@ const PbxIpList = () => {
             icon: 'question', title: 'IP 내선번호 삭제',
             html: `<b>${extension}</b> 를(을) 삭제 하시겠습니까?`,
             showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니오',
-            reverseButtons: true, focusCancel: true,
         });
         if (!first.isConfirmed) return;
 
@@ -72,7 +71,6 @@ const PbxIpList = () => {
             icon: 'warning', title: 'IP 내선번호 삭제 확인',
             html: `<b>${extension}</b> 를(을) 삭제하시면 시스템에 영향이 있을 수 있습니다.<br>정말로 삭제하시겠습니까?`,
             showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니오',
-            reverseButtons: true, focusCancel: true,
         });
         if (!second.isConfirmed) return;
 
