@@ -6,10 +6,11 @@ import URL from '@/constants/URL.jsx';
 import CODE from '@/constants/CODE.jsx';
 import { useSafeFormatter } from '@/hooks/use-formatters.jsx';
 
+import ManagerTapInfo from './ManagerTapInfo.jsx';
+
 // TODO: 이전 프로젝트의 탭 컴포넌트를 ./components/ 폴더로 이동 후 아래 플레이스홀더를 교체하세요
 const HotelTabInfo  = ({ comCode }) => <div className="p-4 text-muted small">호텔 및 객실 관리 — 컴포넌트 준비 중 (comCode: {comCode})</div>;
 const OptionTabInfo = ({ comCode }) => <div className="p-4 text-muted small">옵션 관리 — 컴포넌트 준비 중 (comCode: {comCode})</div>;
-const ManageTabInfo = ({ comCode }) => <div className="p-4 text-muted small">관리자 관리 — 컴포넌트 준비 중 (comCode: {comCode})</div>;
 
 const tabBtnStyle = (isActive) => ({
     padding: '12px 20px',
@@ -95,7 +96,7 @@ export default function VendorDetailInfo() {
             return <OptionTabInfo comCode={comCode} />;
         case 'member':
         default:
-            return <ManageTabInfo comCode={comCode} />;
+            return <ManagerTapInfo comCode={comCode} />;
         }
     }, [activeTab, vendor, comCode]);
 

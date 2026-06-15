@@ -34,6 +34,12 @@ const SeatInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/SeatInfo.jsx'))
 const VendorInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorInfo.jsx'));
 const VenderDetailInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorDetailInfo.jsx'));
 
+const PbxInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxInfo.jsx'));
+const PbxAgentInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxAgentInfo.jsx'));
+const PbxSmsModelInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxSmsModelInfo.jsx'));
+
+
+
 export default function RouterConfig() {
     return (
         <>
@@ -53,8 +59,8 @@ export default function RouterConfig() {
 
                         { /* system menu */}
                         <Route path="/sub/sym/systemInfo" element={<SystemInfo />} />
-
                         <Route path="/sub/sym/messageInfo" element={<MessageInfo />} />
+                        
                         { /* hr menu */}
                         <Route path="/sub/hr/partInfo" element={<PartInfo />} />
                         <Route path="/sub/hr/managerInfo" element={<ManagerInfo />} />
@@ -68,9 +74,11 @@ export default function RouterConfig() {
                         <Route path="/sub/bld/seatInfo" element={<SeatInfo />} />
 
                         { /* 거래처 관리 */}
-
                         <Route path="/sub/client/venderInfo" element={<VendorInfo />} />
                         <Route path="/sub/client/detail/:comCode" element={<VenderDetailInfo />} />
+
+                        { /* infra 리스트*/}
+
                     </Route>   
                     {/* 인증이 필요 없는 라우트 */}
                     <Route element={<AppTopDownLayout />}>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
@@ -9,6 +9,21 @@ import { useCommonDelete } from '@/hooks/use-common-delete.js';
 import { useResetForm } from '@/hooks/use-form.jsx';
 import Swal from '@/lib/swal.js';
 import VenderForm from './components/VenderForm.jsx';
+import { useCommonCodeData } from '@/hooks/use-combo-data.js';
+import UseSwitch from '@/components/Common/IosSwitch.jsx';
+
+const STATE_COLORS = ['#22c55e', '#f59e0b', '#ef4444', '#6366f1', '#94a3b8'];
+
+// 로고 없음 / 로드 실패 시 사용하는 SVG 플레이스홀더 data URI
+const NO_IMG_SRC = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">' +
+  '<rect width="24" height="24" rx="4" fill="#f1f5f9"/>' +
+  '<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="#cbd5e1" stroke-width="1.5"/>' +
+  '<circle cx="9" cy="9" r="1.5" fill="#94a3b8"/>' +
+  '<path d="M4 17l4-4 4 4 2-2 4 3" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>' +
+  '</svg>'
+)}`;
+
 
 const INITIAL_VENDER_FORM = {
   mode: 'Ins',
@@ -32,6 +47,7 @@ const INITIAL_VENDER_FORM = {
   comRepresentativeEmail: '',
   comState: '',
   comUseyn: 'Y',
+  comMemo: '',
   idCheck: 'N',
 };
 
@@ -42,7 +58,12 @@ const INITIAL_SEARCH_FORM = {
 
 const VendorInfo = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const comFirstGubun = searchParams.get('comGubun') || 'COM_GUBUN_1';
+
+
+  const { options: comStateOptions } = useCommonCodeData('COMPANY_STATE');
+  const { options: comGubunOptions } = useCommonCodeData('COMPANY_GUBUN');
 
   const [pageUnit] = useState(20);
   const [modalOpen, setModalOpen] = useState(false);
@@ -83,14 +104,24 @@ const VendorInfo = () => {
 
   const { handleReset } = useResetForm(setTempParams, INITIAL_SEARCH_FORM);
 
+  const handleNameClick = useCallback((comCode) => {
+    navigate(`/sub/client/detail/${comCode}?comGubun=${comFirstGubun}`);
+  }, [navigate, comFirstGubun]);
+
   const openComModal = useCallback(async (comCode) => {
+    console.log("comCode:" + comCode);
+
     if (!comCode) {
       setForm({ ...INITIAL_VENDER_FORM, comGubun: comFirstGubun });
       setModalOpen(true);
       return;
     }
     try {
-      const res = await fnAjaxFetch({ url: `${URL.VENDER_INFO}/${comCode}.do`, method: 'GET' });
+      const res = await fnAjaxFetch({
+        url: `${URL.VENDER_INFO}/${comCode}.do`, 
+        method: 'GET' ,
+        withCredentials: true,
+      });
       const obj = res?.data?.result?.result ?? null;
       if (obj) {
         setForm({
@@ -115,9 +146,12 @@ const VendorInfo = () => {
           comRepresentativeEmail: obj.comRepresentativeEmail || '',
           comState: obj.comState || '',
           comUseyn: obj.comUseyn || 'Y',
+          comMemo : obj.comUseyn || '',
           idCheck: 'Y',
         });
         setModalOpen(true);
+      } else {
+        await Swal.fire({ icon: 'warning', title: '조회 실패', text: '거래처 정보를 불러오지 못했습니다.' });
       }
     } catch (e) {
       await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '상세 조회 중 오류' });
@@ -177,25 +211,121 @@ const VendorInfo = () => {
   const { handleDelete } = useCommonDelete({
     gridApiRef,
     URL: URL.VENDER_INFO,
-    MESSAGE: comFirstGubun === 'COM_GUBUN_1' ? '공급사' : '판매사',
+    MESSAGE: comFirstGubun === 'COM_GUBUN_1' ? '거래처' : '판매사',
     reloadFunction: onSearch,
   });
 
+  const handleStateChange = useCallback(async (comCode, newState, node, colDef) => {
+    try {
+      await fnAjaxFetch({
+        url: URL.VENDER_STATE_UPDATE,
+        method: 'POST',
+        data: { comCode, comState: newState },
+        withCredentials: true,
+      });
+      node.setDataValue(colDef.field, newState);
+    } catch (e) {
+      await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '상태 변경 중 오류' });
+    }
+  }, []);
+
+  const handleUseynChange = useCallback(async (comCode, newValue, node, colDef) => {
+    try {
+      await fnAjaxFetch({
+        url: URL.VENDER_USEYN_UPDATE,
+        method: 'POST',
+        data: { comCode, comUseyn: newValue },
+        withCredentials: true,
+      });
+      node.setDataValue(colDef.field, newValue);
+    } catch (e) {
+      await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '사용유무 변경 중 오류' });
+    }
+  }, []);
+
   const columnDefs = useMemo(() => [
-    { headerName: '회사코드', field: 'comCode', cellStyle: { textAlign: 'center' }, width: 120 },
-    { headerName: '회사명', field: 'comName', cellStyle: { textAlign: 'left' }, flex: 1.5 },
+    {
+      headerName: '회사명', field: 'comName', flex: 1.2,
+      cellRenderer: (params) => {
+        const logo = params.data?.comLogo;
+        const IMG_URL = import.meta.env.VITE_REACT_APP_IMG_URL;
+        const imgSrc = logo ? `${IMG_URL}${logo}` : NO_IMG_SRC;
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, height: '100%' }}>
+            <img
+              src={imgSrc}
+              alt=""
+              style={{ width: 22, height: 22, objectFit: 'contain', borderRadius: 3, flexShrink: 0 }}
+              onError={(e) => { e.currentTarget.src = NO_IMG_SRC; }}
+            />
+            <span
+              style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'pointer', color: '#0d6efd', textDecoration: 'underline' }}
+              onClick={() => handleNameClick(params.data?.comCode)}
+            >{params.value}
+            </span>
+          </div>
+        );
+      },
+    },
+    { headerName: '구분', field: 'comGubunNm', cellStyle: { textAlign: 'left' }, width: 140 },
     { headerName: '대표자명', field: 'comCeoName', cellStyle: { textAlign: 'center' }, width: 110 },
     { headerName: '사업자 번호', field: 'comNumber', cellStyle: { textAlign: 'center' }, width: 140 },
     { headerName: '전화번호', field: 'comTel', cellStyle: { textAlign: 'center' }, width: 130 },
     { headerName: '홈페이지', field: 'comHomepage', cellStyle: { textAlign: 'left' }, flex: 1 },
-    { headerName: '상태', field: 'comState', cellStyle: { textAlign: 'center' }, width: 90 },
-    { headerName: '사용', field: 'comUseyn', cellStyle: { textAlign: 'center' }, width: 70 },
+    {
+      headerName: '상태', field: 'comState', width: 150, sortable: false,
+      cellRenderer: (params) => {
+        const idx = comStateOptions.findIndex(
+          (o) => (o.codeDetailId || o.code) === params.data?.comState
+        );
+        const color = STATE_COLORS[idx >= 0 ? idx : STATE_COLORS.length - 1];
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <select
+              value={params.data?.comState || ''}
+              onChange={(e) => handleStateChange(params.data?.comCode, e.target.value, params.node, params.colDef)}
+              style={{
+                width: '100%', height: 26, fontSize: 12,
+                border: `1px solid ${color}`, color,
+                outline: 'none', cursor: 'pointer',
+                background: 'transparent',
+              }}
+            >
+              {comStateOptions.map((o) => (
+                <option key={o.codeDetailId || o.code} value={o.codeDetailId || o.code}>
+                  {o.codeDetailNm || o.codeNm}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      },
+    },
+    {
+      headerName: '사용유무', field: 'comUseyn', cellStyle: { textAlign: 'center' }, width: 110,
+      cellRenderer: (params) => {
+        const handleChange = async (payload) => {
+          await handleUseynChange(params.data?.comCode, payload.comUseyn, params.node, params.colDef);
+        };
+        return (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <UseSwitch
+              value={params.value}
+              name="comUseyn"
+              onChange={handleChange}
+              onText="사용"
+              offText="사용안함"
+            />
+          </div>
+        );
+      },
+    },
     {
       headerName: '수정', width: 80, sortable: false, filter: false,
       cellRenderer: (p) => (
         <button
           className="btn btn-outline-secondary btn-outline__gray btn-modify"
-          onClick={() => openComModal(p.data?.comCode)}
+          onClick={()=>openComModal(p.data?.comCode)}
         >
           수정
         </button>
@@ -212,9 +342,9 @@ const VendorInfo = () => {
         </button>
       ),
     },
-  ], [openComModal, handleDelete]);
+  ], [comStateOptions, handleStateChange, handleUseynChange, handleNameClick, openComModal, handleDelete]);
 
-  const titleLabel = comFirstGubun === 'COM_GUBUN_1' ? '공급사' : '판매사';
+  const titleLabel = comFirstGubun === 'COM_GUBUN_1' ? '거래처' : '판매사';
 
   return (
     <>
@@ -309,7 +439,7 @@ const VendorInfo = () => {
         form={form}
         setForm={setForm}
         onClose={() => setModalOpen(false)}
-        onData={[[], []]}
+        onData={[comStateOptions, comGubunOptions]}
         onSubmit={handleSubmit}
       />
     </>

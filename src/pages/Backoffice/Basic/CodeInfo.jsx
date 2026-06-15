@@ -48,7 +48,7 @@ const INITIAL_SEARCH_FORM = {
 
 const SYSTEM_PARAMS = { systemUseyn: 'Y' };
 const SYSTEM_MAPPING  = { id: 'systemCode',      text: 'systemName'};
-const SEARCH_MENU = { pageIndex: '1', pageUnit: '1000', searchSystemCode : 'IPCC'};
+
 
 
 // ── 메인 그리드 사용유무 Switch 셀 ────────────────────────────────────────
@@ -82,13 +82,12 @@ const MainUseAtCell = ({ value, data, context }) => {
 const CodeInfo = () => {
     const gridApiRef = useRef(null);
     const searchRef = useRef(null);
+    // codeId → doRefresh 함수 Map. detailCellRenderer 마운트 시 등록, 언마운트 시 해제
+    const detailRefreshMap = useRef(new Map());
 
     const [tempParams, setTempParams] = useState(INITIAL_SEARCH_FORM);
     const [pageUnit] = useState(20);
     const [rowData, setRowData] = useState([]);
-
-    // 서브 그리드 재조회 트리거 — codeId별 카운터
-    const [subRefresh, setSubRefresh] = useState({});
 
     // ── 분류코드 모달 ──
     const [codeForm, setCodeForm] = useState(INITIAL_CODE_FORM);
@@ -161,10 +160,10 @@ const CodeInfo = () => {
     useEffect(() => { fetchDetailCodeRef.current = fetchDetailCodeStable; }, [fetchDetailCodeStable]);
 
     // ── 서브 그리드 리프레시 ──
-    // subRefresh[codeId] 카운터를 올리면 CodeDetailCellRenderer의 useEffect가 감지해
-    // 내부 state로 직접 재조회한다. (info.api.setGridOption 방식은 React 렌더에 덮어쓰여 무효화됨)
+    // detailRefreshMap에 등록된 doRefresh 함수를 직접 호출한다.
+    // (AG Grid context prop 변경이 detailCellRenderer에 전파되지 않아 subRefresh 방식이 무효화됨)
     const refreshDetailRows = useCallback(({ codeId }) => {
-        setSubRefresh(prev => ({ ...prev, [codeId]: (prev[codeId] || 0) + 1 }));
+        detailRefreshMap.current.get(codeId)?.();
     }, []);
 
     // ── 분류코드 사용유무 API ──
@@ -329,8 +328,8 @@ const CodeInfo = () => {
         onDelete: handleCodeDelete,
         refreshRows: refreshDetailRows,
         updateUseAt,
-        subRefresh,
-    }), [openDetailCodeMoal, handleCodeDelete, refreshDetailRows, updateUseAt, subRefresh]);
+        refreshRegistry: detailRefreshMap,  // stable ref — codeId별 doRefresh 등록용
+    }), [openDetailCodeMoal, handleCodeDelete, refreshDetailRows, updateUseAt]);
 
     const handleSearchChange = useCallback((e) => {
         const { name, value } = e.target;

@@ -111,6 +111,7 @@ const CodeDetailCellRenderer = (props) => {
     const ctxRef = useRef(context);
     useEffect(() => { ctxRef.current = context; });
 
+    // ── 초기 로드 ──
     useEffect(() => {
         const codeId = data?.codeId;
         const systemCode = data?.systemCode;
@@ -120,8 +121,26 @@ const CodeDetailCellRenderer = (props) => {
         ctxRef.current.fetchDetail({ codeId, systemCode, pageIndex: '1', pageUnit: '100' })
             .then((list) => setRowData(list.map((r) => ({ ...r, codeId, __parentId: nodeId }))))
             .catch(() => setRowData([]));
-    // context?.subRefresh?.[codeId] 카운터가 오르면 재조회 트리거
-    }, [data?.codeId, data?.systemCode, node?.id, context?.subRefresh?.[data?.codeId]]);
+    }, [data?.codeId, data?.systemCode, node?.id]);
+
+    // ── refreshRegistry 등록: 부모가 doRefresh를 직접 호출할 수 있도록 등록 ──
+    useEffect(() => {
+        const codeId = data?.codeId;
+        const systemCode = data?.systemCode;
+        const nodeId = node?.id;
+        const registry = context?.refreshRegistry;
+        if (!codeId || !registry) return;
+
+        const doRefresh = () => {
+            const ctx = ctxRef.current;
+            if (!ctx?.fetchDetail) return;
+            ctx.fetchDetail({ codeId, systemCode, pageIndex: '1', pageUnit: '100' })
+                .then((list) => setRowData(list.map((r) => ({ ...r, codeId, __parentId: nodeId }))))
+                .catch(() => setRowData([]));
+        };
+        registry.current.set(codeId, doRefresh);
+        return () => { registry.current.delete(codeId); };
+    }, [data?.codeId, data?.systemCode, node?.id, context?.refreshRegistry]);
 
     return (
         <div style={{ width: '100%', backgroundColor: '#fff', padding: 0, boxSizing: 'border-box' }}>

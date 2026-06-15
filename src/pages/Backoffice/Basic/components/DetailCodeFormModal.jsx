@@ -15,9 +15,7 @@ const DetailCodeFormModal = ({
          }));
     }, [setForm]);
 
-    console.log('DetailCodeFormModal rendered with form:', form);
-    
-    if (!open) return null; 
+    if (!open) return null;
     return (   
         <>
             <div className="modal-backdrop-custom">
