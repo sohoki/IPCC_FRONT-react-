@@ -134,6 +134,10 @@ export async function fnAjaxFetch(options) {
         if (!Object.keys(headers).some(k => k.toLowerCase() === 'content-type')) {
             headers['Content-Type'] = 'application/json; charset=utf-8';
         }
+        // FormData는 axios가 Content-Type(multipart + boundary)을 자동 설정하도록 제거
+        if (data instanceof FormData) {
+            delete headers['Content-Type'];
+        }
 
         const accessToken = getCookie('accessToken');
         if (accessToken) {

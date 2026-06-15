@@ -89,15 +89,14 @@ const INITIAL_MENU_FORM = {
     upperMenuNm: '',
     menuOrdr: '0',
     relateImage: null,
-    iconType: '',
-    txt_menuClass: '',
+    menuIconType: '',
+    menuClass: '',
     progrmFileNm: '',
     progrmKoreanNm: '',
     menuPageTarget: 'PAGE_GUBUN_4',
     menuPopupnfo: '',
     menuDc: '',
     usePrivacy: 'N',
-    menuClass: '',
     idCheck: 'N',
 };
 
@@ -176,10 +175,10 @@ const MenuInfo = () => {
         const newType = e.target.value;
         setForm((p) => ({
             ...p,
-            iconType: newType,
-            ...(newType !== 'ICON_TYPE_1' ? { relateImage: null } : { txt_menuClass: '' }),
+            menuIconType: newType,
+            ...(newType !== 'IPCC_ICON_TYPE_1' ? { relateImage: null } : { menuClass: '' }),
         }));
-        if (newType !== 'ICON_TYPE_1') {
+        if (newType !== 'IPCC_ICON_TYPE_1') {
             setIconFile(null);
             setIconPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return null; });
         }
@@ -220,10 +219,10 @@ const MenuInfo = () => {
             menuPageTarget: ret.menuPageTarget || 'PAGE_GUBUN_4',
             menuPopupnfo: ret.menuPopupnfo || '',
             menuDc: ret.menuDc || '',
-            txt_menuClass: ret.menuClass || '',
+            menuClass: ret.menuClass || '',
             usePrivacy: ret.menuPrivacy || 'N',
             relateImage: null,
-            iconType: ret.iconType || '',
+            menuIconType: ret.menuIconType || '',
         }));
         resetIcon();
     }, [treeData, setSelectedKey, resetIcon]);
@@ -294,7 +293,7 @@ const MenuInfo = () => {
             menuPageTarget: 'PAGE_GUBUN_4',
             usePrivacy: 'N',
             relateImage: null,
-            iconType: '',
+            menuIconType: '',
         });
         resetIcon();
     }, [menu.node, hide, calcLevel, treeData, setTreeData, setExpandedKeys, resetIcon]);
@@ -438,7 +437,7 @@ const MenuInfo = () => {
                             value={tempParams.searchSystemCode || ''}
                             onChange={(e) => handleSearchChange({ searchSystemCode: e.target.value })}
                             placeholder={isLoadingSystem ? '로딩 중...' : '시스템을 선택하세요'}
-                            style={{ height: 28, fontSize: 12, fontWeight: 600 }}
+                            className="form-select"
                         />
                     </div>
 
@@ -595,7 +594,7 @@ const MenuInfo = () => {
                                             <td>
                                                 <select
                                                     className="form-select"
-                                                    value={form.iconType}
+                                                    value={form.menuIconType}
                                                     onChange={handleIconTypeChange}
                                                 >
                                                     <option value="">선택</option>
@@ -608,7 +607,7 @@ const MenuInfo = () => {
                                             </td>
                                         </tr>
                                         {/* ICON 파일 업로드 — ICON_TYPE_1 선택 시 */}
-                                        {form.iconType === 'ICON_TYPE_1' && (
+                                        {form.menuIconType === 'IPCC_ICON_TYPE_1' && (
                                             <tr className="input-box">
                                                 <th>ICON</th>
                                                 <td>
@@ -664,7 +663,7 @@ const MenuInfo = () => {
                                             </tr>
                                         )}
                                         {/* MENU CLASS 입력 — ICON_TYPE_2 선택 시 */}
-                                        {form.iconType === 'ICON_TYPE_2' && (
+                                        {form.menuIconType === 'IPCC_ICON_TYPE_2' && (
                                             <tr className="input-box">
                                                 <th>MENU CLASS</th>
                                                 <td>
@@ -674,8 +673,8 @@ const MenuInfo = () => {
                                                             name="txt_menuClass"
                                                             id="txt_menuClass"
                                                             className="form-control"
-                                                            value={form.txt_menuClass}
-                                                            onChange={(e) => setForm((p) => ({ ...p, txt_menuClass: e.target.value }))}
+                                                            value={form.menuClass}
+                                                            onChange={(e) => setForm((p) => ({ ...p, menuClass: e.target.value }))}
                                                         />
                                                     </div>
                                                 </td>

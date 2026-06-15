@@ -1,6 +1,7 @@
 import { Card, Button, Image } from 'react-bootstrap';
 import { PlusCircle, BoxArrowRight, HouseDoor, X } from 'react-bootstrap-icons';
-import URL from "@/constants/URL.jsx";
+
+const IMG_BASE_URL = import.meta.env.VITE_REACT_APP_IMG_URL || '';
 
 const Profile = ({
     managerInfo, 
@@ -60,7 +61,7 @@ const Profile = ({
                 >
                     {managerPic ? (
                         <Image 
-                            src={`${URL.IMG_URL}${managerPic}`}
+                            src={`${IMG_BASE_URL}${managerPic}`}
                             roundedCircle
                             alt={managerName}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}

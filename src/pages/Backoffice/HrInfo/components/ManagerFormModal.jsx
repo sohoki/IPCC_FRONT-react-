@@ -61,6 +61,17 @@ const ManagerFormModal = ({ open,
         setForm((prev) => ({ ...prev, ...payload }));
     }, [setForm]);
 
+    const phoneValid = !form.adminTel || /^01[016789]-\d{3,4}-\d{4}$/.test(form.adminTel);
+    const emailValid = !form.adminEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.adminEmail);
+
+    const handlePhoneChange = useCallback((e) => {
+        const d = e.target.value.replace(/\D/g, '').slice(0, 11);
+        let formatted = d;
+        if (d.length > 7) formatted = `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+        else if (d.length > 3) formatted = `${d.slice(0, 3)}-${d.slice(3)}`;
+        updateForm({ adminTel: formatted });
+    }, [updateForm]);
+
     const updatePhoto = useCallback((payload) => {
         const file = payload.managerPic;
         setPhotoPreview((prev) => { if (prev) URL.revokeObjectURL(prev); return file ? URL.createObjectURL(file) : null; });
@@ -180,10 +191,12 @@ const ManagerFormModal = ({ open,
             submitData = new FormData();
             Object.entries(payload).forEach(([k, v]) => {
                 if (v !== undefined && v !== null) {
-                    submitData.append(k, typeof v === 'object' && !(v instanceof File) ? JSON.stringify(v) : v);
+                    const key = k === 'authInfo' ? 'authInfoJson' : k;
+                    submitData.append(key, typeof v === 'object' && !(v instanceof File) ? JSON.stringify(v) : v);
                 }
             });
-            submitData.append('managerPic', photoFile);
+            // 파일 키를 managerPic(String 필드)과 충돌하지 않도록 picFile로 분리
+            submitData.append('picFile', photoFile);
             extraHeaders = { 'content-type': undefined };
         }
 
@@ -208,9 +221,9 @@ const ManagerFormModal = ({ open,
     return (
         <>
             <div className="modal-backdrop-custom" onClick={onClose} />
-            <div className="modal-custom" style={{ alignItems: 'flex-start', overflowY: 'auto', paddingTop: '4vh', paddingBottom: '4vh' }}>
+            <div className="modal-custom" style={{ alignItems: 'center', justifyContent: 'center', overflowY: 'auto', paddingTop: '4vh', paddingBottom: '4vh' }}>
                 <div className="modal-dialog modal-dialog-scrollable"
-                    style={{ width: 800, maxWidth: '95%', backgroundColor: '#fff', maxHeight: '92vh', display: 'flex', flexDirection: 'column', margin: '0 auto' }}>
+                    style={{ width: 800, maxWidth: '95%', backgroundColor: '#fff', maxHeight: '92vh', display: 'flex', flexDirection: 'column', margin: 'auto' }}>
                     <div className="modal-content" style={{ display: 'flex', flexDirection: 'column', minHeight: 0, flex: 1 }}>
                         <div className="modal-header" style={{ flexShrink: 0 }}>
                             <div className="modal-title">
@@ -247,28 +260,32 @@ const ManagerFormModal = ({ open,
                                                         <span style={{ fontSize: 28, color: '#cbd5e1' }}>사진 없음</span>
                                                     )}
                                                 </div>
-                                                {/* 드롭존 */}
+                                                {/* 드롭존 — 파일 없을 때만 업로드 가능 */}
                                                 <div style={{ flex: 1 }}>
-                                                    <div
-                                                        {...getRootProps()}
-                                                        className={`dropzone-box${isDragActive ? ' active' : ''}${photoFile ? ' has-file' : ''}`}
-                                                        style={{ minHeight: 90, padding: 12 }}
-                                                    >
-                                                        <input {...getInputProps()} />
-                                                        <div className="placeholder-content" style={{ textAlign: 'center' }}>
-                                                            {photoFile ? (
-                                                                <div style={{ fontSize: 12, color: '#475569' }}>
-                                                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{photoFile.name}</div>
-                                                                    <div style={{ color: '#94a3b8' }}>{(photoFile.size / 1024).toFixed(1)} KB</div>
-                                                                </div>
-                                                            ) : (
+                                                    {!photoFile ? (
+                                                        <div
+                                                            {...getRootProps()}
+                                                            className={`dropzone-box${isDragActive ? ' active' : ''}`}
+                                                            style={{ minHeight: 90, padding: 12 }}
+                                                        >
+                                                            <input {...getInputProps()} />
+                                                            <div className="placeholder-content" style={{ textAlign: 'center' }}>
                                                                 <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>
                                                                     <div>파일을 클릭하거나 여기로 드래그하세요</div>
                                                                     <div>JPG, PNG, GIF, WEBP</div>
                                                                 </div>
-                                                            )}
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    ) : (
+                                                        <div className="dropzone-box has-file" style={{ minHeight: 90, padding: 12 }}>
+                                                            <div className="placeholder-content" style={{ textAlign: 'center' }}>
+                                                                <div style={{ fontSize: 12, color: '#475569' }}>
+                                                                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{photoFile.name}</div>
+                                                                    <div style={{ color: '#94a3b8' }}>{(photoFile.size / 1024).toFixed(1)} KB</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                     {photoFile && (
                                                         <button
                                                             type="button"
@@ -336,16 +353,16 @@ const ManagerFormModal = ({ open,
                                     </div>
                                 </div>
 
-                                {/* 기관 + 부서 */}
+                                {/* 기관코드 + 부서명 + 권한 구분 + 권한 등급 */}
                                 <div className="row input-box-wrap">
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">기관코드<span className="text-danger">*</span></label>
                                             <CommonSelect
-                                                comboId="insttCode" 
+                                                comboId="insttCode"
                                                 comboName="insttCode"
                                                 readOnly={form.mode !== 'Ins'}
-                                                disabled={form.mode !== 'Ins' ? true : false}
+                                                disabled={form.mode !== 'Ins'}
                                                 comboData={onData}
                                                 value={form.insttCode || ''}
                                                 onChange={(e) => {
@@ -353,11 +370,11 @@ const ManagerFormModal = ({ open,
                                                     loadPartOptions(e.target.value);
                                                 }}
                                                 className="form-select"
-                                                placeholder="기관을 선택하세요"
+                                                placeholder="기관 선택"
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">부서명<span className="text-danger">*</span></label>
                                             <select className="form-select"
@@ -370,11 +387,7 @@ const ManagerFormModal = ({ open,
                                             </select>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* 권한 구분 + 권한 등급 */}
-                                <div className="row input-box-wrap">
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">권한 구분<span className="text-danger">*</span></label>
                                             <select className="form-select"
@@ -390,7 +403,7 @@ const ManagerFormModal = ({ open,
                                         </div>
                                     </div>
                                     {form.roleGubun === 'AUTH_GUBUN_1' && (
-                                        <div className="col-6">
+                                        <div className="col-3">
                                             <div className="input-box">
                                                 <label className="form-label">권한 등급</label>
                                                 <select className="form-select"
@@ -419,16 +432,20 @@ const ManagerFormModal = ({ open,
                                     <div className="col-6">
                                         <div className="input-box">
                                             <label className="form-label">연락처</label>
-                                            <input type="text" className="form-control"
+                                            <input type="text" className={`form-control${form.adminTel ? (phoneValid ? ' is-valid' : ' is-invalid') : ''}`}
+                                                placeholder="010-0000-0000"
                                                 value={form.adminTel}
-                                                onChange={(e) => updateForm({ adminTel: e.target.value })} />
+                                                onChange={handlePhoneChange} />
+                                            {form.adminTel && !phoneValid && (
+                                                <small className="text-danger mt-1 d-block">올바른 전화번호 형식이 아닙니다. (예: 010-1234-5678)</small>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* 비밀번호 + 비밀번호 확인 */}
+                                {/* 비밀번호 + 비밀번호 확인 + 힌트 + 정답 (1행) */}
                                 <div className="row input-box-wrap">
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">비밀번호</label>
                                             <input type="password"
@@ -436,7 +453,7 @@ const ManagerFormModal = ({ open,
                                                 value={form.adminPwd}
                                                 onChange={(e) => updateForm({ adminPwd: e.target.value })} />
                                             {form.adminPwd && (
-                                                <div style={{ marginTop: 6, display: 'flex', flexWrap: 'wrap', rowGap: 2 }}>
+                                                <div style={{ marginTop: 4, display: 'flex', flexWrap: 'wrap', rowGap: 2 }}>
                                                     {pwdRules.map((r) => (
                                                         <RuleItem key={r.key} passed={r.passed} label={r.label} />
                                                     ))}
@@ -444,7 +461,7 @@ const ManagerFormModal = ({ open,
                                             )}
                                         </div>
                                     </div>
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">비밀번호 확인</label>
                                             <input type="password"
@@ -452,18 +469,14 @@ const ManagerFormModal = ({ open,
                                                 value={form.adminPwdConfirm}
                                                 onChange={(e) => updateForm({ adminPwdConfirm: e.target.value })} />
                                             {pwdNoMatch && (
-                                                <small style={{ color: '#ef4444', marginTop: 4, display: 'block' }}>비밀번호가 일치하지 않습니다.</small>
+                                                <small style={{ color: '#ef4444', marginTop: 4, display: 'block' }}>불일치</small>
                                             )}
                                             {pwdMatch && (
-                                                <small style={{ color: '#22c55e', marginTop: 4, display: 'block' }}>비밀번호가 일치합니다.</small>
+                                                <small style={{ color: '#22c55e', marginTop: 4, display: 'block' }}>일치</small>
                                             )}
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* 비밀번호 힌트 + 비밀번호 정답 */}
-                                <div className="row input-box-wrap">
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">비밀번호 힌트</label>
                                             <input type="text" className="form-control"
@@ -471,7 +484,7 @@ const ManagerFormModal = ({ open,
                                                 onChange={(e) => updateForm({ passwordHint: e.target.value })} />
                                         </div>
                                     </div>
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">비밀번호 정답</label>
                                             <input type="text" className="form-control"
@@ -481,17 +494,21 @@ const ManagerFormModal = ({ open,
                                     </div>
                                 </div>
 
-                                {/* 이메일 + 사용여부 */}
+                                {/* 이메일 + 사용여부 + 상태 */}
                                 <div className="row input-box-wrap">
                                     <div className="col-6">
                                         <div className="input-box">
                                             <label className="form-label">이메일</label>
-                                            <input type="text" className="form-control"
+                                            <input type="text" className={`form-control${form.adminEmail ? (emailValid ? ' is-valid' : ' is-invalid') : ''}`}
+                                                placeholder="example@domain.com"
                                                 value={form.adminEmail}
                                                 onChange={(e) => updateForm({ adminEmail: e.target.value })} />
+                                            {form.adminEmail && !emailValid && (
+                                                <small className="text-danger mt-1 d-block">올바른 이메일 형식이 아닙니다.</small>
+                                            )}
                                         </div>
                                     </div>
-                                    <div className="col-6">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">사용여부</label>
                                             <div className="d-flex align-items-center" style={{ height: 32 }}>
@@ -505,11 +522,7 @@ const ManagerFormModal = ({ open,
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                {/* 상태 */}
-                                <div className="row input-box-wrap">
-                                    <div className="col-12">
+                                    <div className="col-3">
                                         <div className="input-box">
                                             <label className="form-label">상태</label>
                                             <select className="form-select"

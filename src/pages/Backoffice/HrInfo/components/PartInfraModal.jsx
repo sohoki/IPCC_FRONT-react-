@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import API_URL from '@/constants/URL.jsx';
 import Swal from '@/lib/swal.js';
-import { useRadioGroup } from '@/hooks/use-form.jsx';
-
 
 
 const INITIAL_INFRA_FORM = {
@@ -15,9 +13,7 @@ const INITIAL_INFRA_FORM = {
     agentStartNumber: '',
     agentEndNumber: '',
     ctiStartNumber: '',
-    ctiEndNumber: '',
-    useAt: 'Y',
-    endAt: 'N',
+    ctiEndNumber: ''
 };
 
 const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
@@ -64,8 +60,6 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
             ctiStartNumber: infraForm.ctiStartNumber,
             ctiEndNumber: infraForm.ctiEndNumber,
             stationMeno: infraForm.stationMeno,
-            useAt: infraForm.useAt,
-            endAt: infraForm.endAt,
         };
 
         const checkRes = await fnAjaxFetch({ url: API_URL.PART_AGENT_CHECK, method: 'POST', data: infraData });
@@ -103,9 +97,7 @@ const PartInfraModal = ({ open, partId, insttCode, onClose }) => {
                 agentStartNumber: obj.agentStartNumber || '',
                 agentEndNumber: obj.agentEndNumber || '',
                 ctiStartNumber: obj.ctiStartNumber || '',
-                ctiEndNumber: obj.ctiEndNumber || '',
-                useAt: obj.useAt || 'Y',
-                endAt: obj.endAt || 'N',
+                ctiEndNumber: obj.ctiEndNumber || ''
             });
         }
     }, []);

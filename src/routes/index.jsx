@@ -31,6 +31,9 @@ const PartClassInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/PartClassI
 const SeasonInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/SeasonInfo.jsx'));
 const SeatInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/SeatInfo.jsx'));
 
+const VendorInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorInfo.jsx'));
+const VenderDetailInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorDetailInfo.jsx'));
+
 export default function RouterConfig() {
     return (
         <>
@@ -49,7 +52,7 @@ export default function RouterConfig() {
                         <Route path="/sub/bas/codeInfo" element={<CodeInfo />} />
 
                         { /* system menu */}
-                         <Route path="/sub/sym/systemInfo" element={<SystemInfo />} />
+                        <Route path="/sub/sym/systemInfo" element={<SystemInfo />} />
 
                         <Route path="/sub/sym/messageInfo" element={<MessageInfo />} />
                         { /* hr menu */}
@@ -63,6 +66,11 @@ export default function RouterConfig() {
                         <Route path="/sub/bld/partClassInfo" element={<PartClassInfo />} />
                         <Route path="/sub/bld/seasonInfo" element={<SeasonInfo />} />
                         <Route path="/sub/bld/seatInfo" element={<SeatInfo />} />
+
+                        { /* 거래처 관리 */}
+
+                        <Route path="/sub/client/venderInfo" element={<VendorInfo />} />
+                        <Route path="/sub/client/detail/:comCode" element={<VenderDetailInfo />} />
                     </Route>   
                     {/* 인증이 필요 없는 라우트 */}
                     <Route element={<AppTopDownLayout />}>

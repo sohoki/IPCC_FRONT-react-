@@ -131,6 +131,17 @@ body[data-sb] header {
 .sb-icon img  { width: 18px; height: 18px; object-fit: contain; }
 .sb-icon svg  { width: 18px; height: 18px; }
 
+/* DB에서 불러온 인라인 SVG 래퍼 */
+.sb-svg-icon {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: currentColor;
+}
+
 /* ── 메뉴명 ─────────────────────────────────────────────────────────────── */
 .sb-label {
     flex: 1;

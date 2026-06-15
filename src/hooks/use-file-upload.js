@@ -1,37 +1,51 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-// Drag and Drop File Input 
-export const useFileUpload = ({ 
-    fieldName,  //파일이름 
-    updateForm, // 부모의 updateForm 함수
-    fileValue, // 부모로부터 전달받는 현재 파일 값 (null 또는 File 객체)
-    accept, // 허용할 파일 타입 (예: { 'application/pdf': ['.pdf'] })
-    multiUse = false, // 다중 파일 허용 여부 (현재는 false로 고정)
- }) => {
+
+// Drag and Drop File Input
+export const useFileUpload = ({
+    fieldName,           // 파일 필드명
+    updateForm,          // 부모의 updateForm 함수
+    fileValue,           // 현재 파일 값 (단일: File | null, 멀티: File[])
+    accept,              // 허용 파일 타입
+    multiUse = false,    // true: 다중 파일 누적, false: 단일 파일
+}) => {
     const onDrop = useCallback((acceptedFiles) => {
-        if (acceptedFiles && acceptedFiles.length > 0) {
-            // 부모의 updateForm 호출 (첫 번째 파일 전달)
+        if (!acceptedFiles || acceptedFiles.length === 0) return;
+
+        if (multiUse) {
+            // 멀티: 기존 파일 배열에 추가
+            const prev = Array.isArray(fileValue) ? fileValue : [];
+            updateForm({ [fieldName]: [...prev, ...acceptedFiles] });
+        } else {
+            // 단일: 첫 번째 파일만 전달
             updateForm({ [fieldName]: acceptedFiles[0] });
         }
-    }, [fieldName, updateForm]);
+    }, [fieldName, updateForm, multiUse, fileValue]);
 
-    // 기본 허용 파일 (엑셀/CSV)
     const defaultAccept = {
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
         'application/vnd.ms-excel': ['.xls'],
-        'text/csv': ['.csv']
+        'text/csv': ['.csv'],
     };
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         accept: accept || defaultAccept,
-        multiple: multiUse
+        multiple: multiUse,
     });
 
-    // 파일 삭제 함수
+    // 단일 파일 제거
     const clearFile = (e) => {
-        e.stopPropagation(); // 드롭존 클릭 이벤트 방지
-        updateForm({ [fieldName]: null });
+        e.stopPropagation();
+        updateForm({ [fieldName]: multiUse ? [] : null });
+    };
+
+    // 멀티 파일에서 특정 인덱스 제거
+    const removeFileAt = (e, index) => {
+        e.stopPropagation();
+        if (!multiUse || !Array.isArray(fileValue)) return;
+        const next = fileValue.filter((_, i) => i !== index);
+        updateForm({ [fieldName]: next });
     };
 
     return {
@@ -39,6 +53,7 @@ export const useFileUpload = ({
         getInputProps,
         isDragActive,
         file: fileValue,
-        clearFile
+        clearFile,
+        removeFileAt,
     };
 };

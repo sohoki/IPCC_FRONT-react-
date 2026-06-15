@@ -3,6 +3,36 @@ import { Link } from 'react-router-dom';
 import { useSidebar } from '@/hooks/use-sidebar.js';
 import '@/style/SideBar.css';
 
+// HTML 엔티티 디코딩 (&lt; → <, &gt; → >, &quot; → " 등)
+const decodeHtmlEntities = (str) => {
+    if (!str) return '';
+    return str
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+};
+
+// menu_class 값이 실제 SVG 마크업인지 확인 (엔티티 인코딩 여부 무관)
+const isSvgContent = (str) => {
+    if (!str) return false;
+    const lower = str.trim().toLowerCase();
+    return lower.includes('<svg') || lower.includes('&lt;svg');
+};
+
+// DB에 저장된 SVG 문자열 정리: 엔티티 디코딩 → XML 선언·DOCTYPE 제거, pt 단위 크기 제거, fill을 currentColor로 치환
+const prepareSvg = (raw) => {
+    if (!raw) return '';
+    return decodeHtmlEntities(raw)
+        .replace(/<\?xml[^?]*\?>/gi, '')
+        .replace(/<!DOCTYPE[^>]*>/gi, '')
+        .replace(/\s+width="[^"]*pt"/g, '')
+        .replace(/\s+height="[^"]*pt"/g, '')
+        .replace(/fill="#000000"/gi, 'fill="currentColor"')
+        .trim();
+};
+
 // 폴더 아이콘 (기본 아이콘)
 const FolderIcon = () => (
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,10 +124,11 @@ const SideBar = () => {
             {/* 사이드바 메뉴 */}
             <nav className="sb-nav">
                 {parents.map((m) => {
+                    console.log('[SideBar]', m.menu_nm, '| icon_type:', m.menu_icon_type, '| isSvg:', isSvgContent(m.menu_class), '| class_head:', String(m.menu_class || '').substring(0, 80));
                     const pNo    = Number(m.menu_no);
                     const opened = openParents.has(pNo);
                     const active = activeParentNo === pNo;
-                    const iconSrc = m.relate_image_nm
+                    const iconSrc = m.menu_icon_type === 'IPCC_ICON_TYPE_1' && m.relate_image_nm
                         ? `/upload/${m.relate_image_nm.trim()}`
                         : null;
                     const children = childrenByParent[pNo] || [];
@@ -113,9 +144,16 @@ const SideBar = () => {
                                 title={!isOpenSideBar ? m.menu_nm?.replace(/\s/g, '') : undefined}
                             >
                                 <span className="sb-icon">
-                                    {iconSrc
-                                        ? <img src={iconSrc} alt="" />
-                                        : <FolderIcon />
+                                    {m.menu_icon_type === 'IPCC_ICON_TYPE_2' && m.menu_class
+                                        ? (
+                                            <span
+                                                className="sb-svg-icon"
+                                                dangerouslySetInnerHTML={{ __html: prepareSvg(m.menu_class) }}
+                                            />
+                                        )
+                                        : iconSrc
+                                            ? <img src={iconSrc} alt="" />
+                                            : <FolderIcon />
                                     }
                                 </span>
 

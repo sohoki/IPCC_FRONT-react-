@@ -250,6 +250,18 @@ const URL = {
     CONSULTANT_DELETE: "/api/backoffice/uat/uia/contant",
     CONSULTANT_RETIRE: "/api/backoffice/uat/uia/contant/consultant/withdrow",
     CONSULTANT_EXCEL_UPDATE: "/api/backoffice/uat/uia/contant/ctiExcelUpdate.do",
+    // 거래처 (공급사/판매사) 관리
+    VENDER_LIST:           "/api/backoffice/infra/cor/com/companyList.do",
+    VENDER_INFO:           "/api/backoffice/infra/cor/com",
+    VENDER_UPDATE:         "/api/backoffice/infra/cor/com/companyUpdate.do",
+    VENDER_ID_CHECK:       "/api/backoffice/infra/cor/com/check",
+    // 거래처 담당자 관리
+    VENDER_USER_LIST:      "/api/backoffice/infra/cor/com/user/userList.do",
+    VENDER_USER_INFO:      "/api/backoffice/infra/cor/com/user",
+    VENDER_USER_UPDATE:    "/api/backoffice/infra/cor/com/user/userUpdate.do",
+    VENDER_USER_ID_CHECK:  "/api/backoffice/infra/cor/com/user/idCheck",
+    VENDER_USER_PWD_RESET: "/api/backoffice/infra/cor/com/user/passwordReset",
+    VENDER_USER_COMBO:     "/api/backoffice/infra/cor/com/user/userCombo.do",
     // SKILL 관리
     SKILL_LIST: "/api/interface/int/nex/skillList.do",
     SKILL_UPDATE: "/api/interface/int/nex/skillUpdate.do",

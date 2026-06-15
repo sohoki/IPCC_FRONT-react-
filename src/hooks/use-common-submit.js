@@ -124,7 +124,7 @@ export const useCommonSubmit = ({
                     }
                 });
                 requestData = fd;
-                headers = { 'Content-Type': 'multipart/form-data' };
+                headers = {}; // Content-Type은 fnAjaxFetch에서 FormData 감지 후 axios가 boundary 포함해 자동 설정
             }
 
             const res = await fnAjaxFetch({
