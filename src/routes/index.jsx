@@ -17,7 +17,7 @@ const RoleInfo = lazy(() => import('@/pages/Backoffice/Basic/RoleInfo.jsx'));
 const CodeInfo = lazy(() => import('@/pages/Backoffice/Basic/CodeInfo.jsx'));
 
 const SystemInfo = lazy(() => import('@/pages/Backoffice/System/SystemInfo.jsx'));
-const MessageInfo = lazy(() => import('@/pages/Backoffice/System/MessageInfo.jsx'));
+const QueueInfo = lazy(() => import('@/pages/Backoffice/System/QueueInfo.jsx'));
 
 const PartInfo = lazy(() => import('@/pages/Backoffice/HrInfo/PartInfo.jsx'));
 const ManagerInfo = lazy(() => import('@/pages/Backoffice/HrInfo/ManagerInfo.jsx'));
@@ -30,13 +30,17 @@ const FloorInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/FloorInfo.jsx'
 const PartClassInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/PartClassInfo.jsx'));
 const SeasonInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/SeasonInfo.jsx'));
 const SeatInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/SeatInfo.jsx'));
-
+//거래처 관리
 const VendorInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorInfo.jsx'));
 const VenderDetailInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorDetailInfo.jsx'));
-
+//infra 관리 넣기
 const PbxInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxInfo.jsx'));
 const PbxAgentInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxAgentInfo.jsx'));
 const PbxSmsModelInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxSmsModelInfo.jsx'));
+const IvrConfigInfo = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/IvrConfigInfo.jsx'));
+const BuildInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/BuildInfo.jsx'));
+
+
 
 
 
@@ -59,7 +63,7 @@ export default function RouterConfig() {
 
                         { /* system menu */}
                         <Route path="/sub/sym/systemInfo" element={<SystemInfo />} />
-                        <Route path="/sub/sym/messageInfo" element={<MessageInfo />} />
+                        <Route path="/sub/sym/queueInfo" element={<QueueInfo />} />
                         
                         { /* hr menu */}
                         <Route path="/sub/hr/partInfo" element={<PartInfo />} />
@@ -68,6 +72,8 @@ export default function RouterConfig() {
                         <Route path="/sub/infra/serverInfo" element={<ServerInfo />} />
                         <Route path="/sub/infra/systemServiceInfo" element={<SystemServiceInfo />} />
                         { /* 시설 관리(BLD) */}
+
+                        <Route path="/sub/bld/buildInfo" element={<BuildInfo />} />
                         <Route path="/sub/bld/floorInfo" element={<FloorInfo />} />
                         <Route path="/sub/bld/partClassInfo" element={<PartClassInfo />} />
                         <Route path="/sub/bld/seasonInfo" element={<SeasonInfo />} />
@@ -78,6 +84,7 @@ export default function RouterConfig() {
                         <Route path="/sub/client/detail/:comCode" element={<VenderDetailInfo />} />
 
                         { /* infra 리스트*/}
+                        <Route path="/sub/infra/call/ivrinfo" element={<IvrConfigInfo />} />
 
                     </Route>   
                     {/* 인증이 필요 없는 라우트 */}

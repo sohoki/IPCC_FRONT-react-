@@ -44,10 +44,13 @@ export const useIdCheck = (checkUrl, message) => {
             : base;
 
         try {
+            // suppressErrorHandling: true — fnAjaxFetch 내부의 Swal·페이지 이동을 막고
+            // 에러 처리를 이 hook에서 직접 담당한다.
             const res = await fnAjaxFetch({
                 url,
                 method: 'GET',
                 withCredentials: true,
+                suppressErrorHandling: true,
             });
 
             const json = res?.data;
@@ -67,11 +70,9 @@ export const useIdCheck = (checkUrl, message) => {
 
             return isSuccess;
         } catch (e) {
-            // fnAjaxFetch에서 이미 Swal을 띄운 HandledError는 재처리하지 않는다.
-            // (재처리하면 첫 Swal이 닫히면서 /error 리다이렉트가 즉시 실행됨)
-            if (e?.name !== 'HandledError') {
-                await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '중복 체크 중 오류가 발생했습니다.' });
-            }
+            // suppressErrorHandling: true 이므로 HandledError도 여기서 직접 처리
+            // → 페이지 이동 없이 경고창만 표시
+            await Swal.fire({ icon: 'error', title: '오류', text: '중복 체크 중 오류가 발생했습니다.' });
             return false;
         }
     }, [checkUrl, message]);

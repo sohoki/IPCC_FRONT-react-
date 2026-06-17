@@ -20,9 +20,11 @@ const SystemServiceInfo = () => {
 
     const [serviceFormOpen, setServiceFormOpen] = useState(false);
     const [serviceModalData, setServiceModalData] = useState({ serviceSeq: null, rowData: null });
+    const [serviceFormKey, setServiceFormKey] = useState(0);
 
     const [oidFormOpen, setOidFormOpen] = useState(false);
     const [oidModalData, setOidModalData] = useState({ serviceSeq: '', oidSeq: null, oidData: null });
+    const [oidFormKey, setOidFormKey] = useState(0);
 
     const { options: systemCodeOptions } = useCommonCodeData('SYSTEM_GUBUN');
     const { handleReset } = useResetForm(setTempParams, INITIAL_SEARCH_FORM);
@@ -130,6 +132,7 @@ const SystemServiceInfo = () => {
             return;
         }
         setOidModalData({ serviceSeq: selectedServiceSeq, oidSeq: null, oidData: null });
+        setOidFormKey(k => k + 1);
         setOidFormOpen(true);
     }, [selectedServiceSeq]);
 
@@ -147,7 +150,7 @@ const SystemServiceInfo = () => {
             headerName: '수정', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
-                    onClick={() => { setServiceModalData({ serviceSeq: p.data?.serviceSeq, rowData: p.data }); setServiceFormOpen(true); }}
+                    onClick={() => { setServiceModalData({ serviceSeq: p.data?.serviceSeq, rowData: p.data }); setServiceFormKey(k => k + 1); setServiceFormOpen(true); }}
                 >수정</button>
             ),
         },
@@ -165,6 +168,7 @@ const SystemServiceInfo = () => {
         onOidView: handleOidView,
         onOpenOidEdit: (oidData, serviceSeq) => {
             setOidModalData({ serviceSeq, oidSeq: oidData?.oidSeq, oidData });
+            setOidFormKey(k => k + 1);
             setOidFormOpen(true);
         },
         refreshRows: refreshOidForService,
@@ -223,7 +227,7 @@ const SystemServiceInfo = () => {
                                 OID 등록
                             </button>
                             <button type="button" className="btn btn-primary btn-default__blue"
-                                onClick={() => { setServiceModalData({ serviceSeq: null, rowData: null }); setServiceFormOpen(true); }}
+                                onClick={() => { setServiceModalData({ serviceSeq: null, rowData: null }); setServiceFormKey(k => k + 1); setServiceFormOpen(true); }}
                             >
                                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
@@ -249,6 +253,7 @@ const SystemServiceInfo = () => {
             </div>
 
             <SystemServiceFormModal
+                key={serviceFormKey}
                 open={serviceFormOpen}
                 onClose={() => setServiceFormOpen(false)}
                 serviceSeq={serviceModalData.serviceSeq}
@@ -256,6 +261,7 @@ const SystemServiceInfo = () => {
                 onSuccess={() => { setServiceFormOpen(false); onSearch(); }}
             />
             <SystemServiceOidFormModal
+                key={oidFormKey}
                 open={oidFormOpen}
                 onClose={() => setOidFormOpen(false)}
                 serviceSeq={oidModalData.serviceSeq}

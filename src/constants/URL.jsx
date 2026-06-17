@@ -121,7 +121,12 @@ const URL = {
     QUEUE_LIST: "/api/backoffice/sys/message/amqp/queueList.do",
     QUEUE_ID_CHECK: "/api/backoffice/sys/message/amqp/existsQueues",
     QUEUE_CREATE: "/api/backoffice/sys/message/amqp/createQueues.do",
-    QUEUE_DELETE: "/api/backoffice/sys/message/amqp/deleteQueues.do",
+    QUEUE_DELETE: "/api/backoffice/sys/message/amqp/queue",
+    // 메세지 Exchange 관리
+    EXCHANGE_LIST: "/api/backoffice/sys/message/amqp/exchangeList.do",
+    EXCHANGE_ID_CHECK: "/api/backoffice/sys/message/amqp/existsQueues",
+    EXCHANGE_CREATE: "/api/backoffice/sys/message/amqp/createQueues.do",
+    EXCHANGE_DELETE: "/api/backoffice/sys/message/amqp/exchange",
     // 장애관리 (VOC)
     VOC_LIST: "/api/backoffice/sym/voc/voclist.do",
     VOC_INFO: "/api/backoffice/sym/voc",
@@ -151,10 +156,12 @@ const URL = {
     SERVICE_OID_VIEW: "/api/backoffice/sym/svr/oidView",
     SERVICE_SERVER_COMBO: "/api/backoffice/sym/svr/serverCombo.do",
     //서버 현황
+    SERVER_SUMMARY: "/api/backoffice/sym/svr/summary.do",
     SERVER_INFO_LIST: "/api/backoffice/sym/svr/list.do",
     SERVER_INFO: "/api/backoffice/sym/svr",
     SERVER_INFO_UPDATE: "/api/backoffice/sym/svr/updateServer.do",
     SERVER_STATUS_CHECK: "/api/backoffice/sym/svr/check",
+    SERVER_STATUS_DETAIL: "/api/backoffice/sym/svr/status",
     SERVER_SYSTEM_COMBO: "/api/backoffice/sys/system/systemCombo.do",
     SERVER_COMPANY_COMBO: "/api/backoffice/infra/cor/com/companyCombo.do",
     // IP 내선관리
@@ -206,6 +213,8 @@ const URL = {
     IVR_HOLY_LIST: "/api/interface/int/diotis/holy/List.do",
     IVR_HOLY_UPDATE: "/api/interface/int/diotis/updateIvrHoly.do",
     IVR_HOLY_DELETE: "/api/interface/int/diotis/holy",
+    IVR_USEYN: "/api/interface/int/diotis/useyn",
+    IVR_MENT_USEYN: "/api/interface/int/diotis/mentUseyn",
     IVR_INSTT_COMBO: "/api/backoffice/sys/cmm/cde/comboEtc",
     // 에이전트 관리
     AGENT_LIST: "/api/backoffice/ipcc/avaya/pbx/agent/list.do",

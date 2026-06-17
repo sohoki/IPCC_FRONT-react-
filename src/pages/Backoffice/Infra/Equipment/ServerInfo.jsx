@@ -8,7 +8,8 @@ import URL from '@/constants/URL.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
-const ServerFormModal = lazy(() => import('@/pages/Backoffice/Infra/Equipment/components/ServerFormModal.jsx'));
+const ServerFormModal   = lazy(() => import('@/pages/Backoffice/Infra/Equipment/components/ServerFormModal.jsx'));
+const ServerStatusModal = lazy(() => import('@/pages/Backoffice/Infra/Equipment/components/ServerStatusModal.jsx'));
 
 const INITIAL_SEARCH_FORM = {
     searchSystemCode: '',
@@ -21,11 +22,15 @@ const ServerInfo = () => {
     const [selectedServerCode, setSelectedServerCode] = useState(null);
     const [selectedRowData, setSelectedRowData] = useState(null);
 
+    const [statusModalOpen, setStatusModalOpen] = useState(false);
+    const [statusTarget, setStatusTarget] = useState({ serverCode: '', serverName: '' });
+
     const { options: systemCodeOptions }   = useCommonCodeData('SYSTEM_GUBUN');
     const { options: serverMethodOptions } = useCommonCodeData('SERVER_CON_GUBUN');
 
     const [systemOptions,  setSystemOptions]  = useState([]);
     const [companyOptions, setCompanyOptions] = useState([]);
+    const [summary, setSummary] = useState({ totalCount: '-', normalCount: '-', failCount: '-', unknownCount: '-', activeCount: '-' });
 
     useEffect(() => {
         let active = true;
@@ -39,16 +44,28 @@ const ServerInfo = () => {
                 if (!active) return;
                 setSystemOptions(extractList(res).map(o => ({ code: o.systemCode, codeNm: o.systemName || o.systemCode })));
             }).catch((e) => { console.warn('[ServerInfo] systemOptions fetch blocked:', e?.message); });
-        fnAjaxFetch({ url: URL.SERVER_COMPANY_COMBO, 
+        fnAjaxFetch({ url: URL.SERVER_COMPANY_COMBO,
                     method: 'POST',
-                    data: { searchUseyn: 'Y' }, 
-                    withCredentials: true, 
-                    showLoading: false 
+                    data: { searchUseyn: 'Y' },
+                    withCredentials: true,
+                    showLoading: false
                     })
             .then(res => {
                 if (!active) return;
                 setCompanyOptions(extractList(res).map(o => ({ code: o.comCode , codeNm: o.comName })));
             }).catch((e) => { console.warn('[ServerInfo] companyOptions fetch blocked:', e?.message); });
+        fnAjaxFetch({ url: URL.SERVER_SUMMARY, method: 'GET', withCredentials: true, showLoading: false })
+            .then(res => {
+                if (!active) return;
+                const d = res?.data?.result?.result ?? res?.data?.result ?? {};
+                setSummary({
+                    totalCount:   d.totalCount   ?? d.total_count   ?? '-',
+                    normalCount:  d.normalCount  ?? d.normal_count  ?? '-',
+                    failCount:    d.failCount    ?? d.fail_count    ?? '-',
+                    unknownCount: d.unknownCount ?? d.unknown_count ?? '-',
+                    activeCount:  d.activeCount  ?? d.active_count  ?? '-',
+                });
+            }).catch((e) => { console.warn('[ServerInfo] summary fetch error:', e?.message); });
         return () => { active = false; };
     }, []);
 
@@ -86,6 +103,11 @@ const ServerInfo = () => {
     const onSearchKeyDown = (e) => { if (e.key === 'Enter') onSearch(1); };
 
     const { handleReset } = useResetForm(setTempParams, INITIAL_SEARCH_FORM);
+
+    const handleOpenStatusModal = useCallback((data) => {
+        setStatusTarget({ serverCode: data?.serverCode || '', serverName: data?.serverName || '' });
+        setStatusModalOpen(true);
+    }, []);
 
     const handleOpenFormModal = useCallback((rowData = null) => {
         setSelectedServerCode(rowData ? rowData.serverCode : null);
@@ -150,15 +172,37 @@ const ServerInfo = () => {
     const columnDefs = useMemo(() => [
         { headerName: '시스템 코드',  field: 'systemName',        width: 130 },
         { headerName: '서버위치',     field: 'serverLocationInfo', flex: 1 },
-        { headerName: '상태',         field: 'serverStatus',       width: 80 },
+        {
+            headerName: '상태', field: 'serverStatus', width: 95,
+            cellStyle: { overflow: 'visible' },
+            cellRenderer: (p) => {
+                const val = String(p.value || '').toLowerCase();
+                const isFail  = val === 'fail';
+                const isEmpty = !p.value;
+                const color = isFail ? '#dc3545' : isEmpty ? '#adb5bd' : '#0d6efd';
+                const label = isFail ? '에러' : isEmpty ? '미확인' : '정상';
+                return (
+                    <div
+                        className="d-flex align-items-center gap-1 h-100"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleOpenStatusModal(p.data)}
+                    >
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: color, flexShrink: 0, display: 'inline-block' }} />
+                        <span style={{ fontSize: 13, color }}>{label}</span>
+                    </div>
+                );
+            },
+        },
         { headerName: '서버명',       field: 'serverName',         flex: 1 },
         { headerName: '서버IP',       field: 'serverIp',           width: 140 },
         { headerName: 'PORT',         field: 'serverPort',         width: 80 },
         {
-            headerName: '연동방법', field: 'serverMethodTxt', width: 110,
+            headerName: '연동방법', field: 'serverMethodTxt', width: 120,
+            cellStyle: { overflow: 'visible' },
             cellRenderer: (p) => (
                 <button
-                    className="btn btn-link btn-sm p-0"
+                    className="btn btn-outline-secondary btn-sm"
+                    style={{ whiteSpace: 'nowrap' }}
                     onClick={() => handleStatusCheck(p.data?.serverCode)}
                 >
                     {p.value || '-'}
@@ -169,9 +213,11 @@ const ServerInfo = () => {
         { headerName: '최종접속일', field: 'serverEndTime', width: 150 },
         {
             headerName: '수정', width: 70, sortable: false, filter: false,
+            cellStyle: { overflow: 'visible' },
             cellRenderer: (p) => (
                 <button
                     className="btn btn-outline-secondary btn-outline__gray btn-modify"
+                    style={{ whiteSpace: 'nowrap' }}
                     onClick={() => handleOpenFormModal(p.data)}
                 >
                     수정
@@ -180,16 +226,18 @@ const ServerInfo = () => {
         },
         {
             headerName: '삭제', width: 70, sortable: false, filter: false,
+            cellStyle: { overflow: 'visible' },
             cellRenderer: (p) => (
                 <button
                     className="btn btn-outline-danger btn-outline__gray btn-delete"
+                    style={{ whiteSpace: 'nowrap' }}
                     onClick={() => handleDelete(p.data?.serverCode)}
                 >
                     삭제
                 </button>
             ),
         },
-    ], [handleOpenFormModal, handleStatusCheck, handleDelete]);
+    ], [handleOpenFormModal, handleOpenStatusModal, handleStatusCheck, handleDelete]);
 
     return (
         <div className="row g-0 main-contents">
@@ -200,6 +248,41 @@ const ServerInfo = () => {
                         <li className="breadcrumb-item">인프라 관리</li>
                         <li className="breadcrumb-item">서버 현황</li>
                     </ol>
+                </div>
+            </div>
+            <div className="col-12" style={{ padding: '12px 20px 4px' }}>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    {[
+                        { label: '전체 서버',   sub: 'Total Servers',   value: summary.totalCount,   color: '#6366f1', icon: '🖥' },
+                        { label: '정상 서버',   sub: 'Normal',          value: summary.normalCount,  color: '#22c55e', icon: '✅' },
+                        { label: '에러 서버',   sub: 'Error',           value: summary.failCount,    color: '#ef4444', icon: '❌' },
+                        { label: '미확인 서버', sub: 'Unknown',         value: summary.unknownCount, color: '#f59e0b', icon: '❓' },
+                        { label: '사용중 서버', sub: 'Active',          value: summary.activeCount,  color: '#06b6d4', icon: '⚡' },
+                    ].map(({ label, sub, value, color, icon }) => (
+                        <div
+                            key={label}
+                            style={{
+                                flex: 1,
+                                background: 'linear-gradient(145deg, #1e2533 0%, #252d3f 100%)',
+                                borderRadius: 10,
+                                padding: '16px 18px 14px',
+                                border: '1px solid rgba(255,255,255,0.07)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                minWidth: 0,
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                                <span style={{ fontSize: 11, color: '#8892a4', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{label}</span>
+                                <span style={{ fontSize: 16 }}>{icon}</span>
+                            </div>
+                            <div style={{ fontSize: 38, fontWeight: 800, color: '#fff', lineHeight: 1.1, letterSpacing: '-1px' }}>
+                                {value}
+                            </div>
+                            <div style={{ fontSize: 11, color: '#6b7a96', marginTop: 4 }}>{sub}</div>
+                            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: color, borderRadius: '0 0 10px 10px' }} />
+                        </div>
+                    ))}
                 </div>
             </div>
             <div className="col-12 content-search">
@@ -278,6 +361,12 @@ const ServerInfo = () => {
                 serverMethodOptions={serverMethodOptions}
                 systemOptions={systemOptions}
                 companyOptions={companyOptions}
+            />
+            <ServerStatusModal
+                open={statusModalOpen}
+                onClose={() => setStatusModalOpen(false)}
+                serverCode={statusTarget.serverCode}
+                serverName={statusTarget.serverName}
             />
         </div>
     );

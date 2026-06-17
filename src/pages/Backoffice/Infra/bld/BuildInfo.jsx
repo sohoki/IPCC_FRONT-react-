@@ -12,7 +12,7 @@ import URL from '@/constants/URL.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
-const BuildFormModal = lazy(() => import('@/pages/Backoffice/Facility/components/BuildFormModal.jsx'));
+const BuildFormModal = lazy(() => import('@/pages/Backoffice/Infra/bld/components/BuildFormModal.jsx'));
 
 const INITIAL_FORM = {
     mode: 'Ins',
