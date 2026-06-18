@@ -16,12 +16,9 @@ const IvrWorkModal = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/compon
 const IvrCallbackModal = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/components/IvrCallbackModal.jsx'));
 
 const INITIAL_SEARCH_FORM = {
-    searchInsttCode : '',
     searchCondition: '',
     searchKeyword: '',
 };
-const INSTT_PARAMS = {};
-const INSTT_MAPPING = { id: 'insttCode', text: 'allInsttNm' };
 
 const IvrConfigInfo = () => {
     const [pageUnit] = useState(20);
@@ -43,12 +40,7 @@ const IvrConfigInfo = () => {
     const [mentModal, setMentModal] = useState(null);
 
 
-    const { options: insttOptions, isLoading: isLoadingInstt } = useCustomReqDataCombo({
-        url: URL.INSTT_COMBO,
-        method: 'POST',
-        params: INSTT_PARAMS,
-        mapping: INSTT_MAPPING,
-    });
+   
 
     const fetchData = async (query) => {
         const res = await fnAjaxFetch({

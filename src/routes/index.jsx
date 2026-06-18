@@ -40,6 +40,11 @@ const PbxSmsModelInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/Pbx
 const IvrConfigInfo = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/IvrConfigInfo.jsx'));
 const BuildInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/BuildInfo.jsx'));
 
+//상담사 관리
+const AlertMessageInfo = lazy(() => import('@/pages/Backoffice/Manager/Message/AlertMessageInfo.jsx'));
+const ConstantInfo = lazy(() => import('@/pages/Backoffice/Manager/CallCenter/ConstantInfo.jsx'));
+const ConstantSkillStatus = lazy(() => import('@/pages/Backoffice/Manager/CallCenter/ConstantSkillStatus.jsx'));
+
 
 
 
@@ -85,6 +90,7 @@ export default function RouterConfig() {
 
                         { /* infra 리스트*/}
                         <Route path="/sub/infra/call/ivrinfo" element={<IvrConfigInfo />} />
+                        <Route path="/sub/manager/msg/alertMsgInfo" element={<AlertMessageInfo />} />
 
                     </Route>   
                     {/* 인증이 필요 없는 라우트 */}

@@ -1,79 +1,109 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import Swal from '@/lib/swal.js';
-import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useCommonCodeData } from '@/hooks/use-combo-data.js';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
+import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 import UseSwitch from '@/components/Common/IosSwitch.jsx';
+import { CommonSelect } from '@/components/Common/select.jsx';
 
-const EMPTY_FORM = { partGubun: '', alertPart: '', alertPartUseyn: 'Y' };
+const EMPTY_FORM = {
+    mode:           'Ins',
+    alertSeq:       '',
+    alertPartSeq:   '',
+    alertInsttCode: '',
+    partGubun:      '',
+    alertPart:      '',
+    alertPartUseyn: 'Y',
+};
 
-/**
- * Props:
- *   open, onClose
- *   alertSeq      ??부�??�림 ?�퀀?? *   alertPartSeq  ??null = ?�규, string = ?�정
- *   partData      ???�정 ??row ?�이?? *   onSuccess(alertSeq)
- */
-const AlertPartFormModal = ({ open, onClose, alertSeq, alertPartSeq, partData, onSuccess }) => {
+const buildInitialForm = (isEdt, partData, alertSeq) => {
+    if (!isEdt || !partData) return { ...EMPTY_FORM, mode: 'Ins', alertSeq };
+    return {
+        mode:           'Edt',
+        alertSeq,
+        alertPartSeq:   partData.alertPartSeq   || '',
+        alertInsttCode: partData.alertInsttCode || '',
+        partGubun:      partData.partGubun      || '',
+        alertPart:      partData.alertPart      || '',
+        alertPartUseyn: partData.alertPartUseyn || 'Y',
+    };
+};
+
+const AlertPartFormModal = ({
+    open,
+    onClose,
+    alertSeq,
+    alertMessage,
+    alertPartSeq,
+    partData,
+    onData,
+    onSuccess,
+}) => {
     const isEdt = alertPartSeq !== null && alertPartSeq !== undefined;
-    const [form, setForm] = useState(EMPTY_FORM);
+
+    // 부모에서 key={openAt}으로 리마운트하므로 lazy initializer로 최초 1회 초기화
+    const [form, setForm]               = useState(() => buildInitialForm(isEdt, partData, alertSeq));
+    const [partOptions, setPartOptions] = useState([]);
     const { options: partGubunOptions } = useCommonCodeData('PART_GUBUN');
 
-    useEffect(() => {
-        if (!open) return;
-        if (!isEdt || !partData) {
-            setForm(EMPTY_FORM);
-        } else {
-            setForm({
-                partGubun: partData.partGubun || '',
-                alertPart: partData.alertPart || '',
-                alertPartUseyn: partData.alertPartUseyn || 'Y',
+    const loadPartOptions = useCallback(async (insttCode) => {
+        if (!insttCode) { setPartOptions([]); return; }
+        try {
+            const res = await fnAjaxFetch({
+                url: `${URL.PART_PARENT_COMBO}?searchInsttCode=${encodeURIComponent(insttCode)}`,
+                method: 'GET',
             });
-        }
-    }, [open, isEdt, partData]);
+            const list = res?.data?.result?.resultList || res?.data?.result || [];
+            setPartOptions(Array.isArray(list)
+                ? list.map(p => ({ code: p.partId , codeNm: p.partNmHi || p.codeNm }))
+                : []
+            );
+        } catch { setPartOptions([]); }
+    }, []);
+
+    // React Compiler: useEffect 내 loadPartOptions 직접 호출 불가 (내부 setState를 정적 추적)
+    // → .then() 콜백 패턴으로 비동기 처리
+    useEffect(() => {
+        if (!open || !isEdt || !partData?.alertInsttCode) return;
+        const insttCode = partData.alertInsttCode;
+        fnAjaxFetch({ url: `${URL.PART_PARENT_COMBO}?searchInsttCode=${encodeURIComponent(insttCode)}`, method: 'GET' })
+            .then(res => {
+                const list = res?.data?.result?.resultList || res?.data?.result || [];
+                setPartOptions(Array.isArray(list)
+                    ? list.map(p => ({ code: p.partId || p.code, codeNm: p.partNmHi || p.codeNm }))
+                    : []
+                );
+            })
+            .catch(() => setPartOptions([]));
+        return () => setPartOptions([]);
+    }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const updateForm = useCallback((e) => {
         const { name, value } = e.target;
         setForm(prev => ({ ...prev, [name]: value }));
     }, []);
 
-    const handleSave = useCallback(async () => {
-        if (!form.alertPart) { await Swal.fire({ icon: 'warning', text: '부??코드�??�력??주세??' }); return; }
-        if (!form.partGubun) { await Swal.fire({ icon: 'warning', text: '부??구분???�택??주세??' }); return; }
+    const handleInsttChange = useCallback((e) => {
+        const { value } = e.target;
+        setForm(prev => ({ ...prev, alertInsttCode: value, alertPart: '' }));
+        if (value) loadPartOptions(value);
+        else setPartOptions([]);
+    }, [loadPartOptions]);
 
-        const action = isEdt ? '?�정' : '?�록';
-        const ok = await Swal.fire({
-            icon: 'question', title: `부??${action}`,
-            html: `부?��? <b>${action}</b> ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
+    const handleSuccess = useCallback(() => onSuccess(alertSeq), [onSuccess, alertSeq]);
 
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.ALERT_PART_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: isEdt ? 'Edt' : 'Ins',
-                    alertSeq,
-                    alertPartSeq: alertPartSeq || '',
-                    partGubun: form.partGubun,
-                    alertPart: form.alertPart,
-                    alertPartUseyn: form.alertPartUseyn,
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
-                onSuccess(alertSeq);
-            } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
-        }
-    }, [form, alertSeq, alertPartSeq, isEdt, onSuccess]);
+    const { handleSubmit } = useCommonSubmit({
+        form,
+        URL: URL.ALERT_PART_UPDATE,
+        confirmMessage: '부서',
+        checkField: [
+            { inputId: 'partGubun', label: '부서 구분', type: 'select' },
+            { inputId: 'alertPart', label: '부서',      type: 'select' },
+            { inputId: 'alertInsttCode', label: '기관',      type: 'select' },
+        ],
+        setModalOpen: onClose,
+        callback: handleSuccess,
+    });
 
     if (!open) return null;
     return (
@@ -85,51 +115,85 @@ const AlertPartFormModal = ({ open, onClose, alertSeq, alertPartSeq, partData, o
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">부??{isEdt ? '?�정' : '?�록'}</h2>
+                                <h2 className="modal-title__title">부서 {isEdt ? '수정' : '등록'}</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>
                         <div className="modal-body">
                             <div className="modal-body__content">
                                 <div className="row input-box-wrap">
-                                    {alertSeq && (
+
+                                    {alertSeq && alertMessage && (
                                         <div className="col-12">
                                             <div className="input-box">
-                                                <label className="form-label">분류코드ID</label>
-                                                <div className="form-control bg-light">{alertSeq}</div>
+                                                <label className="form-label">알림메세지</label>
+                                                <div className="form-control bg-light">{alertMessage}</div>
                                             </div>
                                         </div>
                                     )}
+
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="partGubun" className="form-label">부??구분 <span className="text-danger">*</span></label>
+                                            <label htmlFor="partGubun" className="form-label">부서 구분 <span className="text-danger">*</span></label>
                                             <select id="partGubun" name="partGubun" className="form-select" value={form.partGubun} onChange={updateForm}>
-                                                <option value="">?�택</option>
+                                                <option value="">선택</option>
                                                 {partGubunOptions.map(o => <option key={o.code} value={o.code}>{o.codeNm}</option>)}
                                             </select>
                                         </div>
                                     </div>
-                                    <div className="col-12">
+
+                                    {/* 기관 선택 */}
+                                    <div className="col-6">
                                         <div className="input-box">
-                                            <label htmlFor="alertPart" className="form-label">부??<span className="text-danger">*</span></label>
-                                            <input id="alertPart" name="alertPart" type="text" className="form-control"
-                                                placeholder="부??코드�??�력?�주?�요." value={form.alertPart} onChange={updateForm} />
+                                            <label htmlFor="alertInsttCode" className="form-label">기관</label>
+                                            <CommonSelect
+                                                comboId="alertInsttCode"
+                                                comboData={onData || []}
+                                                value={form.alertInsttCode}
+                                                onChange={handleInsttChange}
+                                                placeholder="기관을 선택하세요"
+                                                className="form-select"
+                                                style={{ height: 32, fontSize: 15 }}
+                                            />
                                         </div>
                                     </div>
+
+                                    {/* 부서 — 기관 선택 시 select, 미선택 시 text input */}
+                                    <div className="col-6">
+                                        <div className="input-box">
+                                            <label htmlFor="alertPart" className="form-label">부서 <span className="text-danger">*</span></label>
+                                            {partOptions.length > 0 ? (
+                                                <CommonSelect
+                                                    comboId="alertPart"
+                                                    comboData={partOptions}
+                                                    value={form.alertPart}
+                                                    onChange={updateForm}
+                                                    placeholder="부서를 선택하세요"
+                                                    className="form-select"
+                                                    style={{ height: 32, fontSize: 15 }}
+                                                />
+                                            ) : (
+                                                <input id="alertPart" name="alertPart" type="text" className="form-control"
+                                                    placeholder="부서 코드를 입력해주세요." value={form.alertPart} onChange={updateForm} />
+                                            )}
+                                        </div>
+                                    </div>
+
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">?�용 ?�무</label>
+                                            <label className="form-label">사용 여부</label>
                                             <div style={{ height: 38, display: 'flex', alignItems: 'center' }}>
                                                 <UseSwitch
                                                     value={form.alertPartUseyn}
                                                     name="alertPartUseyn"
                                                     onChange={(payload) => setForm(prev => ({ ...prev, alertPartUseyn: payload.alertPartUseyn }))}
-                                                    onText="?�용"
-                                                    offText="?�용 ?�함"
+                                                    onText="사용"
+                                                    offText="사용 안함"
                                                 />
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -137,7 +201,7 @@ const AlertPartFormModal = ({ open, onClose, alertSeq, alertPartSeq, partData, o
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
                             </div>
                         </div>
                     </div>

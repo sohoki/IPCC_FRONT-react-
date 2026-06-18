@@ -4,6 +4,10 @@ import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
 import { useRadioGroup } from '@/hooks/use-form.jsx';
 
+const RADIO_CONFIGS = [
+	{ label: 'DARS 사용여부',     name: 'useDarsAt',     col: 'col-6', useSwitch: true, options: [{ value: 'Y', text: '사용' }, { value: 'N', text: '미사용' }] },
+	{ label: 'callback 사용여부', name: 'useCallbackAt', col: 'col-6', useSwitch: true, options: [{ value: 'Y', text: '사용' }, { value: 'N', text: '미사용' }] },
+];
 
 const IvrCallbackModal = ({ open, onClose, ivrCode, ivrDars, ivrCbk, onSuccess }) => {
 
@@ -69,26 +73,11 @@ const IvrCallbackModal = ({ open, onClose, ivrCode, ivrDars, ivrCbk, onSuccess }
 						<div className="modal-body">
 							<div className="modal-body__content">
 								<div className="row input-box-wrap">
-									{renderRadioGroup({
-                                        label: 'DARS 사용여부',
-                                        name: 'useDarsAt',
-                                        options: [
-                                        { value: 'Y', text: '사용' },
-                                        { value: 'N', text: '미사용' },
-                                        ],
-                                        col: 'col-6',
-                                        useSwitch: true,
-                                    })}
-                                    {renderRadioGroup({
-                                        label: 'callback 사용여부',
-                                        name: 'useCallbackAt',
-                                        options: [
-                                        { value: 'Y', text: '사용' },
-                                        { value: 'N', text: '미사용' },
-                                        ],
-                                        col: 'col-6',
-                                        useSwitch: true,
-                                    })}
+									{RADIO_CONFIGS.map(config => (
+										<React.Fragment key={config.name}>
+											{renderRadioGroup(config)}
+										</React.Fragment>
+									))}
 								</div>
 							</div>
 						</div>

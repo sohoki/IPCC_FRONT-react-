@@ -43,15 +43,15 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
     }, []);
 
     const handleSave = useCallback(async () => {
-        if (!form.alertMessage) { await Swal.fire({ icon: 'warning', text: '?�애 ?�림 ?�?��????�력??주세??' }); return; }
-        if (!form.alertMsgResult) { await Swal.fire({ icon: 'warning', text: '?�애 ?�림 결과값을 ?�력??주세??' }); return; }
-        if (!form.alertSmsMsg) { await Swal.fire({ icon: 'warning', text: '?�애 ?�림 SMS 문자 ?�용???�력??주세??' }); return; }
+        if (!form.alertMessage) { await Swal.fire({ icon: 'warning', text: '장애 알림 메세지를 입력해 주세요.' }); return; }
+        if (!form.alertMsgResult) { await Swal.fire({ icon: 'warning', text: '장애 알림 결과값을 입력해 주세요.' }); return; }
+        if (!form.alertSmsMsg) { await Swal.fire({ icon: 'warning', text: '장애 알림 SMS 문자 내용을 입력해 주세요.' }); return; }
 
-        const action = isEdt ? '?�정' : '?�록';
+        const action = isEdt ? '수정' : '등록';
         const ok = await Swal.fire({
-            icon: 'question', title: `?�애 ?�림 ${action}`,
-            html: `<b>${form.alertMessage}</b> �??? ${action} ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'question', title: `장애 알림 ${action}`,
+            html: `<b>${form.alertMessage}</b>를 ${action} 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -76,13 +76,13 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
+                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다.` });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 도중 문제가 발생했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form, alertSeq, isEdt, onSuccess]);
 
@@ -96,7 +96,7 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">?�애 ?�림 {isEdt ? '?�정' : '?�록'}</h2>
+                                <h2 className="modal-title__title">장애 알림 {isEdt ? '수정' : '등록'}</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>
@@ -105,28 +105,28 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
                                 <div className="row input-box-wrap">
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="alertMessage" className="form-label">?�람�?<span className="text-danger">*</span></label>
+                                            <label htmlFor="alertMessage" className="form-label">알람명 <span className="text-danger">*</span></label>
                                             <input id="alertMessage" name="alertMessage" type="text" className="form-control"
-                                                placeholder="?�람명을 ?�력?�주?�요." value={form.alertMessage} onChange={updateForm} />
+                                                placeholder="알람명을 입력해주세요." value={form.alertMessage} onChange={updateForm} />
                                         </div>
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="alertSmsMsg" className="form-label">?�람 SMS 문자 <span className="text-danger">*</span></label>
+                                            <label htmlFor="alertSmsMsg" className="form-label">알람 SMS 문자 <span className="text-danger">*</span></label>
                                             <input id="alertSmsMsg" name="alertSmsMsg" type="text" className="form-control"
-                                                placeholder="SMS 문자 ?�용???�력?�주?�요." value={form.alertSmsMsg} onChange={updateForm} />
+                                                placeholder="SMS 문자 내용을 입력해주세요." value={form.alertSmsMsg} onChange={updateForm} />
                                         </div>
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="alertMsgResult" className="form-label">?�애 ?�림 ?�치 <span className="text-danger">*</span></label>
+                                            <label htmlFor="alertMsgResult" className="form-label">장애 알림 수치 <span className="text-danger">*</span></label>
                                             <input id="alertMsgResult" name="alertMsgResult" type="text" className="form-control"
-                                                placeholder="?�림 ?�치�??�력?�주?�요." value={form.alertMsgResult} onChange={updateForm} />
+                                                placeholder="알림 수치를 입력해주세요." value={form.alertMsgResult} onChange={updateForm} />
                                         </div>
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">?�영 ?�간</label>
+                                            <label className="form-label">운영 시간</label>
                                             <div className="d-flex gap-2 align-items-center">
                                                 <input name="alertMsgStarttime" type="time" className="form-control"
                                                     value={form.alertMsgStarttime} onChange={updateForm} />
@@ -138,7 +138,7 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">?�외 ?�간</label>
+                                            <label className="form-label">예외 시간</label>
                                             <div className="d-flex gap-2 align-items-center">
                                                 <input name="alertMsgExceptionStarttime" type="time" className="form-control"
                                                     value={form.alertMsgExceptionStarttime} onChange={updateForm} />
@@ -150,14 +150,14 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">?�용 ?�무</label>
+                                            <label className="form-label">사용 여부</label>
                                             <div style={{ height: 38, display: 'flex', alignItems: 'center' }}>
                                                 <UseSwitch
                                                     value={form.alertMsgUseyn}
                                                     name="alertMsgUseyn"
                                                     onChange={(payload) => setForm(prev => ({ ...prev, alertMsgUseyn: payload.alertMsgUseyn }))}
-                                                    onText="?�용"
-                                                    offText="?�용 ?�함"
+                                                    onText="사용"
+                                                    offText="사용 안함"
                                                 />
                                             </div>
                                         </div>
@@ -169,7 +169,7 @@ const AlertFormModal = ({ open, onClose, alertSeq, rowData, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
                             </div>
                         </div>
                     </div>
