@@ -47,7 +47,7 @@ const BuildInfo = () => {
 
     const { options: insttOptions } = useCustomReqDataCombo({
         url: URL.INSTT_COMBO,
-        method: 'GET',
+        method: 'POST',
         mapping: { id: 'insttCode', text: 'allInsttNm' },
     });
 

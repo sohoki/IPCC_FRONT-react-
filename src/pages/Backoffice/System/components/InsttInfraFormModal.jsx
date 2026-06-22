@@ -195,12 +195,12 @@ const InsttInfraFormModal = ({
                     <div
                         className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
                         style={{
-                            width: '90vw',           // ✅ 뷰포트 기준
-                            maxWidth: '90vw',       // ✅ maxWidth도 vw로
-                            marginLeft: 'auto',     // ✅ 중앙 정렬
+                            width: '90vw',
+                            maxWidth: '90vw',
+                            marginLeft: 'auto',
                             maxHeight: '80vh',
                             marginRight: 'auto',
-                            background: '#fff',
+                            backgroundColor: 'var(--bs-body-bg, #fff)',
                         }}
                     >
                         <div className="modal-content">
@@ -230,18 +230,18 @@ const InsttInfraFormModal = ({
                                         <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                                             <table
                                                 className="content-table__sub"
-                                                style={{ width: '100%',  background: '#fff', minWidth: totalWidth, tableLayout: 'fixed', borderCollapse: 'collapse' }}
+                                                style={{ width: '100%', minWidth: totalWidth, tableLayout: 'fixed', borderCollapse: 'collapse', color: 'inherit' }}
                                             >
                                                 <TheadRow />
                                                 <tbody>
                                                     {infraData.map((r, i) => {
                                                         return (
-                                                            <tr key={i} style={{ backgroundColor: 'transparent' }}>
-                                                                <td>{r.stationMeno}</td>
-                                                                <td colSpan={2}>{r.stationStartNumber}~{r.stationEndNumber}</td>
-                                                                <td colSpan={2}>{r.agentStartNumber}~{r.agentEndNumber}</td>
-                                                                <td colSpan={2}>{r.ctiStartNumber}~{r.ctiEndNumber}</td>
-                                                                <td colSpan={2}>{r.ipStart}~{r.ipEnd}</td>
+                                                            <tr key={i}>
+                                                                <td style={{ color: 'inherit' }}>{r.stationMeno}</td>
+                                                                <td colSpan={2} style={{ color: 'inherit' }}>{r.stationStartNumber}~{r.stationEndNumber}</td>
+                                                                <td colSpan={2} style={{ color: 'inherit' }}>{r.agentStartNumber}~{r.agentEndNumber}</td>
+                                                                <td colSpan={2} style={{ color: 'inherit' }}>{r.ctiStartNumber}~{r.ctiEndNumber}</td>
+                                                                <td colSpan={2} style={{ color: 'inherit' }}>{r.ipStart}~{r.ipEnd}</td>
                                                                 <td>
                                                                     <button className="btn btn-sm btn-primary" onClick={() => handleModify({ mode: "Ins", data: r })}>
                                                                         수정

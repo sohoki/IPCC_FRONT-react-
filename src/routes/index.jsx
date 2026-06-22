@@ -35,10 +35,11 @@ const VendorInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorInfo.jsx')
 const VenderDetailInfo = lazy(() => import('@/pages/Backoffice/Vendor/VendorDetailInfo.jsx'));
 //infra 관리 넣기
 const PbxInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxInfo.jsx'));
-const PbxAgentInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxAgentInfo.jsx'));
 const PbxSmsModelInfo = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxSmsModelInfo.jsx'));
 const IvrConfigInfo = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/IvrConfigInfo.jsx'));
 const BuildInfo = lazy(() => import('@/pages/Backoffice/Infra/bld/BuildInfo.jsx'));
+const PbxIpList = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/PbxIpList.jsx'));
+const CtiDnInfo = lazy(() => import('@/pages/Backoffice/Infra/call/cti/CtiDnInfo.jsx'));
 
 //상담사 관리
 const AlertMessageInfo = lazy(() => import('@/pages/Backoffice/Manager/Message/AlertMessageInfo.jsx'));
@@ -91,6 +92,9 @@ export default function RouterConfig() {
                         { /* infra 리스트*/}
                         <Route path="/sub/infra/call/ivrinfo" element={<IvrConfigInfo />} />
                         <Route path="/sub/manager/msg/alertMsgInfo" element={<AlertMessageInfo />} />
+                        <Route path="/sub/infra/call/pbxinfo" element={<PbxInfo />} />
+                        <Route path="/sub/infra/call/pbxipinfo" element={<PbxIpList />} />
+                        <Route path="/sub/infra/call/ctidninfo" element={<CtiDnInfo />} />
 
                     </Route>   
                     {/* 인증이 필요 없는 라우트 */}

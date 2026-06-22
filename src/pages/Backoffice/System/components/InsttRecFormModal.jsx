@@ -52,7 +52,7 @@ const InsttRecFormModal = ({
                 <div className="modal-custom">
                     <div
                         className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                        style={{ width: 560, maxWidth: '90%', backgroundColor: '#fff' }}
+                        style={{ width: 560, maxWidth: '90%', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                     >
                         <div className="modal-content">
                             <div className="modal-header">
@@ -73,14 +73,14 @@ const InsttRecFormModal = ({
                                                 alignItems: 'center',
                                                 justifyContent: 'space-between',
                                                 padding: '14px 20px',
-                                                borderBottom: i < SETTINGS.length - 1 ? '1px solid #f3f4f6' : 'none',
+                                                borderBottom: i < SETTINGS.length - 1 ? '1px solid rgba(128,128,128,0.2)' : 'none',
                                             }}
                                         >
                                             <div>
-                                                <div style={{ fontSize: '14px', fontWeight: '600', color: '#111827', marginBottom: '3px' }}>
+                                                <div style={{ fontSize: '14px', fontWeight: '600', color: 'inherit', marginBottom: '3px' }}>
                                                     {s.label}
                                                 </div>
-                                                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                                                <div style={{ fontSize: '12px', color: 'inherit', opacity: 0.6 }}>
                                                     {s.desc}
                                                 </div>
                                             </div>
@@ -94,14 +94,14 @@ const InsttRecFormModal = ({
                                         </div>
                                     ))}
                                     {form.smryYn === 'Y' && (
-                                        <div style={{ padding: '14px 20px', borderTop: '1px solid #f3f4f6', background: '#f9fafb' }}>
+                                        <div style={{ padding: '14px 20px', borderTop: '1px solid rgba(128,128,128,0.2)', background: 'rgba(128,128,128,0.05)' }}>
                                             <label
                                                 htmlFor="longCallTime"
-                                                style={{ fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px', display: 'block' }}
+                                                style={{ fontSize: '13px', fontWeight: '600', color: 'inherit', marginBottom: '8px', display: 'block' }}
                                             >
                                                 긴 통화 시간 허용
                                                 <span style={{ color: '#ef4444', marginLeft: '2px' }}>*</span>
-                                                <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '400', marginLeft: '6px' }}>분(min) 단위</span>
+                                                <span style={{ fontSize: '12px', color: 'inherit', opacity: 0.5, fontWeight: '400', marginLeft: '6px' }}>분(min) 단위</span>
                                             </label>
                                             <input
                                                 type="number"

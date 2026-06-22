@@ -185,6 +185,7 @@ const CtiLoginInfo = () => {
             </div>
 
             <CtiLoginFormModal
+                key={formModalOpen ? 'open' : 'closed'}
                 open={formModalOpen}
                 onClose={() => setFormModalOpen(false)}
                 onSuccess={() => { setFormModalOpen(false); onSearch(1); }}

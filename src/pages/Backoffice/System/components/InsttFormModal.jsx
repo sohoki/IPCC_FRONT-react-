@@ -18,12 +18,8 @@ const InsttFormModal = ({
     }, [form.insttCode, setForm, handleIdCheck]);
 
     const updateForm = useCallback((payload) => {
-        // 🔥 중요: 'prev'를 사용하여 기존의 모든 필드(아이디, 이름 등)를 유지함
-        setForm((prev) => ({
-            ...prev,    // 기존 값 복사
-            ...payload  // 변경된 값(전화번호 등)만 덮어쓰기
-        }));
-    }, []); // 참조 고정
+        setForm((prev) => ({ ...prev, ...payload }));
+    }, [setForm]);
     const { handleTelChange } = usePhoneInput(updateForm);
     const { handleFaxChange } = usePhoneInput(updateForm);
 
@@ -34,7 +30,7 @@ const InsttFormModal = ({
                 <div className="modal-custom">
                     <div
                         className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                        style={{ width: 800, maxWidth: '55%', backgroundColor: '#fff' }}
+                        style={{ width: 800, maxWidth: '55%', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                     >
                         <div className="modal-content">
                             <div className="modal-header">

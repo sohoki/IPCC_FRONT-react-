@@ -6,8 +6,8 @@ import URL from '@/constants/URL.jsx';
 const EMPTY_PART_FORM = { employeepartId: '', employeepartName: '', monitorFlag: '', idCheck: 'N' };
 
 /**
- * CTI ?�트 ?�황 + ?�트 ?�록/?�정 ?�합 모달.
- * view ?�태: 'list' | 'form'
+ * CTI 파트 현황 + 파트 등록/수정 통합 모달.
+ * view 상태: 'list' | 'form'
  *
  * Props: open, onClose, employeegrpId, tenantId, centerId
  */
@@ -32,9 +32,20 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
     }, [employeegrpId, tenantId, centerId]);
 
     useEffect(() => {
-        if (!open) { setView('list'); return; }
-        loadParts();
-    }, [open, loadParts]);
+        if (!open || !employeegrpId || !tenantId) return;
+        let active = true;
+        fnAjaxFetch({
+            url: URL.CTI_PART_LIST,
+            method: 'POST',
+            data: { centerId: centerId || '1', pageUnit: '50', pageIndex: '1', tenantId, employeegrpId },
+            withCredentials: true,
+        }).then(res => {
+            if (!active) return;
+            const json = res?.data;
+            setPartRows(json?.resultList || json?.result?.resultList || []);
+        }).catch(() => { if (active) setPartRows([]); });
+        return () => { active = false; setView('list'); };
+    }, [open, employeegrpId, tenantId, centerId]);
 
     const openAddForm = useCallback(() => {
         setPartForm(EMPTY_PART_FORM);
@@ -59,7 +70,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
 
     const handlePartIdCheck = useCallback(async () => {
         if (!partForm.employeepartId) {
-            await Swal.fire({ icon: 'warning', text: 'Part Id�??�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: 'Part Id를 입력해 주세요' });
             return;
         }
         try {
@@ -72,26 +83,26 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS') {
                 setPartForm(prev => ({ ...prev, idCheck: 'Y' }));
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?�용 가?�합?�다.' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
                 setPartForm(prev => ({ ...prev, idCheck: 'N' }));
-                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?��? ?�용 중입?�다.' });
+                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '이미 사용 중입니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [partForm.employeepartId, employeegrpId, tenantId, centerId]);
 
     const handleSavePart = useCallback(async () => {
-        if (!partForm.employeepartId) { await Swal.fire({ icon: 'warning', text: 'Part ID�??�력?�주?�요.' }); return; }
-        if (!partForm.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시�??�택??주세??' }); return; }
-        if (partMode === 'Ins' && partForm.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크�??�주?�요.' }); return; }
+        if (!partForm.employeepartId) { await Swal.fire({ icon: 'warning', text: 'Part ID를 입력해주세요.' }); return; }
+        if (!partForm.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시를 선택해 주세요' }); return; }
+        if (partMode === 'Ins' && partForm.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
 
-        const action = partMode === 'Ins' ? '?�록' : '?�정';
+        const action = partMode === 'Ins' ? '등록' : '수정';
         const ok = await Swal.fire({
             icon: 'question', title: `Part ${action}`,
-            html: `Part ?�보�?<b>${action}</b> ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            html: `Part 정보를 <b>${action}</b> 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -113,22 +124,22 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
+                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
                 setView('list');
                 loadParts();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [partForm, partMode, employeegrpId, tenantId, centerId, loadParts]);
 
     const handleDeletePart = useCallback(async (employeepartId) => {
         const ok = await Swal.fire({
-            icon: 'question', title: 'Part ??��',
-            html: `<b>${employeepartId}</b> �??? ??�� ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'question', title: 'Part 삭제',
+            html: `<b>${employeepartId}</b> 를(을) 삭제 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -142,13 +153,13 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??��?�었?�니??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '삭제되었습니다' });
                 loadParts();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??��???�패?�습?�다.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '삭제에 실패했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [employeegrpId, tenantId, centerId, loadParts]);
 
@@ -158,26 +169,26 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         <>
             <div className="modal-header">
                 <div className="modal-title">
-                    <h2 className="modal-title__title">CTI ?�트 ?�황 ??{employeegrpId}</h2>
+                    <h2 className="modal-title__title">CTI 파트 현황 — {employeegrpId}</h2>
                 </div>
                 <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
             </div>
             <div className="modal-body">
                 <div className="modal-body__content">
                     <div style={{ overflowX: 'auto' }}>
-                        <table className="content-table__sub" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}>
+                        <table className="content-table__sub" style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', color: 'inherit' }}>
                             <thead>
                                 <tr>
-                                    <th>?�트ID</th>
-                                    <th>?�트�?/th>
-                                    <th>모니?�링?��?</th>
-                                    <th style={{ width: 120 }}>?�정 / ??��</th>
+                                    <th>파트ID</th>
+                                    <th>파트명</th>
+                                    <th>모니터링여부</th>
+                                    <th style={{ width: 120 }}>수정 / 삭제</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {partRows.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="text-center text-muted py-3">?�록???�트가 ?�습?�다.</td>
+                                        <td colSpan={4} className="text-center text-muted py-3">등록된 파트가 없습니다.</td>
                                     </tr>
                                 ) : partRows.map(row => (
                                     <tr key={row.employeepartId}>
@@ -185,8 +196,8 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                                         <td>{row.employeepartName}</td>
                                         <td>{row.monitorFlag}</td>
                                         <td>
-                                            <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => openEditForm(row)}>?�정</button>
-                                            <button className="btn btn-sm btn-danger" onClick={() => handleDeletePart(row.employeepartId)}>??��</button>
+                                            <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => openEditForm(row)}>수정</button>
+                                            <button className="btn btn-sm btn-danger" onClick={() => handleDeletePart(row.employeepartId)}>삭제</button>
                                         </td>
                                     </tr>
                                 ))}
@@ -197,10 +208,10 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
             </div>
             <div className="modal-footer">
                 <div className="modal-footer__left">
-                    <button type="button" className="btn btn-primary" onClick={openAddForm}>?�트?�록</button>
+                    <button type="button" className="btn btn-primary" onClick={openAddForm}>파트등록</button>
                 </div>
                 <div className="modal-footer__right">
-                    <button type="button" className="btn btn-action__lightblue" onClick={onClose}>?�기</button>
+                    <button type="button" className="btn btn-action__lightblue" onClick={onClose}>닫기</button>
                 </div>
             </div>
         </>
@@ -208,7 +219,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         <>
             <div className="modal-header">
                 <div className="modal-title">
-                    <h2 className="modal-title__title">Part {partMode === 'Ins' ? '?�록' : '?�정'}</h2>
+                    <h2 className="modal-title__title">Part {partMode === 'Ins' ? '등록' : '수정'}</h2>
                 </div>
                 <button type="button" className="modal-close" aria-label="Close" onClick={handleCancelForm} />
             </div>
@@ -227,7 +238,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                                         <input
                                             id="employeepartId"
                                             type="text" className="form-control"
-                                            placeholder="?�자 최�? 10?�리" maxLength={10}
+                                            placeholder="숫자 최대 10자리" maxLength={10}
                                             value={partForm.employeepartId}
                                             onChange={(e) => {
                                                 const v = e.target.value.replace(/[^0-9]/g, '');
@@ -235,7 +246,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                                             }}
                                         />
                                         <button type="button" className="btn btn-primary btn-default__blue" onClick={handlePartIdCheck}>
-                                            중복?�인
+                                            중복확인
                                         </button>
                                     </div>
                                 )}
@@ -243,11 +254,11 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                         </div>
                         <div className="col-6">
                             <div className="input-box">
-                                <label htmlFor="employeepartName" className="form-label">Part �?/label>
+                                <label htmlFor="employeepartName" className="form-label">Part 명</label>
                                 <input
                                     id="employeepartName"
                                     type="text" className="form-control"
-                                    placeholder="?�트명을 ?�력?�주?�요."
+                                    placeholder="파트명을 입력해주세요."
                                     value={partForm.employeepartName}
                                     onChange={(e) => setPartForm(prev => ({ ...prev, employeepartName: e.target.value }))}
                                 />
@@ -262,9 +273,9 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                                     value={partForm.monitorFlag}
                                     onChange={(e) => setPartForm(prev => ({ ...prev, monitorFlag: e.target.value }))}
                                 >
-                                    <option value="">?�음</option>
+                                    <option value="">없음</option>
                                     <option value="1">감시</option>
-                                    <option value="0">감시?�함</option>
+                                    <option value="0">감시안함</option>
                                 </select>
                             </div>
                         </div>
@@ -276,7 +287,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                 <div className="modal-footer__right">
                     <button type="button" className="btn btn-action__lightblue" onClick={handleCancelForm}>취소</button>
                     <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSavePart}>
-                        {partMode === 'Ins' ? '?�록' : '?�정'}
+                        {partMode === 'Ins' ? '등록' : '수정'}
                     </button>
                 </div>
             </div>
@@ -287,7 +298,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         <div className="modal-backdrop-custom" style={{ zIndex: 1060 }}>
             <div className="modal-custom" style={{ zIndex: 1061, marginLeft: 0 }}>
                 <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: 680, maxWidth: '90%', marginLeft: 'auto', marginRight: 'auto', backgroundColor: '#fff' }}
+                    style={{ width: 680, maxWidth: '90%', marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                 >
                     <div className="modal-content">
                         {modalContent}

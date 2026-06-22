@@ -18,28 +18,22 @@ const EMPTY_FORM = {
 
 const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) => {
     const isEdt = notiSeq !== null && notiSeq !== undefined;
-    const [form, setForm] = useState(EMPTY_FORM);
+    const [form, setForm] = useState(
+        isEdt && rowData
+            ? {
+                notiSeq: String(rowData.notiSeq || ''),
+                smsModel: rowData.smsModel || '',
+                smsFields: '',
+                smsName: rowData.smsName || '',
+                smsFieldsDc: '',
+                smsOperation: rowData.smsOperation || '',
+                smsGubun: rowData.smsGubun || '',
+                smsUseyn: rowData.smsUseyn || 'Y',
+              }
+            : EMPTY_FORM
+    );
 
     const { options: smsGubunOptions } = useCommonCodeData('AUTH_GUBUN');
-
-    // 기본 ?�드??rowData?�서, smsFields/smsFieldsDc???�세 API?�서 로드
-    useEffect(() => {
-        if (!open) return;
-        if (!isEdt || !rowData) {
-            setForm(EMPTY_FORM);
-            return;
-        }
-        setForm({
-            notiSeq: String(rowData.notiSeq || ''),
-            smsModel: rowData.smsModel || '',
-            smsFields: '',
-            smsName: rowData.smsName || '',
-            smsFieldsDc: '',
-            smsOperation: rowData.smsOperation || '',
-            smsGubun: rowData.smsGubun || '',
-            smsUseyn: rowData.smsUseyn || 'Y',
-        });
-    }, [open, isEdt, rowData]);
 
     useEffect(() => {
         if (!open || !isEdt || !notiSeq) return;
@@ -67,21 +61,21 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
 
     const handleSave = useCallback(async () => {
         if (!form.smsModel) {
-            await Swal.fire({ icon: 'warning', text: 'SMS MODEL???�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: 'SMS MODEL을 입력해 주세요' });
             return;
         }
         if (!form.smsFields) {
-            await Swal.fire({ icon: 'warning', text: 'SMS MODEL FIELD�??�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: 'SMS MODEL FIELD를 입력해 주세요' });
             return;
         }
-        const action = isEdt ? '?�정' : '?�록';
+        const action = isEdt ? '수정' : '등록';
         const ok = await Swal.fire({
             icon: 'question',
             title: `SMS Model ${action}`,
-            html: `SMS Model??<b>${action}</b> ?�시겠습?�까?`,
+            html: `SMS Model을 <b>${action}</b> 하시겠습니까?`,
             showCancelButton: true,
-            confirmButtonText: '??,
-            cancelButtonText: '?�니??,
+            confirmButtonText: '예',
+            cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -105,13 +99,13 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
+                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form, isEdt, onSuccess]);
 
@@ -121,13 +115,13 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
             <div className="modal-custom">
                 <div
                     className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: 680, maxWidth: '95%', backgroundColor: '#fff' }}
+                    style={{ width: 680, maxWidth: '95%', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                 >
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
                                 <h2 className="modal-title__title">
-                                    SMS MODEL {isEdt ? '?�정' : '?�록'}
+                                    SMS MODEL {isEdt ? '수정' : '등록'}
                                 </h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
@@ -144,7 +138,7 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
                                             <input
                                                 id="smsModel" name="smsModel"
                                                 type="text" className="form-control"
-                                                placeholder="SMS MODEL???�력?�주?�요."
+                                                placeholder="SMS MODEL을 입력해주세요."
                                                 value={form.smsModel}
                                                 onChange={updateForm}
                                             />
@@ -160,47 +154,47 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
                                                 id="smsFields" name="smsFields"
                                                 className="form-control"
                                                 rows={4}
-                                                placeholder="SMS FIELD�??�력?�주?�요."
+                                                placeholder="SMS FIELD를 입력해주세요."
                                                 value={form.smsFields}
                                                 onChange={updateForm}
                                             />
                                         </div>
                                     </div>
-                                    {/* ?�명?��? */}
+                                    {/* 명칭 */}
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="smsName" className="form-label">?�명?��?</label>
+                                            <label htmlFor="smsName" className="form-label">명칭</label>
                                             <input
                                                 id="smsName" name="smsName"
                                                 type="text" className="form-control"
-                                                placeholder="?�명???�력?�주?�요."
+                                                placeholder="명칭을 입력해주세요."
                                                 value={form.smsName}
                                                 onChange={updateForm}
                                             />
                                         </div>
                                     </div>
-                                    {/* SMS FIELD ?�명?��? */}
+                                    {/* SMS FIELD 명칭 */}
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="smsFieldsDc" className="form-label">SMS FIELD ?�명?��?</label>
+                                            <label htmlFor="smsFieldsDc" className="form-label">SMS FIELD 명칭</label>
                                             <textarea
                                                 id="smsFieldsDc" name="smsFieldsDc"
                                                 className="form-control"
                                                 rows={4}
-                                                placeholder="SMS FIELD ?�명???�력?�주?�요."
+                                                placeholder="SMS FIELD 명칭을 입력해주세요."
                                                 value={form.smsFieldsDc}
                                                 onChange={updateForm}
                                             />
                                         </div>
                                     </div>
-                                    {/* SMS ?�영 지??*/}
+                                    {/* SMS 운영 지원 */}
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="smsOperation" className="form-label">SMS ?�영 지??/label>
+                                            <label htmlFor="smsOperation" className="form-label">SMS 운영 지원</label>
                                             <input
                                                 id="smsOperation" name="smsOperation"
                                                 type="text" className="form-control"
-                                                placeholder="SMS ?�영 지???�보�??�력?�주?�요."
+                                                placeholder="SMS 운영 지원 정보를 입력해주세요."
                                                 value={form.smsOperation}
                                                 onChange={updateForm}
                                             />
@@ -216,24 +210,24 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
                                                 value={form.smsGubun}
                                                 onChange={updateForm}
                                             >
-                                                <option value="">?�택</option>
+                                                <option value="">선택</option>
                                                 {smsGubunOptions.map(o => (
                                                     <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                 ))}
                                             </select>
                                         </div>
                                     </div>
-                                    {/* ?�용 ?�무 */}
+                                    {/* 사용 여부 */}
                                     <div className="col-6">
                                         <div className="input-box">
-                                            <label className="form-label">?�용 ?�무</label>
+                                            <label className="form-label">사용 여부</label>
                                             <div style={{ height: 38, display: 'flex', alignItems: 'center' }}>
                                                 <UseSwitch
                                                     value={form.smsUseyn}
                                                     name="smsUseyn"
                                                     onChange={(payload) => setForm(prev => ({ ...prev, smsUseyn: payload.smsUseyn }))}
-                                                    onText="?�용"
-                                                    offText="?�용 ?�함"
+                                                    onText="사용"
+                                                    offText="사용 안함"
                                                 />
                                             </div>
                                         </div>
@@ -245,7 +239,7 @@ const PbxSmsModelFormModal = ({ open, onClose, notiSeq, rowData, onSuccess }) =>
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
                             </div>
                         </div>
                     </div>

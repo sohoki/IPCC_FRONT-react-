@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useCallback, lazy } from 'react';
+﻿import React, { useState, useMemo, useCallback, useEffect, lazy } from 'react';
 import IosSwitch from '@/components/Common/IosSwitch.jsx';
 import Swal from '@/lib/swal.js';
 import { useGridInfinite } from '@/hooks/grid/use-grid-infinite.js';
@@ -7,7 +7,6 @@ import { useResetForm } from '@/hooks/use-form.jsx';
 import URL from '@/constants/URL.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
-import { useCustomReqDataCombo } from '@/hooks/use-combo-data.js';
 import { CommonSelect } from '@/components/Common/Select.jsx';
 
 const IvrFormModal = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/components/IvrFormModal.jsx'));
@@ -16,6 +15,7 @@ const IvrWorkModal = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/compon
 const IvrCallbackModal = lazy(() => import('@/pages/Backoffice/Infra/call/ivr/components/IvrCallbackModal.jsx'));
 
 const INITIAL_SEARCH_FORM = {
+    searchInsttCode: '',
     searchCondition: '',
     searchKeyword: '',
 };
@@ -38,8 +38,22 @@ const IvrConfigInfo = () => {
     const [callbackKey, setCallbackKey] = useState(0);
     const [formKey, setFormKey] = useState(0);
     const [mentModal, setMentModal] = useState(null);
+    const [insttOptions, setInsttOptions] = useState(null);
 
-
+    useEffect(() => {
+        fnAjaxFetch({
+            url: `${URL.IVR_INSTT_COMBO}/IVR_INSTT.do`,
+            method: 'GET',
+            withCredentials: true,
+        }).then(res => {
+            const list = res?.data?.result.result || res?.data || [];
+            setInsttOptions(
+                Array.isArray(list)
+                    ? list.map(o => ({ code: o.codeDc || '', codeNm: o.codeNm || '' }))
+                    : []
+            );
+        }).catch(() => setInsttOptions([]));
+    }, []);
    
 
     const fetchData = async (query) => {
@@ -320,10 +334,10 @@ const IvrConfigInfo = () => {
         },
         { headerName: '멘트시작일', field: 'notiSday', width: 110 },
         { headerName: '멘트종료일', field: 'notiEday', width: 110 },
-        { headerName: '비고', field: 'ivrMeno', flex: 1 },
-        { headerName: '최종 수정일', field: 'createDate', width: 130 },
+        { headerName: '최종전송일', field: 'ivrSendDate', width: 130  },
+        { headerName: '결과', field: 'ivrSendResult', flex: 1 },
         {
-            headerName: '휴일관리', width: 90, sortable: false, filter: false,
+            headerName: '휴일관리', width: 110, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={() => { setHolyIvrCode(p.data?.ivrCode); setHolyModalOpen(true); }}
@@ -331,7 +345,7 @@ const IvrConfigInfo = () => {
             ),
         },
         {
-            headerName: '업무시간', width: 90, sortable: false, filter: false,
+            headerName: '업무시간', width: 110, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-sm"
                     onClick={() => { setWorkIvrCode(p.data?.ivrCode); setWorkModalOpen(true); }}
@@ -339,7 +353,7 @@ const IvrConfigInfo = () => {
             ),
         },
         {
-            headerName: '수정', width: 70, sortable: false, filter: false,
+            headerName: '수정', width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => handleOpenFormModal(p.data)}
@@ -347,7 +361,7 @@ const IvrConfigInfo = () => {
             ),
         },
         {
-            headerName: '전송', width: 70, sortable: false, filter: false,
+            headerName: '전송', width: 80, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-primary btn-sm"
                     onClick={() => handleSend(p.data?.ivrCode)}
@@ -380,12 +394,12 @@ const IvrConfigInfo = () => {
                     <div className="col-auto content-search__option d-flex gap-2 align-items-center flex-wrap">
                         <CommonSelect
                             comboId="searchInsttCode"
-                            comboData={insttOptions || []}
+                            comboData={insttOptions ?? []}
                             value={tempParams.searchInsttCode || ''}
                             onChange={(e) => {
                                 handleInputChange(e);
                             }}
-                            placeholder={isLoadingInstt ? '로딩 중...' : '기관을 선택하세요'}
+                            placeholder={insttOptions === null ? '로딩 중...' : '기관을 선택하세요'}
                             style={{ height: 32, fontSize: 15 }}
                         />
                         <select
@@ -458,6 +472,7 @@ const IvrConfigInfo = () => {
                 onClose={() => setFormModalOpen(false)}
                 ivrCode={selectedIvrCode}
                 rowData={selectedRowData}
+                insttOptions={insttOptions ?? []}
                 onSuccess={() => { setFormModalOpen(false); onSearch(1); }}
             />
             <IvrHolyModal

@@ -28,10 +28,10 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                 setRows(agents);
                 setCheckedIds(new Set());
             } else {
-                await Swal.fire({ icon: 'warning', title: '조회', text: json?.MESSAGE || '조회???�패?�습?�다.' });
+                await Swal.fire({ icon: 'warning', title: '조회', text: json?.MESSAGE || '조회에 실패했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [txtExt, txtCount]);
 
@@ -55,16 +55,16 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
 
     const handleSave = useCallback(async () => {
         if (checkedIds.size === 0) {
-            await Swal.fire({ icon: 'warning', text: '?�담??LoginId�??�택??주세??' });
+            await Swal.fire({ icon: 'warning', text: '담당 LoginId를 선택해 주세요' });
             return;
         }
         const ok = await Swal.fire({
             icon: 'question',
-            title: '?�담??LoginId',
-            text: '?�록 ?�시겠습?�까?',
+            title: '담당 LoginId',
+            text: '등록 하시겠습니까?',
             showCancelButton: true,
-            confirmButtonText: '??,
-            cancelButtonText: '?�니??,
+            confirmButtonText: '예',
+            cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -78,13 +78,13 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: '?�록', text: json?.MESSAGE || '?�록?�었?�니??' });
+                await Swal.fire({ icon: 'success', title: '등록', text: json?.MESSAGE || '등록되었습니다' });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', title: '?�류', text: json?.MESSAGE || '?�록???�패?�습?�다.' });
+                await Swal.fire({ icon: 'error', title: '오류', text: json?.MESSAGE || '등록에 실패했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [checkedIds, onSuccess]);
 
@@ -94,12 +94,12 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
             <div className="modal-custom" style={{ zIndex: 1056, marginLeft: 0 }}>
                 <div
                     className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: '80vw', maxWidth: '80vw', marginLeft: 'auto', marginRight: 'auto', backgroundColor: '#fff' }}
+                    style={{ width: '80vw', maxWidth: '80vw', marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                 >
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">?�이?�트 ?�황</h2>
+                                <h2 className="modal-title__title">에이전트 현황</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>
@@ -110,12 +110,12 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                                         type="text"
                                         className="form-control form-control-sm"
                                         style={{ width: 120 }}
-                                        placeholder="?�작 번호"
+                                        placeholder="시작 번호"
                                         value={txtExt}
                                         onChange={e => setTxtExt(e.target.value)}
                                         onKeyDown={handleSearchKeyDown}
                                     />
-                                    <span>부??/span>
+                                    <span>부터</span>
                                     <input
                                         type="text"
                                         className="form-control form-control-sm"
@@ -125,9 +125,10 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                                         onChange={e => setTxtCount(e.target.value)}
                                         onKeyDown={handleSearchKeyDown}
                                     />
-                                    <span>까�?</span>
+                                    <span>까지</span>
                                     <button type="button" className="btn btn-sm btn-primary" onClick={handleSearch}>
-                                        검??                                    </button>
+                                        검색
+                                    </button>
                                 </div>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table
@@ -143,8 +144,8 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                                                         onChange={e => toggleAll(e.target.checked)}
                                                     />
                                                 </th>
-                                                <th>?�이?�트번호</th>
-                                                <th>?�름</th>
+                                                <th>에이전트번호</th>
+                                                <th>이름</th>
                                                 <th>AAS</th>
                                                 <th>AUDIX</th>
                                                 <th>COR</th>
@@ -154,7 +155,7 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                                             {rows.length === 0 ? (
                                                 <tr>
                                                     <td colSpan={6} className="text-center text-muted py-3">
-                                                        검??조건???�력?�고 검??버튼???�릭?�세??
+                                                        검색 조건을 입력하고 검색 버튼을 클릭하세요
                                                     </td>
                                                 </tr>
                                             ) : rows.map((row, idx) => (
@@ -181,8 +182,8 @@ const PbxAgentPbxSearchModal = ({ open, onClose, onSuccess }) => {
                         <div className="modal-footer">
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
-                                <button type="button" className="btn btn-action__lightblue" onClick={onClose}>?�기</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�록</button>
+                                <button type="button" className="btn btn-action__lightblue" onClick={onClose}>닫기</button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>등록</button>
                             </div>
                         </div>
                     </div>

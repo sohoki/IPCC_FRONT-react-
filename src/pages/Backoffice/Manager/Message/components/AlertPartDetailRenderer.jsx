@@ -29,6 +29,14 @@ const AlertPartDetailRenderer = (props) => {
 		loadData();
 	}, [loadData]);
 
+	// 부모(AlertMessageInfo)가 refreshPartForAlert 호출 시 loadData 실행
+	useEffect(() => {
+		const alertSeq = data?.alertSeq;
+		if (!alertSeq || !context) return;
+		context.registerRefresh?.(alertSeq, loadData);
+		return () => context.unregisterRefresh?.(alertSeq);
+	}, [context, data?.alertSeq, loadData]);
+
 	const { handleDelete } = useCommonDelete({
 		URL: URL.ALERT_PART,
 		MESSAGE: '부서',

@@ -1,10 +1,18 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import { useCommonCodeData } from '@/hooks/use-combo-data.js';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
+import { useCommonDelete } from '@/hooks/use-common-delete.js';
 import URL from '@/constants/URL.jsx';
 
-const EMPTY_ADD = { ivrTimeGubun: '', ivrStartTime: '', ivrEndTime: '' };
+const EMPTY_ADD = { mode: 'Ins', ivrTimeGubun: '', ivrStartTime: '', ivrEndTime: '' };
+
+const CHECK_FIELDS = [
+	{ inputId: 'workTimeGubun', label: '요일',     type: 'select' },
+	{ inputId: 'workStartTime', label: '시작시간', type: 'text' },
+	{ inputId: 'workEndTime',   label: '종료시간', type: 'text' },
+];
 
 const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 	const [workRows, setWorkRows] = useState([]);
@@ -12,7 +20,6 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 
 	const { options: timeGubunOptions } = useCommonCodeData('IVR_WEEKGUBUN');
 
-	// 이벤트 핸들러(등록·삭제 후 재조회)용 함수
 	const loadList = useCallback(async () => {
 		if (!ivrCode) return;
 		try {
@@ -23,13 +30,12 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 				withCredentials: true,
 			});
 			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS') setWorkRows(json.resultList || []);
+			if (json?.resultCodeInfo === 'SUCCESS') setWorkRows(json.result?.resultList || []);
 		} catch (e) {
 			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
 		}
 	}, [ivrCode]);
 
-	// 모달 오픈 시 최초 조회 — fnAjaxFetch 직접 호출로 setState-in-effect 진단 방지
 	useEffect(() => {
 		if (!open || !ivrCode) return;
 		fnAjaxFetch({
@@ -39,67 +45,31 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 			withCredentials: true,
 		}).then(res => {
 			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS') setWorkRows(json.resultList || []);
+			if (json?.resultCodeInfo === 'SUCCESS') setWorkRows(json.result?.resultList || []);
 		}).catch(() => {});
 	}, [open, ivrCode]);
 
-	const handleAdd = useCallback(async () => {
-		if (!addRow.ivrTimeGubun) {
-			await Swal.fire({ icon: 'warning', text: '요일을 선택해주세요' });
-			return;
-		}
-		if (!addRow.ivrStartTime) {
-			await Swal.fire({ icon: 'warning', text: '시작시간을 입력해주세요' });
-			return;
-		}
-		if (!addRow.ivrEndTime) {
-			await Swal.fire({ icon: 'warning', text: '종료시간을 입력해주세요' });
-			return;
-		}
-		try {
-			const res = await fnAjaxFetch({
-				url: URL.IVR_WORK_UPDATE,
-				method: 'POST',
-				data: {
-					mode: 'Ins',
-					ivrCode,
-					ivrTimeGubun: addRow.ivrTimeGubun,
-					ivrStartTime: addRow.ivrStartTime,
-					ivrEndTime: addRow.ivrEndTime,
-				},
-				withCredentials: true,
-			});
-			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || '저장되었습니다' });
-				setAddRow(EMPTY_ADD);
-				loadList();
-			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || '저장에 실패했습니다' });
-			}
-		} catch (e) {
-			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
-		}
-	}, [addRow, ivrCode, loadList]);
+	// ivrCode를 form에 합산해서 submit 훅에 전달
+	const submitForm = useMemo(() => ({ ...addRow, ivrCode }), [addRow, ivrCode]);
 
-	const handleDelete = useCallback(async (seq) => {
-		try {
-			const res = await fnAjaxFetch({
-				url: `${URL.IVR_WORK_DELETE}/${encodeURIComponent(seq)}.do`,
-				method: 'DELETE',
-				withCredentials: true,
-			});
-			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || '삭제되었습니다' });
-				loadList();
-			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || '삭제에 실패했습니다' });
-			}
-		} catch (e) {
-			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
-		}
+	const onSubmitSuccess = useCallback(() => {
+		setAddRow(EMPTY_ADD);
+		loadList();
 	}, [loadList]);
+
+	const { handleSubmit } = useCommonSubmit({
+		form:           submitForm,
+		checkField:     CHECK_FIELDS,
+		confirmMessage: '근무시간',
+		URL:            URL.IVR_WORK_UPDATE,
+		callback:       onSubmitSuccess,
+	});
+
+	const { handleDelete } = useCommonDelete({
+		URL:      URL.IVR_WORK_DELETE,
+		MESSAGE:  '근무시간',
+		callback: loadList,
+	});
 
 	if (!open) return null;
 	return (
@@ -136,6 +106,7 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 											<tr>
 												<td>
 													<select
+														id="workTimeGubun"
 														className="form-select form-select-sm"
 														value={addRow.ivrTimeGubun}
 														onChange={e => setAddRow(prev => ({ ...prev, ivrTimeGubun: e.target.value }))}
@@ -148,6 +119,7 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 												</td>
 												<td className="text-center">
 													<input
+														id="workStartTime"
 														type="time"
 														className="form-control form-control-sm"
 														value={addRow.ivrStartTime}
@@ -156,6 +128,7 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 												</td>
 												<td className="text-center">
 													<input
+														id="workEndTime"
 														type="time"
 														className="form-control form-control-sm"
 														value={addRow.ivrEndTime}
@@ -163,7 +136,7 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 													/>
 												</td>
 												<td className="text-center">
-													<button type="button" className="btn btn-sm btn-primary" onClick={handleAdd}>
+													<button type="button" className="btn btn-sm btn-primary" onClick={handleSubmit}>
 														저장
 													</button>
 												</td>
@@ -175,7 +148,7 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 								<div className="mt-2" style={{ overflowX: 'auto' }}>
 									<table
 										className="content-table__sub"
-										style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse' }}
+										style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', color: 'inherit' }}
 									>
 										<thead>
 											<tr>
@@ -194,14 +167,14 @@ const IvrWorkModal = ({ open, onClose, ivrCode }) => {
 												</tr>
 											) : workRows.map(row => (
 												<tr key={row.ivrWorkSeq}>
-													<td>{row.codeNm}</td>
-													<td className="text-center">{row.ivrStartTime}</td>
-													<td className="text-center">{row.ivrEndTime}</td>
+													<td style={{ color: 'inherit' }}>{row.codeNm}</td>
+													<td className="text-center" style={{ color: 'inherit' }}>{row.ivrStartTime}</td>
+													<td className="text-center" style={{ color: 'inherit' }}>{row.ivrEndTime}</td>
 													<td className="text-center">
 														<button
 															type="button"
 															className="btn btn-sm btn-danger"
-															onClick={() => handleDelete(row.ivrWorkSeq)}
+															onClick={() => handleDelete({ code: row.ivrWorkSeq, name: row.codeNm })}
 														>삭제</button>
 													</td>
 												</tr>

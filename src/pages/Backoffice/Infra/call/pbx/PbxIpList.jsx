@@ -7,7 +7,14 @@ import URL from '@/constants/URL.jsx';
 import { gridTheme } from '@/constants/agGridTheme.js';
 import AppAgGrid from '@/components/Common/AppAgGrid.jsx';
 
-const PbxIpFormModal = lazy(() => import('@/pages/Backoffice/Infra/pgx/components/PbxIpFormModal.jsx'));
+const PbxIpFormModal = lazy(() => import('@/pages/Backoffice/Infra/call/pbx/components/PbxIpFormModal.jsx'));
+
+const ynCellRenderer = (p) => {
+    const v = p.value?.toUpperCase();
+    if (v === 'Y') return <span className="badge bg-success">사용</span>;
+    if (v === 'N') return <span className="badge bg-danger">사용안함</span>;
+    return p.value ?? '';
+};
 
 const INITIAL_SEARCH_FORM = {
     searchCondition: '',
@@ -97,9 +104,9 @@ const PbxIpList = () => {
         { headerName: '기관명',          field: 'allInsttNm', flex: 1 },
         { headerName: '내선',            field: 'extension',  width: 120 },
         { headerName: 'IPAddress',       field: 'ipAddress',  width: 150 },
-        { headerName: '통합관리사용유무', field: 'ipUseyn',   width: 130 },
-        { headerName: '녹취사용유무',    field: 'recUseyn',   width: 110 },
-        { headerName: 'STT사용유무',     field: 'sttUseyn',   width: 110 },
+        { headerName: '통합관리사용유무', field: 'ipUseyn',  width: 130, cellRenderer: ynCellRenderer },
+        { headerName: '녹취사용유무',    field: 'recUseyn', width: 110, cellRenderer: ynCellRenderer },
+        { headerName: 'STT사용유무',     field: 'sttUseyn', width: 110, cellRenderer: ynCellRenderer },
         {
             headerName: '수정', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
@@ -196,6 +203,7 @@ const PbxIpList = () => {
             </div>
 
             <PbxIpFormModal
+                key={formModalOpen ? (selectedRowData?.extension ?? 'new') : 'closed'}
                 open={formModalOpen}
                 onClose={() => setFormModalOpen(false)}
                 rowData={selectedRowData}

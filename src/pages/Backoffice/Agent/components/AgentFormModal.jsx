@@ -19,7 +19,7 @@ const AgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
     const { options: pbxIndexOptions } = useCommonCodeData('PBX_INDEX');
     const { options: insttOptions } = useCustomReqDataCombo({
         url: URL.INSTT_COMBO,
-        method: 'GET',
+        method: 'POST',
         mapping: { id: 'insttCode', text: 'allInsttNm' },
     });
 

@@ -68,20 +68,10 @@ const AlertMessageInfo = () => {
 
     const onSearchKeyDown = (e) => { if (e.key === 'Enter') onSearch(); };
 
-    const refreshPartForAlert = useCallback(async (alertSeq) => {
-        const api = gridApiRef.current;
-        if (!api) return;
-        const info = api.getDetailGridInfo(`detail_${alertSeq}`);
-        if (!info) return;
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.ALERT_PART_LIST, method: 'POST',
-                data: { alertSeq, pageIndex: '1', pageUnit: '100' },
-                withCredentials: true,
-            });
-            const rows = res?.data?.result?.resultList || [];
-            info.api.setGridOption('rowData', rows.map(r => ({ ...r, __alertSeq: alertSeq })));
-        } catch { /* ignore */ }
+    const refreshCallbacks = useRef({});
+
+    const refreshPartForAlert = useCallback((alertSeq) => {
+        refreshCallbacks.current[alertSeq]?.();
     }, []);
 
     // 장애 알림 메세지 삭제
@@ -150,6 +140,8 @@ const AlertMessageInfo = () => {
             setPartModalData({ alertSeq, alertMessage: null, alertPartSeq: partData?.alertPartSeq, partData, openAt: Date.now() });
             setPartFormOpen(true);
         },
+        registerRefresh:   (alertSeq, fn) => { refreshCallbacks.current[alertSeq] = fn; },
+        unregisterRefresh: (alertSeq)     => { delete refreshCallbacks.current[alertSeq]; },
     }), [handleOpenPartAdd]);
 
     return (
@@ -218,6 +210,7 @@ const AlertMessageInfo = () => {
                         getRowId={(params) => String(params.data.alertSeq)}
                         isRowMaster={(data) => data?.child_cnt !== '0'}
                         detailCellRenderer={AlertPartDetailRenderer}
+                        detailCellRendererParams={{ context: gridContext }}
                         detailRowHeight={220}
                         context={gridContext}
                         onGridReady={(params) => { gridApiRef.current = params.api; }}

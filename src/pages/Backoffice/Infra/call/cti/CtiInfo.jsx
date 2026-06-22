@@ -15,11 +15,11 @@ const INITIAL_SEARCH_FORM = { searchCondition: '', searchKeyword: '' };
 const CtiInfo = () => {
     const gridApiRef = useRef(null);
 
-    // ë©”ì¸ ê·¸ë¦¬???°ì´??(client-side)
+    // ë©”ì¸ ê·¸ë¦¬ë“œ ë°ì´í„° (client-side)
     const [rowData, setRowData] = useState([]);
     const [tempParams, setTempParams] = useState(INITIAL_SEARCH_FORM);
 
-    // ?„ì¬ ? íƒ???Œë„Œ??(Group ?±ë¡ ë²„íŠ¼??
+    // í˜„ì¬ ì„ íƒëœ í…Œë„ŒíŠ¸ (Group ë“±ë¡ ë²„íŠ¼ìš©)
     const [selectedTenant, setSelectedTenant] = useState(null);
 
     // Tenant ëª¨ë‹¬
@@ -34,7 +34,7 @@ const CtiInfo = () => {
     const [partListOpen, setPartListOpen] = useState(false);
     const [partListData, setPartListData] = useState({ employeegrpId: '', tenantId: '', centerId: '' });
 
-    // ?€?€ ?Œë„Œ??ëª©ë¡ ì¡°íšŒ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // í…Œë„ŒíŠ¸ ëª©ë¡ ì¡°íšŒ
     const fetchTenantList = useCallback(async (query) => {
         const res = await fnAjaxFetch({ url: URL.CTI_TENANT_LIST, method: 'POST', data: query });
         const data = res?.data;
@@ -47,8 +47,13 @@ const CtiInfo = () => {
     }, [tempParams, fetchTenantList]);
 
     useEffect(() => {
-        onSearch();
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        let active = true;
+        fetchTenantList({ pageIndex: '1', pageUnit: '200' })
+            .then(rows => { if (active) setRowData(rows); })
+            .catch(() => {});
+        return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const onSearchKeyDown = (e) => { if (e.key === 'Enter') onSearch(); };
 
@@ -58,7 +63,7 @@ const CtiInfo = () => {
         setTempParams(prev => ({ ...prev, [name]: value }));
     };
 
-    // ?€?€ ê·¸ë£¹ ?œë¸Œ ê·¸ë¦¬??fetch (ref ê³ ì •) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // ê·¸ë£¹ ì„œë¸Œ ê·¸ë¦¬ë“œ fetch (ref ê³ ì •)
     const fetchGroupStable = useCallback(async ({ tenantId, centerId, pageUnit = '100' }) => {
         const res = await fnAjaxFetch({
             url: URL.CTI_GROUP_LIST,
@@ -72,7 +77,7 @@ const CtiInfo = () => {
     const fetchGroupRef = useRef(fetchGroupStable);
     useEffect(() => { fetchGroupRef.current = fetchGroupStable; }, [fetchGroupStable]);
 
-    // ?€?€ ?¹ì • ?Œë„Œ?¸ì˜ ?œë¸Œ ê·¸ë¦¬???ˆë¡œê³ ì¹¨ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // íŠ¹ì • í…Œë„ŒíŠ¸ì˜ ì„œë¸Œ ê·¸ë¦¬ë“œ ìƒˆë¡œê³ ì¹¨
     const refreshGroupForTenant = useCallback(async (tenantId, centerId) => {
         const api = gridApiRef.current;
         if (!api) return;
@@ -84,12 +89,12 @@ const CtiInfo = () => {
         } catch { /* ignore */ }
     }, []);
 
-    // ?€?€ ?Œë„Œ???? œ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // í…Œë„ŒíŠ¸ ì‚­ì œ
     const handleTenantDelete = useCallback(async (tenantId, centerId) => {
         const ok = await Swal.fire({
-            icon: 'warning', title: '?Œë„Œ???? œ',
-            html: `<b>${tenantId}</b> ë¥??? ?? œ?˜ì‹œë©??œìŠ¤?œì— ?í–¥???ˆì„ ???ˆìŠµ?ˆë‹¤.<br>?•ë§ë¡??? œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?„ë‹ˆ??,
+            icon: 'warning', title: 'í…Œë„ŒíŠ¸ ì‚­ì œ',
+            html: `<b>${tenantId}</b> ë¥¼(ì„) ì‚­ì œí•˜ì‹œë©´ ì‹œìŠ¤í…œì— ì˜í–¥ì´ ìˆì„ ìˆ˜ ìˆìŠµë‹ˆë‹¤.<br>ì •ë§ë¡œ ì‚­ì œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?`,
+            showCancelButton: true, confirmButtonText: 'ì˜ˆ', cancelButtonText: 'ì•„ë‹ˆìš”',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -103,20 +108,20 @@ const CtiInfo = () => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?? œ?˜ì—ˆ?µë‹ˆ??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || 'ì‚­ì œë˜ì—ˆìŠµë‹ˆë‹¤' });
                 onSearch();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '?? œ???¤íŒ¨?ˆìŠµ?ˆë‹¤.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || 'ì‚­ì œì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆìŠµ?ˆë‹¤.' });
+            await Swal.fire({ icon: 'error', text: e?.message || 'ì²˜ë¦¬ ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤.' });
         }
     }, [onSearch]);
 
-    // ?€?€ Group ?±ë¡ (ë©”ì¸ ë²„íŠ¼ ?´ë¦­) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // Group ë“±ë¡ (ë©”ì¸ ë²„íŠ¼ í´ë¦­)
     const handleOpenGroupAdd = useCallback(async () => {
         if (!selectedTenant) {
-            await Swal.fire({ icon: 'warning', text: '?Œë„Œ?¸ë? ? íƒ??ì£¼ì„¸??' });
+            await Swal.fire({ icon: 'warning', text: 'í…Œë„ŒíŠ¸ë¥¼ ì„ íƒí•´ ì£¼ì„¸ìš”' });
             return;
         }
         setGroupModalData({
@@ -127,34 +132,34 @@ const CtiInfo = () => {
         setGroupModalOpen(true);
     }, [selectedTenant]);
 
-    // ?€?€ ë©”ì¸ ê·¸ë¦¬??ì»¬ëŸ¼ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // ë©”ì¸ ê·¸ë¦¬ë“œ ì»¬ëŸ¼
     const columnDefs = useMemo(() => [
-        { headerName: 'ì§€??,          field: 'centerName',       width: 130, cellRenderer: 'agGroupCellRenderer' },
+        { headerName: 'ì§€ì—­',          field: 'centerName',       width: 130, cellRenderer: 'agGroupCellRenderer' },
         { headerName: 'TENANT ID',     field: 'tenantId',         width: 120 },
-        { headerName: 'TENANT ëª?,     field: 'tenantName',       flex: 1 },
-        { headerName: '?œë¹„??LEVEL',  field: 'servicelevelCalc', width: 120 },
+        { headerName: 'TENANT ëª…',     field: 'tenantName',       flex: 1 },
+        { headerName: 'ì„œë¹„ìŠ¤ LEVEL',  field: 'servicelevelCalc', width: 120 },
         {
-            headerName: '?˜ì •', width: 70, sortable: false, filter: false,
+            headerName: 'ìˆ˜ì •', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-secondary btn-outline__gray btn-modify"
                     onClick={() => {
                         setTenantModalData({ tenantId: p.data?.tenantId, rowData: p.data });
                         setTenantModalOpen(true);
                     }}
-                >?˜ì •</button>
+                >ìˆ˜ì •</button>
             ),
         },
         {
-            headerName: '?? œ', width: 70, sortable: false, filter: false,
+            headerName: 'ì‚­ì œ', width: 70, sortable: false, filter: false,
             cellRenderer: (p) => (
                 <button className="btn btn-outline-danger btn-outline__gray btn-delete"
                     onClick={() => handleTenantDelete(p.data?.tenantId, p.data?.centerId)}
-                >?? œ</button>
+                >ì‚­ì œ</button>
             ),
         },
     ], [handleTenantDelete]);
 
-    // ?€?€ MasterDetailGrid context ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+    // MasterDetailGrid context
     const gridContext = useMemo(() => ({
         fetchGroups: (params) => fetchGroupRef.current(params),
         onOpenGroupEdit: (groupData, tenantData) => {
@@ -176,11 +181,11 @@ const CtiInfo = () => {
         <>
             <div className="row g-0 main-contents">
                 <div className="col-12 content-header">
-                    <div className="content-header__title">CTI ?ì›ê´€ë¦?/div>
+                    <div className="content-header__title">CTI ì§ì›ê´€ë¦¬</div>
                     <div className="content-header__breadcrumb">
                         <ol className="breadcrumb">
-                            <li className="breadcrumb-item">?¸í”„??ê´€ë¦?/li>
-                            <li className="breadcrumb-item">CTI ?ì›ê´€ë¦?/li>
+                            <li className="breadcrumb-item">ì¸í”„ë¼ ê´€ë¦¬</li>
+                            <li className="breadcrumb-item">CTI ì§ì›ê´€ë¦¬</li>
                         </ol>
                     </div>
                 </div>
@@ -193,13 +198,13 @@ const CtiInfo = () => {
                                 value={tempParams.searchCondition}
                                 onChange={handleInputChange}
                             >
-                                <option value="">? íƒ</option>
-                                <option value="tenantId">?„ì´??/option>
-                                <option value="tenantName">?Œë„Œ?¸ëª…</option>
+                                <option value="">ì„ íƒ</option>
+                                <option value="tenantId">ì•„ì´ë””</option>
+                                <option value="tenantName">í…Œë„ŒíŠ¸ëª…</option>
                             </select>
                             <input
                                 type="text" name="searchKeyword"
-                                placeholder="ê²€?‰ì–´ë¥??…ë ¥?˜ì„¸??
+                                placeholder="ê²€ìƒ‰ì–´ë¥¼ ì…ë ¥í•˜ì„¸ìš”"
                                 value={tempParams.searchKeyword}
                                 onChange={handleInputChange}
                                 onKeyDown={onSearchKeyDown}
@@ -210,16 +215,18 @@ const CtiInfo = () => {
                                 <svg width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M10.7 5C12.0791 5 13.4018 5.58699 14.377 6.63183C15.3521 7.67668 15.9 9.09379 15.9 10.5714C15.9 11.9514 15.428 13.22 14.652 14.1971L14.868 14.4286H15.5L19.5 18.7143L18.3 20L14.3 15.7143V15.0371L14.084 14.8057C13.172 15.6371 11.988 16.1429 10.7 16.1429C9.32087 16.1429 7.99823 15.5559 7.02304 14.511C6.04786 13.4662 5.5 12.0491 5.5 10.5714C5.5 9.09379 6.04786 7.67668 7.02304 6.63183C7.99823 5.58699 9.32087 5 10.7 5ZM10.7 6.71429C8.7 6.71429 7.1 8.42857 7.1 10.5714C7.1 12.7143 8.7 14.4286 10.7 14.4286C12.7 14.4286 14.3 12.7143 14.3 10.5714C14.3 8.42857 12.7 6.71429 10.7 6.71429Z" fill="currentColor"/>
                                 </svg>
-                                ê²€??                            </button>
+                                ê²€ìƒ‰
+                            </button>
                             <button type="button" className="btn btn-outline-dark btn-outline__gray" onClick={() => handleReset()}>
                                 <svg width="25" height="25" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M19 8L15 12L19 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     <path d="M12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16C13.1046 16 14.1046 15.5523 14.8284 14.8284" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                     <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C14.4853 3 16.7353 4.00736 18.364 5.63604" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                                 </svg>
-                                ê²€??ì´ˆê¸°??                            </button>
+                                ê²€ìƒ‰ì´ˆê¸°í™”
+                            </button>
                             <button type="button" className="btn btn-outline-secondary btn-outline__gray" onClick={handleOpenGroupAdd}>
-                                Group ?±ë¡
+                                Group ë“±ë¡
                             </button>
                             <button type="button" className="btn btn-primary btn-default__blue"
                                 onClick={() => { setTenantModalData({ tenantId: null, rowData: null }); setTenantModalOpen(true); }}
@@ -227,7 +234,7 @@ const CtiInfo = () => {
                                 <svg width="19" height="19" viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M15.5417 10.2917H10.7917V15.0417H9.20837V10.2917H4.45837V8.70833H9.20837V3.95833H10.7917V8.70833H15.5417V10.2917Z" fill="currentColor"/>
                                 </svg>
-                                Tenant ?±ë¡
+                                Tenant ë“±ë¡
                             </button>
                         </div>
                     </div>
@@ -248,6 +255,7 @@ const CtiInfo = () => {
             </div>
 
             <CtiTenantFormModal
+                key={tenantModalOpen ? (tenantModalData.tenantId ?? 'new') : 'closed'}
                 open={tenantModalOpen}
                 onClose={() => setTenantModalOpen(false)}
                 tenantId={tenantModalData.tenantId}
@@ -255,6 +263,7 @@ const CtiInfo = () => {
                 onSuccess={() => { setTenantModalOpen(false); onSearch(); }}
             />
             <CtiGroupFormModal
+                key={groupModalOpen ? (groupModalData.groupData?.employeegrpId ?? 'new') : 'closed'}
                 open={groupModalOpen}
                 onClose={() => setGroupModalOpen(false)}
                 centerId={groupModalData.centerId}

@@ -23,26 +23,26 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
             };
             reader.readAsBinaryString(file);
         } catch {
-            await Swal.fire({ icon: 'error', text: 'Excel ?�일 ?�싱???�패?�습?�다. xlsx ?�이브러리�? ?�요?�니??' });
+            await Swal.fire({ icon: 'error', text: 'Excel 파일 파싱에 실패했습니다. xlsx 라이브러리가 필요합니다' });
         }
     }, []);
 
     const handleSave = useCallback(async () => {
         if (!basicNumber.trim()) {
-            await Swal.fire({ icon: 'warning', text: '복사???�이?�트�??�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: '복사할 에이전트를 입력해 주세요' });
             return;
         }
         if (parsedAgents.length === 0) {
-            await Swal.fire({ icon: 'warning', text: 'Excel ?�일??먼�? ?�로?�해 주세??' });
+            await Swal.fire({ icon: 'warning', text: 'Excel 파일을 먼저 로드해 주세요' });
             return;
         }
         const ok = await Swal.fire({
             icon: 'question',
-            title: '?�담???�이?�트',
-            text: '?�록 ?�시겠습?�까?',
+            title: '담당 에이전트',
+            text: '등록 하시겠습니까?',
             showCancelButton: true,
-            confirmButtonText: '??,
-            cancelButtonText: '?�니??,
+            confirmButtonText: '예',
+            cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -59,13 +59,13 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: '?�록', text: json?.MESSAGE || '?�록?�었?�니??' });
+                await Swal.fire({ icon: 'success', title: '등록', text: json?.MESSAGE || '등록되었습니다' });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', title: '?�류', text: json?.MESSAGE || '?�록???�패?�습?�다.' });
+                await Swal.fire({ icon: 'error', title: '오류', text: json?.MESSAGE || '등록에 실패했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [basicNumber, parsedAgents, onSuccess]);
 
@@ -82,12 +82,12 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
             <div className="modal-custom">
                 <div
                     className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: 520, maxWidth: '90%', backgroundColor: '#fff' }}
+                    style={{ width: 520, maxWidth: '90%', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                 >
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">?��? ?�로??/h2>
+                                <h2 className="modal-title__title">엑셀 로드</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={handleClose} />
                         </div>
@@ -96,7 +96,7 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
                                 <div className="row input-box-wrap">
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">?��? ?�로???�일</label>
+                                            <label className="form-label">엑셀 로드 파일</label>
                                             <input
                                                 ref={fileInputRef}
                                                 type="file"
@@ -106,19 +106,19 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
                                             />
                                             {parsedAgents.length > 0 && (
                                                 <div className="mt-1 text-muted small">
-                                                    {parsedAgents.length}�??�이?�트 ?�싱 ?�료
+                                                    {parsedAgents.length}개 에이전트 파싱 완료
                                                 </div>
                                             )}
                                         </div>
                                     </div>
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label htmlFor="txt_basicNumber" className="form-label">복사???�선번호</label>
+                                            <label htmlFor="txt_basicNumber" className="form-label">복사할 내선번호</label>
                                             <input
                                                 id="txt_basicNumber"
                                                 type="text"
                                                 className="form-control"
-                                                placeholder="복사???�이?�트 번호�??�력?�세??"
+                                                placeholder="복사할 에이전트 번호를 입력하세요"
                                                 value={basicNumber}
                                                 onChange={e => setBasicNumber(e.target.value)}
                                             />
@@ -131,7 +131,7 @@ const PbxAgentExcelModal = ({ open, onClose, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={handleClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�로??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>등록</button>
                             </div>
                         </div>
                     </div>

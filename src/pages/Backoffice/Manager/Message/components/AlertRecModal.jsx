@@ -83,11 +83,11 @@ const AlertRecModal = ({ open, onClose, alertSeq }) => {
 			});
 			const json = res?.data;
 			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || '등록되었습니다.' });
+				await Swal.fire({ icon: 'success', text: json?.resultMessage || json?.MESSAGE || '등록되었습니다.' });
 				setAddRow(EMPTY_ADD);
 				loadList();
 			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 도중 문제가 발생했습니다.' });
+				await Swal.fire({ icon: 'warning', text: json?.resultMessage || json?.MESSAGE || '처리 도중 문제가 발생했습니다.' });
 			}
 		} catch (e) {
 			await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
@@ -164,7 +164,7 @@ const AlertRecModal = ({ open, onClose, alertSeq }) => {
 													</td>
 												</tr>
 											) : rows.map(row => (
-												<tr key={row.recPartSeq}>
+												<tr key={row.recPartSeq} style={{ color: '#fff' }}>
 													<td>{row.recTelNm}</td>
 													<td>{row.recTelNumber}</td>
 													<td>{row.recTelUseyn}</td>

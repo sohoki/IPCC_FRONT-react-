@@ -53,7 +53,7 @@ const ConstantFormModal = ({ open, onClose, consultCode, onSuccess }) => {
 
   const { options: insttOptions } = useCustomReqDataCombo({
     url: URL.INSTT_COMBO,
-    method: 'GET',
+    method: 'POST',
     mapping: { id: 'insttCode', text: 'allInsttNm' },
   });
   const { options: statusOptions } = useCommonCodeData('CONSULT_CODE');
@@ -657,7 +657,7 @@ const ConstantInfo = () => {
 
   const { options: insttOptions } = useCustomReqDataCombo({
     url: URL.INSTT_COMBO,
-    method: 'GET',
+    method: 'POST',
     mapping: { id: 'insttCode', text: 'allInsttNm' },
   });
 

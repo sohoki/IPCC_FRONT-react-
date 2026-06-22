@@ -1,15 +1,28 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
+
+const fmtDate = (str) => {
+	if (!str || str.length !== 8) return str || '';
+	return `${str.slice(0, 4)}-${str.slice(4, 6)}-${str.slice(6, 8)}`;
+};
 
 const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 	const [holyDay, setHolyDay] = useState('');
 	const [holyRows, setHolyRows] = useState([]);
 	const [pageIndex, setPageIndex] = useState(1);
 	const [pagination, setPagination] = useState(null);
+	const [checkedSeqs, setCheckedSeqs] = useState(new Set());
+	const excelInputRef = useRef(null);
 
-	// 이벤트 핸들러(등록·삭제·페이지 이동 후 재조회)용 함수
+	const applyResult = useCallback((json) => {
+		setHolyRows(json.result?.resultList || []);
+		setPagination(json.result?.paginationInfo || null);
+		setCheckedSeqs(new Set());
+	}, []);
+
 	const loadList = useCallback(async (page = 1) => {
 		if (!ivrCode) return;
 		try {
@@ -20,16 +33,12 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 				withCredentials: true,
 			});
 			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS') {
-				setHolyRows(json.resultList || []);
-				setPagination(json.paginationInfo || null);
-			}
+			if (json?.resultCodeInfo === 'SUCCESS') applyResult(json);
 		} catch (e) {
 			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
 		}
-	}, [ivrCode]);
+	}, [ivrCode, applyResult]);
 
-	// 모달 오픈 시 최초 조회 — fnAjaxFetch 직접 호출로 setState-in-effect 진단 방지
 	useEffect(() => {
 		if (!open || !ivrCode) return;
 		fnAjaxFetch({
@@ -39,12 +48,9 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 			withCredentials: true,
 		}).then(res => {
 			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS') {
-				setHolyRows(json.resultList || []);
-				setPagination(json.paginationInfo || null);
-			}
+			if (json?.resultCodeInfo === 'SUCCESS') applyResult(json);
 		}).catch(() => {});
-	}, [open, ivrCode]);
+	}, [open, ivrCode, applyResult]);
 
 	const handleAdd = useCallback(async () => {
 		if (!holyDay) {
@@ -55,31 +61,29 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 			const res = await fnAjaxFetch({
 				url: URL.IVR_HOLY_UPDATE,
 				method: 'POST',
-				data: {
-					mode: 'Ins',
-					ivrCode,
-					ivrHolyday: holyDay.replaceAll('-', ''),
-				},
+				data: { mode: 'Ins', ivrCode, ivrHolyday: holyDay.replaceAll('-', '') },
 				withCredentials: true,
 			});
 			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || '저장되었습니다' });
+			if (json?.resultCodeInfo === 'SUCCESS') {
+				await Swal.fire({ icon: 'success', text: json?.resultMessage || '저장되었습니다' });
 				setHolyDay('');
 				loadList(pageIndex);
 			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || '저장에 실패했습니다' });
+				await Swal.fire({ icon: 'error', text: json?.resultMessage || '저장에 실패했습니다' });
 			}
 		} catch (e) {
 			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
 		}
 	}, [holyDay, ivrCode, pageIndex, loadList]);
 
-	const handleDelete = useCallback(async (seq) => {
+	// 단건 삭제 (행 삭제 버튼 제거, 체크박스 삭제로 통합)
+	const deleteBySeqs = useCallback(async (seqs) => {
+		if (!seqs.length) return;
 		const ok = await Swal.fire({
 			icon: 'question',
 			title: '확인',
-			text: '삭제 하시겠습니까?',
+			text: `선택한 ${seqs.length}건을 삭제하시겠습니까?`,
 			showCancelButton: true,
 			confirmButtonText: '예',
 			cancelButtonText: '아니오',
@@ -87,27 +91,102 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 		});
 		if (!ok.isConfirmed) return;
 		try {
-			const res = await fnAjaxFetch({
-				url: `${URL.IVR_HOLY_DELETE}/${encodeURIComponent(seq)}.do`,
-				method: 'DELETE',
-				withCredentials: true,
-			});
-			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || '삭제되었습니다' });
-				loadList(pageIndex);
-			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || '삭제에 실패했습니다' });
+			for (const seq of seqs) {
+				await fnAjaxFetch({
+					url: `${URL.IVR_HOLY_DELETE}/${encodeURIComponent(seq)}.do`,
+					method: 'DELETE',
+					withCredentials: true,
+				});
 			}
+			await Swal.fire({ icon: 'success', text: '삭제되었습니다' });
+			loadList(pageIndex);
 		} catch (e) {
 			await Swal.fire({ icon: 'error', text: e?.message || '오류가 발생했습니다' });
 		}
 	}, [pageIndex, loadList]);
 
+	const handleDeleteChecked = useCallback(() => {
+		if (checkedSeqs.size === 0) {
+			Swal.fire({ icon: 'warning', text: '삭제할 항목을 선택해주세요' });
+			return;
+		}
+		deleteBySeqs([...checkedSeqs]);
+	}, [checkedSeqs, deleteBySeqs]);
+
 	const handlePageChange = useCallback((page) => {
 		setPageIndex(page);
 		loadList(page);
 	}, [loadList]);
+
+	// 전체 선택
+	const allChecked = holyRows.length > 0 && holyRows.every(r => checkedSeqs.has(r.ivrHolydaySeq));
+	const handleCheckAll = useCallback((checked) => {
+		setCheckedSeqs(checked ? new Set(holyRows.map(r => r.ivrHolydaySeq)) : new Set());
+	}, [holyRows]);
+	const handleCheckOne = useCallback((seq, checked) => {
+		setCheckedSeqs(prev => {
+			const next = new Set(prev);
+			if (checked) next.add(seq);
+			else next.delete(seq);
+			return next;
+		});
+	}, []);
+
+	// 엑셀 업로드
+	const handleExcelChange = useCallback(async (e) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		e.target.value = '';
+		try {
+			const buf = await file.arrayBuffer();
+			const wb = XLSX.read(buf, { type: 'array' });
+			const ws = wb.Sheets[wb.SheetNames[0]];
+			const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+
+			// 날짜 컬럼 탐색: '날짜', 'ivrHolyday', '공휴일' 순
+			const dateKey = rows.length > 0
+				? Object.keys(rows[0]).find(k => ['날짜', 'ivrHolyday', '공휴일'].includes(k)) || Object.keys(rows[0])[0]
+				: null;
+
+			if (!dateKey) {
+				await Swal.fire({ icon: 'error', text: '날짜 컬럼을 찾을 수 없습니다' });
+				return;
+			}
+
+			const holyUpload = rows
+				.map(r => {
+					let val = String(r[dateKey] || '').trim().replaceAll('-', '').replaceAll('/', '');
+					// 엑셀 시리얼 날짜 처리
+					if (/^\d{5}$/.test(val)) {
+						const d = XLSX.SSF.parse_date_code(Number(val));
+						val = `${d.y}${String(d.m).padStart(2, '0')}${String(d.d).padStart(2, '0')}`;
+					}
+					return val.length === 8 ? { mode: 'Ins', ivrCode, ivrHolyday: val } : null;
+				})
+				.filter(Boolean);
+
+			if (!holyUpload.length) {
+				await Swal.fire({ icon: 'warning', text: '유효한 날짜 데이터가 없습니다' });
+				return;
+			}
+
+			const res = await fnAjaxFetch({
+				url: URL.IVR_HOLY_EXCEL_UPLOAD,
+				method: 'POST',
+				data: { holyUpload },
+				withCredentials: true,
+			});
+			const json = res?.data;
+			if (json?.resultCodeInfo === 'SUCCESS') {
+				await Swal.fire({ icon: 'success', text: `${holyUpload.length}건 업로드 완료` });
+				loadList(1);
+			} else {
+				await Swal.fire({ icon: 'error', text: json?.resultMessage || '업로드에 실패했습니다' });
+			}
+		} catch (e) {
+			await Swal.fire({ icon: 'error', text: e?.message || '파일 처리 중 오류가 발생했습니다' });
+		}
+	}, [ivrCode, loadList]);
 
 	const totalPages = pagination ? pagination.totalPageCount : 0;
 
@@ -128,8 +207,8 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 						</div>
 						<div className="modal-body">
 							<div className="modal-body__content">
-								{/* 날짜 입력 */}
-								<div className="d-flex gap-2 align-items-center mb-3">
+								{/* 상단 버튼 영역 */}
+								<div className="d-flex gap-2 align-items-center mb-3 flex-wrap">
 									<input
 										type="date"
 										className="form-control"
@@ -141,6 +220,29 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 									<button type="button" className="btn btn-primary btn-sm" onClick={handleAdd}>
 										저장
 									</button>
+									<div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+										<input
+											type="file"
+											ref={excelInputRef}
+											accept=".xlsx,.xls,.csv"
+											style={{ display: 'none' }}
+											onChange={handleExcelChange}
+										/>
+										<button
+											type="button"
+											className="btn btn-success btn-sm"
+											onClick={() => excelInputRef.current?.click()}
+										>
+											엑셀 업로드
+										</button>
+										<button
+											type="button"
+											className="btn btn-danger btn-sm"
+											onClick={handleDeleteChecked}
+										>
+											선택 삭제
+										</button>
+									</div>
 								</div>
 								{/* 날짜 목록 */}
 								<div style={{ overflowX: 'auto' }}>
@@ -150,16 +252,24 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 									>
 										<thead>
 											<tr>
-												<th>날짜</th>
-												<th style={{ width: 70 }}>삭제</th>
-												<th>날짜</th>
-												<th style={{ width: 70 }}>삭제</th>
+												<th style={{ width: 40, textAlign: 'center' }}>
+													<input
+														type="checkbox"
+														checked={allChecked}
+														onChange={e => handleCheckAll(e.target.checked)}
+													/>
+												</th>
+												<th style={{ textAlign: 'center' }}>날짜</th>
+												<th style={{ width: 40, textAlign: 'center' }}>
+													<span style={{ visibility: 'hidden' }}>☐</span>
+												</th>
+												<th style={{ textAlign: 'center' }}>날짜</th>
 											</tr>
 										</thead>
 										<tbody>
 											{holyRows.length === 0 ? (
 												<tr>
-													<td colSpan={4} className="text-center text-muted py-3">
+													<td colSpan={4} style={{ textAlign: 'center', padding: '12px 0', color: '#666' }}>
 														등록된 공휴일이 없습니다
 													</td>
 												</tr>
@@ -169,23 +279,27 @@ const IvrHolyModal = ({ open, onClose, ivrCode }) => {
 													const right = holyRows[i * 2 + 1];
 													return (
 														<tr key={left?.ivrHolydaySeq}>
-															<td className="text-center">{left?.ivrHolyday}</td>
-															<td className="text-center">
-																<button
-																	type="button"
-																	className="btn btn-sm btn-danger"
-																	onClick={() => handleDelete(left?.ivrHolydaySeq)}
-																>삭제</button>
+															<td style={{ textAlign: 'center' }}>
+																<input
+																	type="checkbox"
+																	checked={checkedSeqs.has(left?.ivrHolydaySeq)}
+																	onChange={e => handleCheckOne(left?.ivrHolydaySeq, e.target.checked)}
+																/>
 															</td>
-															<td className="text-center">{right?.ivrHolyday || ''}</td>
-															<td className="text-center">
+															<td style={{ textAlign: 'center', color: 'inherit' }}>
+																{fmtDate(left?.ivrHolyday)}
+															</td>
+															<td style={{ textAlign: 'center' }}>
 																{right && (
-																	<button
-																		type="button"
-																		className="btn btn-sm btn-danger"
-																		onClick={() => handleDelete(right?.ivrHolydaySeq)}
-																	>삭제</button>
+																	<input
+																		type="checkbox"
+																		checked={checkedSeqs.has(right?.ivrHolydaySeq)}
+																		onChange={e => handleCheckOne(right?.ivrHolydaySeq, e.target.checked)}
+																	/>
 																)}
+															</td>
+															<td style={{ textAlign: 'center', color: 'inherit' }}>
+																{fmtDate(right?.ivrHolyday)}
 															</td>
 														</tr>
 													);

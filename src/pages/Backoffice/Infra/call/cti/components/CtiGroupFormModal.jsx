@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
 import URL from '@/constants/URL.jsx';
@@ -13,27 +13,22 @@ const EMPTY_FORM = {
 /**
  * Props:
  *   open, onClose
- *   centerId, tenantId  ??부�??�넌???�보
- *   groupData           ??null = ?�규, object = ?�정
- *   onSuccess(tenantId, centerId) ???�????�� ???�출
+ *   centerId, tenantId  — 부모 테넌트 정보
+ *   groupData           — null = 신규, object = 수정
+ *   onSuccess(tenantId, centerId) — 저장 후 호출
  */
 const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuccess }) => {
     const isEdt = groupData !== null && groupData !== undefined;
-    const [form, setForm] = useState(EMPTY_FORM);
-
-    useEffect(() => {
-        if (!open) return;
-        if (!isEdt || !groupData) {
-            setForm(EMPTY_FORM);
-        } else {
-            setForm({
+    const [form, setForm] = useState(
+        isEdt && groupData
+            ? {
                 employeegrpId: String(groupData.employeegrpId || ''),
                 employeegrpName: groupData.employeegrpName || '',
                 monitorFlag: String(groupData.monitorFlag ?? '1'),
                 idCheck: 'Y',
-            });
-        }
-    }, [open, isEdt, groupData]);
+              }
+            : EMPTY_FORM
+    );
 
     const updateForm = useCallback((e) => {
         const { name, value } = e.target;
@@ -41,9 +36,9 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
     }, []);
 
     const handleIdCheck = useCallback(async () => {
-        if (!form.employeegrpId) { await Swal.fire({ icon: 'warning', text: 'employeegrpId�??�력??주세??' }); return; }
-        if (!centerId) { await Swal.fire({ icon: 'warning', text: '지?�을 ?�택??주세??' }); return; }
-        if (!tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id�??�택?�주?�요.' }); return; }
+        if (!form.employeegrpId) { await Swal.fire({ icon: 'warning', text: 'employeegrpId를 입력해 주세요' }); return; }
+        if (!centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
+        if (!tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id를 선택해주세요.' }); return; }
         try {
             const res = await fnAjaxFetch({
                 url: URL.CTI_GROUP_ID_CHECK,
@@ -54,29 +49,29 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?�용 가?�합?�다.' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
                 setForm(prev => ({ ...prev, idCheck: 'N' }));
-                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?��? ?�용 중입?�다.' });
+                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '이미 사용 중입니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form.employeegrpId, centerId, tenantId]);
 
     const handleSave = useCallback(async () => {
-        if (!centerId) { await Swal.fire({ icon: 'warning', text: '지?�을 ?�택??주세??' }); return; }
-        if (!tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id�??�택?�주?�요.' }); return; }
-        if (!form.employeegrpId) { await Swal.fire({ icon: 'warning', text: 'Group ID�??�력?�주?�요.' }); return; }
-        if (!form.employeegrpName) { await Swal.fire({ icon: 'warning', text: 'Group명을 ?�력?�주?�요.' }); return; }
-        if (!form.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시�??�택?�주?�요.' }); return; }
-        if (!isEdt && form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크�??�주?�요.' }); return; }
+        if (!centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
+        if (!tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id를 선택해주세요.' }); return; }
+        if (!form.employeegrpId) { await Swal.fire({ icon: 'warning', text: 'Group ID를 입력해주세요.' }); return; }
+        if (!form.employeegrpName) { await Swal.fire({ icon: 'warning', text: 'Group명을 입력해주세요.' }); return; }
+        if (!form.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시를 선택해주세요.' }); return; }
+        if (!isEdt && form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
 
-        const action = isEdt ? '?�정' : '?�록';
+        const action = isEdt ? '수정' : '등록';
         const ok = await Swal.fire({
             icon: 'question', title: `Group ${action}`,
-            html: `Group�?<b>${action}</b> ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            html: `Group을 <b>${action}</b> 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -97,21 +92,21 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
+                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
                 onSuccess(tenantId, centerId);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form, centerId, tenantId, isEdt, onSuccess]);
 
     const handleDelete = useCallback(async () => {
         const ok = await Swal.fire({
-            icon: 'question', title: '그룹코드 ??��',
-            html: `<b>${form.employeegrpId}</b> �??? ??�� ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'question', title: '그룹코드 삭제',
+            html: `<b>${form.employeegrpId}</b> 를(을) 삭제 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -125,13 +120,13 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '??��?�었?�니??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '삭제되었습니다' });
                 onSuccess(tenantId, centerId);
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '??��???�패?�습?�다.' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '삭제에 실패했습니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form.employeegrpId, centerId, tenantId, onSuccess]);
 
@@ -139,11 +134,11 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
     return (
         <div className="modal-backdrop-custom" style={{ zIndex: 1055 }}>
             <div className="modal-custom" style={{ zIndex: 1056, marginLeft: 0 }}>
-                <div className="modal-dialog modal-dialog-centered" style={{ width: 560, maxWidth: '90%', marginLeft: 'auto', marginRight: 'auto', backgroundColor: '#fff' }}>
+                <div className="modal-dialog modal-dialog-centered" style={{ width: 560, maxWidth: '90%', marginLeft: 'auto', marginRight: 'auto', backgroundColor: 'var(--bs-body-bg, #fff)' }}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">GROUP {isEdt ? '?�정' : '?�록'}</h2>
+                                <h2 className="modal-title__title">GROUP {isEdt ? '수정' : '등록'}</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>
@@ -162,7 +157,7 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                                                     <input
                                                         id="employeegrpId" name="employeegrpId"
                                                         type="text" className="form-control"
-                                                        placeholder="?�자 최�? 10?�리" maxLength={10}
+                                                        placeholder="숫자 최대 10자리" maxLength={10}
                                                         value={form.employeegrpId}
                                                         onChange={(e) => {
                                                             const v = e.target.value.replace(/[^0-9]/g, '');
@@ -170,7 +165,7 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                                                         }}
                                                     />
                                                     <button type="button" className="btn btn-primary btn-default__blue" onClick={handleIdCheck}>
-                                                        중복?�인
+                                                        중복확인
                                                     </button>
                                                 </div>
                                             )}
@@ -179,12 +174,12 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                                     <div className="col-6">
                                         <div className="input-box">
                                             <label htmlFor="employeegrpName" className="form-label">
-                                                Group �?<span className="text-danger">*</span>
+                                                Group 명 <span className="text-danger">*</span>
                                             </label>
                                             <input
                                                 id="employeegrpName" name="employeegrpName"
                                                 type="text" className="form-control"
-                                                placeholder="그룹명을 ?�력?�주?�요."
+                                                placeholder="그룹명을 입력해주세요."
                                                 value={form.employeegrpName}
                                                 onChange={updateForm}
                                             />
@@ -199,9 +194,9 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                                                 value={form.monitorFlag}
                                                 onChange={updateForm}
                                             >
-                                                <option value="">?�음</option>
+                                                <option value="">없음</option>
                                                 <option value="1">감시</option>
-                                                <option value="0">감시?�함</option>
+                                                <option value="0">감시안함</option>
                                             </select>
                                         </div>
                                     </div>
@@ -211,12 +206,12 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                         <div className="modal-footer">
                             <div className="modal-footer__left">
                                 {isEdt && (
-                                    <button type="button" className="btn btn-danger" onClick={handleDelete}>??��</button>
+                                    <button type="button" className="btn btn-danger" onClick={handleDelete}>삭제</button>
                                 )}
                             </div>
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
                             </div>
                         </div>
                     </div>

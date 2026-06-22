@@ -243,6 +243,7 @@ const PbxSmsModelInfo = () => {
             </div>
 
             <PbxSmsModelFormModal
+                key={formModalOpen ? (selectedNotiSeq ?? 'new') : 'closed'}
                 open={formModalOpen}
                 onClose={() => setFormModalOpen(false)}
                 notiSeq={selectedNotiSeq}

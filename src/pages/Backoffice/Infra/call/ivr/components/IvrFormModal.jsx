@@ -1,14 +1,15 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import IosSwitch from '@/components/Common/IosSwitch.jsx';
-import Swal from '@/lib/swal.js';
-import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
 
 const buildForm = (isEdt, rowData) => {
+	const mode = isEdt ? 'Edt' : 'Ins';
 	if (!isEdt || !rowData) {
-		return { insttCode: '', ivrCode: '', ivrName: '', ivrUseyn: 'Y', ivrMentUseyn: 'N', ivrMent: '', notiSday: '', notiEday: '', workStime: '', workEtime: '', ivrMeno: '' };
+		return { mode, insttCode: '', ivrCode: '', ivrName: '', ivrUseyn: 'Y', ivrMentUseyn: 'N', ivrMent: '', notiSday: '', notiEday: '', workStime: '', workEtime: '', ivrMeno: '' };
 	}
 	return {
+		mode,
 		insttCode:    rowData.insttCode    || '',
 		ivrCode:      rowData.ivrCode      || '',
 		ivrName:      rowData.ivrName      || '',
@@ -22,6 +23,11 @@ const buildForm = (isEdt, rowData) => {
 		ivrMeno:      rowData.ivrMeno      || '',
 	};
 };
+
+const CHECK_FIELDS = [
+	{ inputId: 'ivrCode', label: 'IVR 코드', type: 'text' },
+	{ inputId: 'ivrName', label: 'IVR명',    type: 'text' },
+];
 
 const SWITCH_CONFIGS = [
 	{ label: '사용여부',     name: 'ivrUseyn',     onText: '사용', offText: '미사용' },
@@ -38,74 +44,21 @@ const WORK_TIME_FIELDS = [
 	{ label: '업무 종료시간', id: 'workEtime' },
 ];
 
-const IvrFormModal = ({ open, onClose, ivrCode, rowData, onSuccess }) => {
+const IvrFormModal = ({ open, onClose, ivrCode, rowData, insttOptions = [], onSuccess }) => {
 	const isEdt = ivrCode !== null && ivrCode !== undefined;
 
 	const [form, setForm] = useState(() => buildForm(isEdt, rowData));
-	const [insttOptions, setInsttOptions] = useState([]);
-
-	useEffect(() => {
-		if (!open) return;
-		fnAjaxFetch({
-			url: `${URL.IVR_INSTT_COMBO}/IVR_INSTT.do`,
-			method: 'GET',
-			withCredentials: true,
-		}).then(res => {
-			const list = res?.data?.result || res?.data || [];
-			if (Array.isArray(list)) {
-				setInsttOptions(list.map(o => ({
-					code:   o.insttCode || o.code   || '',
-					codeNm: o.insttNm   || o.codeNm || '',
-				})));
-			}
-		}).catch(() => {});
-	}, [open]);
 
 	const updateForm   = useCallback((e) => { const { name, value } = e.target; setForm(prev => ({ ...prev, [name]: value })); }, []);
 	const updateSwitch = useCallback((payload) => { setForm(prev => ({ ...prev, ...payload })); }, []);
 
-	const handleSave = useCallback(async () => {
-		if (!form.ivrCode?.trim()) { await Swal.fire({ icon: 'warning', text: 'IVR 코드를 입력해주세요.' }); return; }
-		if (!form.ivrName?.trim()) { await Swal.fire({ icon: 'warning', text: 'IVR명을 입력해주세요.' }); return; }
-
-		const action = isEdt ? '수정' : '등록';
-		const ok = await Swal.fire({
-			icon: 'question', title: `IVR ${action}`, text: `IVR를 ${action}하시겠습니까?`,
-			showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니오', focusCancel: true,
-		});
-		if (!ok.isConfirmed) return;
-
-		try {
-			const res = await fnAjaxFetch({
-				url: URL.IVR_UPDATE,
-				method: 'POST',
-				data: {
-					mode:         isEdt ? 'Edt' : 'Ins',
-					insttCode:    form.insttCode,
-					ivrCode:      form.ivrCode,
-					ivrName:      form.ivrName,
-					ivrUseyn:     form.ivrUseyn,
-					ivrMentUseyn: form.ivrMentUseyn,
-					ivrMent:      form.ivrMent,
-					notiSday:     form.notiSday.replace(/-/g, ''),
-					notiEday:     form.notiEday.replace(/-/g, ''),
-					workStime:    form.workStime,
-					workEtime:    form.workEtime,
-					ivrMeno:      form.ivrMeno,
-				},
-				withCredentials: true,
-			});
-			const json = res?.data;
-			if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-				await Swal.fire({ icon: 'success', text: json?.MESSAGE || `${action}되었습니다` });
-				onSuccess();
-			} else {
-				await Swal.fire({ icon: 'error', text: json?.MESSAGE || `${action}에 실패했습니다` });
-			}
-		} catch (e) {
-			await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '오류가 발생했습니다' });
-		}
-	}, [form, isEdt, onSuccess]);
+	const { handleSubmit } = useCommonSubmit({
+		form,
+		checkField:      CHECK_FIELDS,
+		confirmMessage:  'IVR',
+		URL:             URL.IVR_UPDATE,
+		callback:        onSuccess,
+	});
 
 	if (!open) return null;
 	return (
@@ -214,7 +167,7 @@ const IvrFormModal = ({ open, onClose, ivrCode, rowData, onSuccess }) => {
 							<div className="modal-footer__left" />
 							<div className="modal-footer__right">
 								<button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-								<button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
+								<button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
 							</div>
 						</div>
 					</div>

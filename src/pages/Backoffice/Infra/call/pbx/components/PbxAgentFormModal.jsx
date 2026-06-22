@@ -9,7 +9,9 @@ const EMPTY_ADD_ROW = { pbxSnType: '', pbxSnIndex: '', pbxSrType: '', pbxSrIndex
 const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
     const isEdt = loginId !== null && loginId !== undefined;
 
-    const [form, setForm] = useState({ loginId: '', name: '', idCheck: 'N' });
+    const [form, setForm] = useState(
+        isEdt ? { loginId, name: '', idCheck: 'Y' } : { loginId: '', name: '', idCheck: 'N' }
+    );
     const [scenRows, setScenRows] = useState([]);
     const [addRow, setAddRow] = useState(EMPTY_ADD_ROW);
     const [idSetupMode, setIdSetupMode] = useState(null); // null | 'auto' | 'manual'
@@ -19,23 +21,9 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
     const { options: pbxIndexOptions } = useCommonCodeData('PBX_INDEX');
     const { options: insttOptions } = useCustomReqDataCombo({
         url: URL.INSTT_COMBO,
-        method: 'GET',
+        method: 'POST',
         mapping: { id: 'insttCode', text: 'allInsttNm' },
     });
-
-    useEffect(() => {
-        if (!open) return;
-        setScenRows([]);
-        setAddRow(EMPTY_ADD_ROW);
-        if (!isEdt) {
-            setForm({ loginId: '', name: '', idCheck: 'N' });
-            setIdSetupMode(null);
-            setInsttCode('');
-            return;
-        }
-        setForm({ loginId, name: '', idCheck: 'Y' });
-        setIdSetupMode(null);
-    }, [open, loginId, isEdt]);
 
     useEffect(() => {
         if (!open || !isEdt || !loginId) return;
@@ -70,12 +58,12 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
 
     const handleShowChoice = useCallback(async () => {
         const result = await Swal.fire({
-            title: '번호?�정',
-            text: '번호 ?�정 방식???�택?�세??',
+            title: '번호설정',
+            text: '번호 설정 방식을 선택하세요',
             showConfirmButton: true,
-            confirmButtonText: '?�동?�성',
+            confirmButtonText: '자동생성',
             showDenyButton: true,
-            denyButtonText: '중복?�인',
+            denyButtonText: '중복확인',
             showCancelButton: true,
             cancelButtonText: '취소',
         });
@@ -85,7 +73,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
 
     const handleAutoGenerate = useCallback(async () => {
         if (!insttCode) {
-            await Swal.fire({ icon: 'warning', text: 'Agent�??�성??기�????�택??주세??' });
+            await Swal.fire({ icon: 'warning', text: 'Agent를 생성할 기관을 선택해 주세요' });
             return;
         }
         try {
@@ -97,19 +85,19 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS') {
                 setForm(prev => ({ ...prev, loginId: String(json.result), idCheck: 'Y' }));
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?�동 ?�성?�었?�니??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '자동 생성되었습니다' });
             } else {
                 setForm(prev => ({ ...prev, idCheck: 'N' }));
-                await Swal.fire({ icon: 'error', text: 'Agent ?�성??초과?�었?�니?? 기�? 메뉴?�서 Agent 범위 �??�이?�스�??�인??주세??' });
+                await Swal.fire({ icon: 'error', text: 'Agent 생성이 초과되었습니다. 기관 메뉴에서 Agent 범위 및 에이전트를 확인해 주세요' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [insttCode]);
 
     const handleManualCheck = useCallback(async () => {
         if (!form.loginId) {
-            await Swal.fire({ icon: 'warning', text: '?�이?�트 번호�??�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: '에이전트 번호를 입력해 주세요' });
             return;
         }
         try {
@@ -121,13 +109,13 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?�용 가?�한 번호?�니??' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능한 번호입니다' });
             } else {
                 setForm(prev => ({ ...prev, idCheck: 'N' }));
-                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?��? ?�용 중인 번호?�니??' });
+                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '이미 사용 중인 번호입니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form.loginId]);
 
@@ -140,12 +128,12 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
     }, []);
 
     const handleAddScenRow = useCallback(async () => {
-        if (!addRow.pbxSnType) { await Swal.fire({ icon: 'warning', text: '?�나리오 번호�??�택??주세??' }); return; }
-        if (!addRow.pbxSnIndex) { await Swal.fire({ icon: 'warning', text: '?�나리오 ?�덱?��? ?�택??주세??' }); return; }
-        if (!addRow.pbxSrType) { await Swal.fire({ icon: 'warning', text: '?�나리오 ?�벨???�택??주세??' }); return; }
-        if (!addRow.pbxSrIndex) { await Swal.fire({ icon: 'warning', text: '?�나리오 ?�벨 ?�덱?��? ?�택??주세??' }); return; }
+        if (!addRow.pbxSnType) { await Swal.fire({ icon: 'warning', text: '시나리오 번호를 선택해 주세요' }); return; }
+        if (!addRow.pbxSnIndex) { await Swal.fire({ icon: 'warning', text: '시나리오 인덱스를 선택해 주세요' }); return; }
+        if (!addRow.pbxSrType) { await Swal.fire({ icon: 'warning', text: '시나리오 레벨을 선택해 주세요' }); return; }
+        if (!addRow.pbxSrIndex) { await Swal.fire({ icon: 'warning', text: '시나리오 레벨 인덱스를 선택해 주세요' }); return; }
         if (scenRows.some(r => r.pbxSnType === addRow.pbxSnType)) {
-            await Swal.fire({ icon: 'warning', text: '?��? ?�록???�나리오 번호?�니??' });
+            await Swal.fire({ icon: 'warning', text: '이미 등록된 시나리오 번호입니다' });
             return;
         }
         setScenRows(prev => [...prev, { ...addRow, _id: Date.now() + Math.random() }]);
@@ -158,17 +146,17 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
 
     const handleSave = useCallback(async () => {
         if (!form.loginId) {
-            await Swal.fire({ icon: 'warning', text: '?�이?�트 번호�??�력??주세??' });
+            await Swal.fire({ icon: 'warning', text: '에이전트 번호를 입력해 주세요' });
             return;
         }
-        const action = isEdt ? '?�정' : '?�록';
+        const action = isEdt ? '수정' : '등록';
         const ok = await Swal.fire({
             icon: 'question',
-            title: `?�이?�트 ${action}`,
-            html: `?�이?�트�?<b>${action}</b> ?�시겠습?�까?`,
+            title: `에이전트 ${action}`,
+            html: `에이전트를 <b>${action}</b> 하시겠습니까?`,
             showCancelButton: true,
-            confirmButtonText: '??,
-            cancelButtonText: '?�니??,
+            confirmButtonText: '예',
+            cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -190,13 +178,13 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}?�었?�니??` });
+                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', title: '?�류', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', title: '오류', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', title: '?�류', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form, scenRows, isEdt, onSuccess]);
 
@@ -206,13 +194,13 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
             <div className="modal-custom">
                 <div
                     className="modal-dialog modal-dialog-centered modal-dialog-scrollable"
-                    style={{ width: 800, maxWidth: '95%', backgroundColor: '#fff' }}
+                    style={{ width: 800, maxWidth: '95%', backgroundColor: 'var(--bs-body-bg, #fff)' }}
                 >
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
                                 <h2 className="modal-title__title">
-                                    ?�이?�트 {isEdt ? '?�정' : '?�록'}
+                                    에이전트 {isEdt ? '수정' : '등록'}
                                 </h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
@@ -240,7 +228,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                         id="agentLoginId"
                                                         type="text"
                                                         className="form-control"
-                                                        placeholder="?�자 최�? 8?�리"
+                                                        placeholder="숫자 최대 8자리"
                                                         maxLength={8}
                                                         value={form.loginId}
                                                         readOnly={idSetupMode === 'auto' && form.idCheck === 'Y'}
@@ -256,7 +244,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                             value={insttCode}
                                                             onChange={e => setInsttCode(e.target.value)}
                                                         >
-                                                            <option value="">기�? ?�택</option>
+                                                            <option value="">기관 선택</option>
                                                             {insttOptions.map(o => (
                                                                 <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                             ))}
@@ -271,32 +259,32 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                             : handleManualCheck
                                                         }
                                                     >
-                                                        {idSetupMode === null ? '번호?�정'
-                                                            : idSetupMode === 'auto' ? '?�동?�성'
-                                                            : '중복?�인'}
+                                                        {idSetupMode === null ? '번호설정'
+                                                            : idSetupMode === 'auto' ? '자동생성'
+                                                            : '중복확인'}
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-                                    {/* ?�름 */}
+                                    {/* 이름 */}
                                     <div className="col-6">
                                         <div className="input-box">
-                                            <label htmlFor="agentName" className="form-label">?�름</label>
+                                            <label htmlFor="agentName" className="form-label">이름</label>
                                             <input
                                                 id="agentName"
                                                 type="text"
                                                 className="form-control"
-                                                placeholder="?�름???�력?�주?�요."
+                                                placeholder="이름을 입력해주세요."
                                                 value={form.name}
                                                 onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
                                             />
                                         </div>
                                     </div>
-                                    {/* 비상 ?�킬 */}
+                                    {/* 비상 스킬 */}
                                     <div className="col-12">
                                         <div className="input-box">
-                                            <label className="form-label">비상 ?�킬</label>
+                                            <label className="form-label">비상 스킬</label>
                                             <div style={{ overflowX: 'auto' }}>
                                                 <table
                                                     className="content-table__sub"
@@ -308,14 +296,14 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                             <th>SN INDEX</th>
                                                             <th>SR</th>
                                                             <th>SR INDEX</th>
-                                                            <th style={{ width: 70 }}>??��</th>
+                                                            <th style={{ width: 70 }}>삭제</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {scenRows.length === 0 ? (
                                                             <tr>
                                                                 <td colSpan={5} className="text-center text-muted py-2">
-                                                                    ?�록???�킬???�습?�다.
+                                                                    등록된 스킬이 없습니다.
                                                                 </td>
                                                             </tr>
                                                         ) : scenRows.map(row => (
@@ -331,7 +319,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                                         style={{ width: '80%' }}
                                                                         onClick={() => handleDeleteScenRow(row._id)}
                                                                     >
-                                                                        ??��
+                                                                        삭제
                                                                     </button>
                                                                 </td>
                                                             </tr>
@@ -339,7 +327,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            {/* ?�킬 추�? ??*/}
+                                            {/* 스킬 추가 행 */}
                                             <div className="d-flex gap-2 mt-2 flex-wrap align-items-center">
                                                 <select
                                                     className="form-select form-select-sm"
@@ -347,7 +335,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                     value={addRow.pbxSnType}
                                                     onChange={e => updateAddRow('pbxSnType', e.target.value)}
                                                 >
-                                                    <option value="">SN ?�택</option>
+                                                    <option value="">SN 선택</option>
                                                     {pbxSnOptions.map(o => (
                                                         <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                     ))}
@@ -369,7 +357,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                     value={addRow.pbxSrType}
                                                     onChange={e => updateAddRow('pbxSrType', e.target.value)}
                                                 >
-                                                    <option value="">SR ?�택</option>
+                                                    <option value="">SR 선택</option>
                                                     {[1,2,3,4,5,6,7,8,9,10].map(n => (
                                                         <option key={n} value={String(n)}>{n}</option>
                                                     ))}
@@ -390,7 +378,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                                                     className="btn btn-sm btn-primary"
                                                     onClick={handleAddScenRow}
                                                 >
-                                                    추�?
+                                                    추가
                                                 </button>
                                             </div>
                                         </div>
@@ -402,7 +390,7 @@ const PbxAgentFormModal = ({ open, onClose, loginId, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
                             </div>
                         </div>
                     </div>

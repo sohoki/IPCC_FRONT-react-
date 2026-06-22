@@ -16,7 +16,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
     const [centerOptions, setCenterOptions] = useState([]);
     const [mediaOptions, setMediaOptions] = useState([]);
 
-    // ?�터 콤보
+    // 센터 콤보
     useEffect(() => {
         if (!open) return;
         let active = true;
@@ -29,9 +29,9 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
         return () => { active = false; };
     }, [open]);
 
-    // 미디??콤보 (centerId 변�???
+    // 미디어 콤보 (centerId 변경 시)
     useEffect(() => {
-        if (!open || !form.centerId) { setMediaOptions([]); return; }
+        if (!open || !form.centerId) return;
         let active = true;
         fnAjaxFetch({
             url: URL.CTI_MEDIA_COMBO,
@@ -43,12 +43,8 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
             const list = res?.data?.result || [];
             setMediaOptions(list.map(o => ({ code: String(o.mediaId), codeNm: o.mediaName })));
         }).catch(() => {});
-        return () => { active = false; };
+        return () => { active = false; setMediaOptions([]); };
     }, [open, form.centerId]);
-
-    // ?�릴 ??초기??    useEffect(() => {
-        if (open) setForm(EMPTY_FORM);
-    }, [open]);
 
     const updateForm = useCallback((e) => {
         const { name, value } = e.target;
@@ -61,9 +57,9 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
     }, []);
 
     const handleIdCheck = useCallback(async () => {
-        if (!form.loginId) { await Swal.fire({ icon: 'warning', text: 'LoginId�??�력??주세??' }); return; }
-        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지?�을 ?�택??주세??' }); return; }
-        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media�??�택?�주?�요.' }); return; }
+        if (!form.loginId) { await Swal.fire({ icon: 'warning', text: 'LoginId를 입력해 주세요' }); return; }
+        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
+        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media를 선택해주세요.' }); return; }
         try {
             const res = await fnAjaxFetch({
                 url: URL.CTI_LOGIN_ID_CHECK,
@@ -74,26 +70,26 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
-                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '?�용 가?�합?�다.' });
+                await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
                 setForm(prev => ({ ...prev, idCheck: 'N' }));
-                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '?��? ?�용 중입?�다.' });
+                await Swal.fire({ icon: 'warning', text: json?.MESSAGE || '이미 사용 중입니다.' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form.loginId, form.centerId, form.mediaId]);
 
     const handleSave = useCallback(async () => {
-        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지?�을 ?�택??주세??' }); return; }
-        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media�??�택?�주?�요.' }); return; }
-        if (!form.loginId) { await Swal.fire({ icon: 'warning', text: 'LoginId�??�력?�주?�요.' }); return; }
-        if (form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크�??�주?�요.' }); return; }
+        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
+        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media를 선택해주세요.' }); return; }
+        if (!form.loginId) { await Swal.fire({ icon: 'warning', text: 'LoginId를 입력해주세요.' }); return; }
+        if (form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
 
         const ok = await Swal.fire({
-            icon: 'question', title: 'LoginId ?�록',
-            html: `loginId�?<b>?�록</b> ?�시겠습?�까?`,
-            showCancelButton: true, confirmButtonText: '??, cancelButtonText: '?�니??,
+            icon: 'question', title: 'LoginId 등록',
+            html: `loginId를 <b>등록</b> 하시겠습니까?`,
+            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
             focusCancel: true,
         });
         if (!ok.isConfirmed) return;
@@ -113,13 +109,13 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
             });
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: '?�록', text: json?.MESSAGE || '?�록?�었?�니??' });
+                await Swal.fire({ icon: 'success', title: '등록', text: json?.MESSAGE || '등록되었습니다' });
                 onSuccess();
             } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 ?�중 문제가 발생?��??�니??' });
+                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
             }
         } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 �??�류가 발생?�습?�다.' });
+            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
     }, [form, onSuccess]);
 
@@ -127,28 +123,28 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
     return (
         <div className="modal-backdrop-custom">
             <div className="modal-custom">
-                <div className="modal-dialog modal-dialog-centered" style={{ width: 560, maxWidth: '90%', backgroundColor: '#fff' }}>
+                <div className="modal-dialog modal-dialog-centered" style={{ width: 560, maxWidth: '90%', backgroundColor: 'var(--bs-body-bg, #fff)' }}>
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="modal-title">
-                                <h2 className="modal-title__title">LoginId ?�록</h2>
+                                <h2 className="modal-title__title">LoginId 등록</h2>
                             </div>
                             <button type="button" className="modal-close" aria-label="Close" onClick={onClose} />
                         </div>
                         <div className="modal-body">
                             <div className="modal-body__content">
                                 <div className="row input-box-wrap">
-                                    {/* ?�터 / 주�??�어 */}
+                                    {/* 센터 / 주 미디어 */}
                                     <div className="col-6">
                                         <div className="input-box">
-                                            <label htmlFor="ctiCenterId" className="form-label">?�터</label>
+                                            <label htmlFor="ctiCenterId" className="form-label">센터</label>
                                             <select
                                                 id="ctiCenterId" name="centerId"
                                                 className="form-select"
                                                 value={form.centerId}
                                                 onChange={updateForm}
                                             >
-                                                <option value="">?�택</option>
+                                                <option value="">선택</option>
                                                 {centerOptions.map(o => (
                                                     <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                 ))}
@@ -158,7 +154,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                                     <div className="col-6">
                                         <div className="input-box">
                                             <label htmlFor="dnMediaId" className="form-label">
-                                                주�??�어 <span className="text-danger">*</span>
+                                                주 미디어 <span className="text-danger">*</span>
                                             </label>
                                             <select
                                                 id="dnMediaId" name="mediaId"
@@ -166,7 +162,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                                                 value={form.mediaId}
                                                 onChange={updateForm}
                                             >
-                                                <option value="">?�택</option>
+                                                <option value="">선택</option>
                                                 {mediaOptions.map(o => (
                                                     <option key={o.code} value={o.code}>{o.codeNm}</option>
                                                 ))}
@@ -183,12 +179,12 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                                                 <input
                                                     id="loginId" name="loginId"
                                                     type="text" className="form-control"
-                                                    placeholder="LoginId�??�력?�주?�요."
+                                                    placeholder="LoginId를 입력해주세요."
                                                     value={form.loginId}
                                                     onChange={updateForm}
                                                 />
                                                 <button type="button" className="btn btn-primary btn-default__blue" onClick={handleIdCheck}>
-                                                    중복?�인
+                                                    중복확인
                                                 </button>
                                             </div>
                                         </div>
@@ -203,9 +199,9 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                                                 value={form.monitorFlag}
                                                 onChange={updateForm}
                                             >
-                                                <option value="">?�음</option>
+                                                <option value="">없음</option>
                                                 <option value="1">감시</option>
-                                                <option value="0">감시?�함</option>
+                                                <option value="0">감시안함</option>
                                             </select>
                                         </div>
                                     </div>
@@ -216,7 +212,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>?�??/button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
                             </div>
                         </div>
                     </div>

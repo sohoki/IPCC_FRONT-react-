@@ -232,6 +232,7 @@ const PbxAgentInfo = () => {
                 </div>
             </div>
             <PbxAgentFormModal
+                key={formModalOpen ? (selectedLoginId ?? 'new') : 'closed'}
                 open={formModalOpen}
                 onClose={() => setFormModalOpen(false)}
                 loginId={selectedLoginId}
