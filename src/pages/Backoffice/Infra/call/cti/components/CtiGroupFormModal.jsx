@@ -1,14 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
-
-const EMPTY_FORM = {
-    employeegrpId: '',
-    employeegrpName: '',
-    monitorFlag: '1',
-    idCheck: 'N',
-};
 
 /**
  * Props:
@@ -19,15 +13,27 @@ const EMPTY_FORM = {
  */
 const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuccess }) => {
     const isEdt = groupData !== null && groupData !== undefined;
+
     const [form, setForm] = useState(
         isEdt && groupData
             ? {
+                mode: 'Edt',
+                centerId,
+                tenantId,
                 employeegrpId: String(groupData.employeegrpId || ''),
                 employeegrpName: groupData.employeegrpName || '',
                 monitorFlag: String(groupData.monitorFlag ?? '1'),
                 idCheck: 'Y',
               }
-            : EMPTY_FORM
+            : {
+                mode: 'Ins',
+                centerId,
+                tenantId,
+                employeegrpId: '',
+                employeegrpName: '',
+                monitorFlag: '1',
+                idCheck: 'N',
+              }
     );
 
     const updateForm = useCallback((e) => {
@@ -47,7 +53,7 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                 withCredentials: true,
             });
             const json = res?.data;
-            if (json?.STATUS === 'SUCCESS') {
+            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
@@ -59,48 +65,18 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
         }
     }, [form.employeegrpId, centerId, tenantId]);
 
-    const handleSave = useCallback(async () => {
-        if (!centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
-        if (!tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id를 선택해주세요.' }); return; }
-        if (!form.employeegrpId) { await Swal.fire({ icon: 'warning', text: 'Group ID를 입력해주세요.' }); return; }
-        if (!form.employeegrpName) { await Swal.fire({ icon: 'warning', text: 'Group명을 입력해주세요.' }); return; }
-        if (!form.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시를 선택해주세요.' }); return; }
-        if (!isEdt && form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
-
-        const action = isEdt ? '수정' : '등록';
-        const ok = await Swal.fire({
-            icon: 'question', title: `Group ${action}`,
-            html: `Group을 <b>${action}</b> 하시겠습니까?`,
-            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
-
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_GROUP_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: isEdt ? 'Edt' : 'Ins',
-                    centerId,
-                    tenantId,
-                    employeegrpId: form.employeegrpId,
-                    employeegrpName: form.employeegrpName,
-                    monitorFlag: form.monitorFlag,
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
-                onSuccess(tenantId, centerId);
-            } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
-        }
-    }, [form, centerId, tenantId, isEdt, onSuccess]);
+    const { handleSubmit } = useCommonSubmit({
+        form,
+        URL: URL.CTI_GROUP_UPDATE,
+        confirmMessage: 'Group',
+        checkField: [
+            { id: 'employeegrpId',   type: 'input',  label: 'Group ID' },
+            { id: 'employeegrpName', type: 'input',  label: 'Group 명' },
+            { id: 'monitorFlag',     type: 'select', label: '감시' },
+        ],
+        idFieldMessage: 'Group ID',
+        callback: () => onSuccess(tenantId, centerId),
+    });
 
     const handleDelete = useCallback(async () => {
         const ok = await Swal.fire({
@@ -211,7 +187,7 @@ const CtiGroupFormModal = ({ open, onClose, centerId, tenantId, groupData, onSuc
                             </div>
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
                             </div>
                         </div>
                     </div>

@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
-
-const EMPTY_PART_FORM = { employeepartId: '', employeepartName: '', monitorFlag: '', idCheck: 'N' };
 
 /**
  * CTI 파트 현황 + 파트 등록/수정 통합 모달.
@@ -14,22 +13,16 @@ const EMPTY_PART_FORM = { employeepartId: '', employeepartName: '', monitorFlag:
 const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) => {
     const [view, setView] = useState('list');
     const [partRows, setPartRows] = useState([]);
-    const [partForm, setPartForm] = useState(EMPTY_PART_FORM);
-    const [partMode, setPartMode] = useState('Ins');
-
-    const loadParts = useCallback(async () => {
-        if (!employeegrpId || !tenantId) return;
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_PART_LIST,
-                method: 'POST',
-                data: { centerId: centerId || '1', pageUnit: '50', pageIndex: '1', tenantId, employeegrpId },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            setPartRows(json?.resultList || json?.result?.resultList || []);
-        } catch { setPartRows([]); }
-    }, [employeegrpId, tenantId, centerId]);
+    const [partForm, setPartForm] = useState({
+        mode: 'Ins',
+        centerId: centerId || '1',
+        tenantId,
+        employeegrpId,
+        employeepartId: '',
+        employeepartName: '',
+        monitorFlag: '',
+        idCheck: 'N',
+    });
 
     useEffect(() => {
         if (!open || !employeegrpId || !tenantId) return;
@@ -47,22 +40,46 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         return () => { active = false; setView('list'); };
     }, [open, employeegrpId, tenantId, centerId]);
 
+    const reloadParts = useCallback(() => {
+        if (!employeegrpId || !tenantId) return;
+        fnAjaxFetch({
+            url: URL.CTI_PART_LIST,
+            method: 'POST',
+            data: { centerId: centerId || '1', pageUnit: '50', pageIndex: '1', tenantId, employeegrpId },
+            withCredentials: true,
+        }).then(res => {
+            const json = res?.data;
+            setPartRows(json?.resultList || json?.result?.resultList || []);
+        }).catch(() => setPartRows([]));
+    }, [employeegrpId, tenantId, centerId]);
+
     const openAddForm = useCallback(() => {
-        setPartForm(EMPTY_PART_FORM);
-        setPartMode('Ins');
+        setPartForm({
+            mode: 'Ins',
+            centerId: centerId || '1',
+            tenantId,
+            employeegrpId,
+            employeepartId: '',
+            employeepartName: '',
+            monitorFlag: '',
+            idCheck: 'N',
+        });
         setView('form');
-    }, []);
+    }, [centerId, tenantId, employeegrpId]);
 
     const openEditForm = useCallback((partData) => {
         setPartForm({
+            mode: 'Edt',
+            centerId: centerId || '1',
+            tenantId,
+            employeegrpId,
             employeepartId: String(partData.employeepartId || ''),
             employeepartName: partData.employeepartName || '',
             monitorFlag: String(partData.monitorFlag ?? ''),
             idCheck: 'Y',
         });
-        setPartMode('Edt');
         setView('form');
-    }, []);
+    }, [centerId, tenantId, employeegrpId]);
 
     const handleCancelForm = useCallback(() => {
         setView('list');
@@ -81,7 +98,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                 withCredentials: true,
             });
             const json = res?.data;
-            if (json?.STATUS === 'SUCCESS') {
+            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 setPartForm(prev => ({ ...prev, idCheck: 'Y' }));
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
@@ -93,47 +110,17 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         }
     }, [partForm.employeepartId, employeegrpId, tenantId, centerId]);
 
-    const handleSavePart = useCallback(async () => {
-        if (!partForm.employeepartId) { await Swal.fire({ icon: 'warning', text: 'Part ID를 입력해주세요.' }); return; }
-        if (!partForm.monitorFlag) { await Swal.fire({ icon: 'warning', text: '감시를 선택해 주세요' }); return; }
-        if (partMode === 'Ins' && partForm.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
-
-        const action = partMode === 'Ins' ? '등록' : '수정';
-        const ok = await Swal.fire({
-            icon: 'question', title: `Part ${action}`,
-            html: `Part 정보를 <b>${action}</b> 하시겠습니까?`,
-            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
-
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_PART_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: partMode,
-                    employeegrpId,
-                    tenantId,
-                    centerId: centerId || '1',
-                    employeepartId: partForm.employeepartId,
-                    employeepartName: partForm.employeepartName,
-                    monitorFlag: partForm.monitorFlag,
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
-                setView('list');
-                loadParts();
-            } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
-        }
-    }, [partForm, partMode, employeegrpId, tenantId, centerId, loadParts]);
+    const { handleSubmit: handleSavePart } = useCommonSubmit({
+        form: partForm,
+        URL: URL.CTI_PART_UPDATE,
+        confirmMessage: 'Part',
+        checkField: [
+            { id: 'employeepartId', type: 'input',  label: 'Part ID' },
+            { id: 'monitorFlag',    type: 'select', label: '감시' },
+        ],
+        idFieldMessage: 'Part ID',
+        callback: () => { setView('list'); reloadParts(); },
+    });
 
     const handleDeletePart = useCallback(async (employeepartId) => {
         const ok = await Swal.fire({
@@ -154,14 +141,14 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
             const json = res?.data;
             if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '삭제되었습니다' });
-                loadParts();
+                reloadParts();
             } else {
                 await Swal.fire({ icon: 'error', text: json?.MESSAGE || '삭제에 실패했습니다.' });
             }
         } catch (e) {
             await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
         }
-    }, [employeegrpId, tenantId, centerId, loadParts]);
+    }, [employeegrpId, tenantId, centerId, reloadParts]);
 
     if (!open) return null;
 
@@ -219,7 +206,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
         <>
             <div className="modal-header">
                 <div className="modal-title">
-                    <h2 className="modal-title__title">Part {partMode === 'Ins' ? '등록' : '수정'}</h2>
+                    <h2 className="modal-title__title">Part {partForm.mode === 'Ins' ? '등록' : '수정'}</h2>
                 </div>
                 <button type="button" className="modal-close" aria-label="Close" onClick={handleCancelForm} />
             </div>
@@ -231,7 +218,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                                 <label htmlFor="employeepartId" className="form-label">
                                     Part ID <span className="text-danger">*</span>
                                 </label>
-                                {partMode === 'Edt' ? (
+                                {partForm.mode === 'Edt' ? (
                                     <input type="text" className="form-control" value={partForm.employeepartId} readOnly />
                                 ) : (
                                     <div className="input-group">
@@ -287,7 +274,7 @@ const CtiPartListModal = ({ open, onClose, employeegrpId, tenantId, centerId }) 
                 <div className="modal-footer__right">
                     <button type="button" className="btn btn-action__lightblue" onClick={handleCancelForm}>취소</button>
                     <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSavePart}>
-                        {partMode === 'Ins' ? '등록' : '수정'}
+                        {partForm.mode === 'Ins' ? '등록' : '수정'}
                     </button>
                 </div>
             </div>

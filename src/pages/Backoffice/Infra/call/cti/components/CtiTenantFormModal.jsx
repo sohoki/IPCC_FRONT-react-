@@ -1,11 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
 
 const SERVICE_LEVEL_OPTIONS = ['1','2','3','4','5','6','7','8','9'];
 
 const EMPTY_FORM = {
+    mode: 'Ins',
     centerId: '1',
     tenantId: '',
     tenantName: '',
@@ -18,6 +20,7 @@ const CtiTenantFormModal = ({ open, onClose, tenantId, rowData, onSuccess }) => 
     const [form, setForm] = useState(
         isEdt && rowData
             ? {
+                mode: 'Edt',
                 centerId: String(rowData.centerId || '1'),
                 tenantId: String(rowData.tenantId || ''),
                 tenantName: rowData.tenantName || '',
@@ -56,7 +59,7 @@ const CtiTenantFormModal = ({ open, onClose, tenantId, rowData, onSuccess }) => 
                 withCredentials: true,
             });
             const json = res?.data;
-            if (json?.STATUS === 'SUCCESS') {
+            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
@@ -68,45 +71,18 @@ const CtiTenantFormModal = ({ open, onClose, tenantId, rowData, onSuccess }) => 
         }
     }, [form.centerId, form.tenantId]);
 
-    const handleSave = useCallback(async () => {
-        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
-        if (!form.tenantId) { await Swal.fire({ icon: 'warning', text: 'tenant Id를 입력해주세요.' }); return; }
-        if (!form.tenantName) { await Swal.fire({ icon: 'warning', text: 'tenant Name을 입력해주세요.' }); return; }
-        if (!isEdt && form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
-
-        const action = isEdt ? '수정' : '등록';
-        const ok = await Swal.fire({
-            icon: 'question', title: `Tenant ${action}`,
-            html: `Tenant를 <b>${action}</b> 하시겠습니까?`,
-            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
-
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_TENANT_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: isEdt ? 'Edt' : 'Ins',
-                    centerId: form.centerId,
-                    tenantId: form.tenantId,
-                    tenantName: form.tenantName,
-                    servicelevelCalc: form.servicelevelCalc,
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
-                onSuccess();
-            } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
-        }
-    }, [form, isEdt, onSuccess]);
+    const { handleSubmit } = useCommonSubmit({
+        form,
+        URL: URL.CTI_TENANT_UPDATE,
+        confirmMessage: 'Tenant',
+        checkField: [
+            { id: 'centerId',    type: 'select', label: '지역' },
+            { id: 'tenantId',    type: 'input',  label: 'tenant Id' },
+            { id: 'tenantName',  type: 'input',  label: 'tenant Name' },
+        ],
+        idFieldMessage: 'tenant Id',
+        callback: onSuccess,
+    });
 
     if (!open) return null;
     return (
@@ -203,7 +179,7 @@ const CtiTenantFormModal = ({ open, onClose, tenantId, rowData, onSuccess }) => 
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
                             </div>
                         </div>
                     </div>

@@ -1,24 +1,26 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
 import UseSwitch from '@/components/Common/IosSwitch.jsx';
 
 const EMPTY_FORM = {
+    mode: 'Ins',
     centerId: '',
     tenantId: '',
-    dnMajorId: '',
-    dnSubId: '',
+    dnmajorId: '',
+    dnsubId: '',
     mediaId: '',
-    submediaId: '',
+    submediaId: '0',
     dnModelname: '',
     dnIp: '',
     dnKind: '',
     dnType: '',
     dn: '',
     observerFlag: '1',
-    monitorFlag: '',
-    tag: '',
+    monitorFlag: '0',
+    tag: '0',
     dnServicedesc: '0',
     idCheck: 'N',
 };
@@ -53,20 +55,21 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
     const [form, setForm] = useState(() =>
         isEdt && rowData
             ? {
+                mode: 'Edt',
                 centerId: rowData.centerId || '',
                 tenantId: rowData.tenantId || '',
-                dnMajorId: rowData.dnmajorId || '',
-                dnSubId: rowData.dnsubId || '',
+                dnmajorId: rowData.dnmajorId || '',
+                dnsubId: rowData.dnsubId || '',
                 mediaId: rowData.mediaId || '',
-                submediaId: rowData.submediaId || '',
+                submediaId: rowData.submediaId || '0',
                 dnModelname: rowData.dnModelname || '',
                 dnIp: rowData.dnIp || '',
                 dnKind: rowData.dnKind || '',
                 dnType: rowData.dnType || '',
                 dn: rowData.dn || dn || '',
                 observerFlag: String(rowData.observerFlag ?? '1'),
-                monitorFlag: String(rowData.monitorFlag ?? ''),
-                tag: rowData.tag || '',
+                monitorFlag: String(rowData.monitorFlag ?? '0'),
+                tag: rowData.tag || '0',
                 dnServicedesc: rowData.dnServicedesc || '0',
                 idCheck: 'Y',
               }
@@ -130,27 +133,27 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
 
     // DN 소분류 콤보 (centerId + tenantId + majorId 의존)
     useEffect(() => {
-        if (!open || !form.centerId || !form.tenantId || !form.dnMajorId) return;
+        if (!open || !form.centerId || !form.tenantId || !form.dnmajorId) return;
         let active = true;
-        fetchCombo(URL.CTI_DN_SUB_COMBO, { centerId: form.centerId, tenantId: form.tenantId, dnmajorId: form.dnMajorId })
+        fetchCombo(URL.CTI_DN_SUB_COMBO, { centerId: form.centerId, tenantId: form.tenantId, dnmajorId: form.dnmajorId })
             .then(list => {
                 if (!active) return;
                 setSubOptions(list.map(o => ({ code: String(o.dnsubId), codeNm: o.dnsubName || o.dnsubId })));
             }).catch(() => {});
         return () => { active = false; setSubOptions([]); };
-    }, [open, form.centerId, form.tenantId, form.dnMajorId]);
+    }, [open, form.centerId, form.tenantId, form.dnmajorId]);
 
-    // 연쇄 onChange 핸들러 (연쇄 초기화 포함)
+    // 연쇄 onChange 핸들러
     const handleCenterChange = useCallback((e) => {
-        setForm(prev => ({ ...prev, centerId: e.target.value, tenantId: '', dnMajorId: '', dnSubId: '', mediaId: '' }));
+        setForm(prev => ({ ...prev, centerId: e.target.value, tenantId: '', dnmajorId: '', dnsubId: '', mediaId: '' }));
     }, []);
 
     const handleTenantChange = useCallback((e) => {
-        setForm(prev => ({ ...prev, tenantId: e.target.value, dnMajorId: '', dnSubId: '' }));
+        setForm(prev => ({ ...prev, tenantId: e.target.value, dnmajorId: '', dnsubId: '' }));
     }, []);
 
     const handleMajorChange = useCallback((e) => {
-        setForm(prev => ({ ...prev, dnMajorId: e.target.value, dnSubId: '' }));
+        setForm(prev => ({ ...prev, dnmajorId: e.target.value, dnsubId: '' }));
     }, []);
 
     const updateForm = useCallback((e) => {
@@ -171,7 +174,7 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                 withCredentials: true,
             });
             const json = res?.data;
-            if (json?.STATUS === 'SUCCESS') {
+            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능한 DN입니다' });
             } else {
@@ -183,64 +186,21 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
         }
     }, [form.centerId, form.tenantId, form.dn]);
 
-    // 저장
-    const handleSave = useCallback(async () => {
-        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해주세요.' }); return; }
-        if (!form.tenantId) { await Swal.fire({ icon: 'warning', text: 'Tenant를 선택해주세요.' }); return; }
-        if (!form.dnMajorId) { await Swal.fire({ icon: 'warning', text: 'DN 대분류를 선택해주세요.' }); return; }
-        if (!form.dnSubId) { await Swal.fire({ icon: 'warning', text: 'DN 소분류를 선택해주세요.' }); return; }
-        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media를 선택해주세요.' }); return; }
-        if (!form.dn) { await Swal.fire({ icon: 'warning', text: 'DN을 입력해주세요.' }); return; }
-
-        const action = isEdt ? '수정' : '등록';
-        const ok = await Swal.fire({
-            icon: 'question',
-            title: `DN ${action}`,
-            html: `DN을 <b>${action}</b> 하시겠습니까?`,
-            showCancelButton: true,
-            confirmButtonText: '예',
-            cancelButtonText: '아니요',
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
-
-        const nvl = (v, def = '0') => (v === '' || v === null || v === undefined) ? def : v;
-
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_DN_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: isEdt ? 'Edt' : 'Ins',
-                    centerId: form.centerId,
-                    tenantId: form.tenantId,
-                    dnmajorId: form.dnMajorId,
-                    dnsubId: form.dnSubId,
-                    dn: form.dn,
-                    mediaId: form.mediaId,
-                    submediaId: nvl(form.submediaId),
-                    dnModelname: form.dnModelname,
-                    dnServicedesc: nvl(form.dnServicedesc),
-                    dnKind: form.dnKind,
-                    dnType: form.dnType,
-                    dnIp: form.dnIp,
-                    observerFlag: nvl(form.observerFlag),
-                    monitorFlag: nvl(form.monitorFlag),
-                    tag: nvl(form.tag),
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: action, text: json?.MESSAGE || `${action}되었습니다` });
-                onSuccess();
-            } else {
-                await Swal.fire({ icon: 'error', title: '오류', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', title: '오류', text: e?.message || '처리 중 오류가 발생했습니다.' });
-        }
-    }, [form, isEdt, onSuccess]);
+    const { handleSubmit } = useCommonSubmit({
+        form,
+        URL: URL.CTI_DN_UPDATE,
+        confirmMessage: 'DN',
+        checkField: [
+            { id: 'centerId',  type: 'select', label: '지역' },
+            { id: 'tenantId',  type: 'select', label: 'Tenant' },
+            { id: 'dnmajorId', type: 'select', label: 'DN 대분류' },
+            { id: 'dnsubId',   type: 'select', label: 'DN 소분류' },
+            { id: 'mediaId',   type: 'select', label: 'Media' },
+            { id: 'dn',        type: 'input',  label: 'DN' },
+        ],
+        idFieldMessage: 'DN',
+        callback: onSuccess,
+    });
 
     if (!open) return null;
     return (
@@ -303,13 +263,13 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                                     {form.tenantId && (
                                         <div className="col-6">
                                             <div className="input-box">
-                                                <label htmlFor="dnMajorId" className="form-label">
+                                                <label htmlFor="dnmajorId" className="form-label">
                                                     DN 대분류 <span className="text-danger">*</span>
                                                 </label>
                                                 <select
-                                                    id="dnMajorId" name="dnMajorId"
+                                                    id="dnmajorId" name="dnmajorId"
                                                     className="form-select"
-                                                    value={form.dnMajorId}
+                                                    value={form.dnmajorId}
                                                     onChange={handleMajorChange}
                                                 >
                                                     <option value="">없음</option>
@@ -320,16 +280,16 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                                             </div>
                                         </div>
                                     )}
-                                    {form.dnMajorId && (
+                                    {form.dnmajorId && (
                                         <div className="col-6">
                                             <div className="input-box">
-                                                <label htmlFor="dnSubId" className="form-label">
+                                                <label htmlFor="dnsubId" className="form-label">
                                                     DN 소분류 <span className="text-danger">*</span>
                                                 </label>
                                                 <select
-                                                    id="dnSubId" name="dnSubId"
+                                                    id="dnsubId" name="dnsubId"
                                                     className="form-select"
-                                                    value={form.dnSubId}
+                                                    value={form.dnsubId}
                                                     onChange={updateForm}
                                                 >
                                                     <option value="">없음</option>
@@ -433,10 +393,7 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                                                 DN <span className="text-danger">*</span>
                                             </label>
                                             {isEdt ? (
-                                                <input
-                                                    id="dn" type="text" className="form-control"
-                                                    value={form.dn} readOnly
-                                                />
+                                                <input id="dn" type="text" className="form-control" value={form.dn} readOnly />
                                             ) : (
                                                 <div className="input-group">
                                                     <input
@@ -449,11 +406,7 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                                                             setForm(prev => ({ ...prev, dn: v, idCheck: 'N' }));
                                                         }}
                                                     />
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-primary btn-default__blue"
-                                                        onClick={handleIdCheck}
-                                                    >
+                                                    <button type="button" className="btn btn-primary btn-default__blue" onClick={handleIdCheck}>
                                                         중복확인
                                                     </button>
                                                 </div>
@@ -511,7 +464,7 @@ const CtiDnFormModal = ({ open, onClose, dn, rowData, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
                             </div>
                         </div>
                     </div>

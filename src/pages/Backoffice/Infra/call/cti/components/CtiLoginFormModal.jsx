@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import Swal from '@/lib/swal.js';
 import { fnAjaxFetch } from '@/service/api/fn-ajax-fetch.jsx';
+import { useCommonSubmit } from '@/hooks/use-common-submit.js';
 import URL from '@/constants/URL.jsx';
 
 const EMPTY_FORM = {
+    mode: 'Ins',
     centerId: '1',
     mediaId: '',
     loginId: '',
@@ -68,7 +70,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                 withCredentials: true,
             });
             const json = res?.data;
-            if (json?.STATUS === 'SUCCESS') {
+            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
                 setForm(prev => ({ ...prev, idCheck: 'Y' }));
                 await Swal.fire({ icon: 'success', text: json?.MESSAGE || '사용 가능합니다.' });
             } else {
@@ -80,44 +82,18 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
         }
     }, [form.loginId, form.centerId, form.mediaId]);
 
-    const handleSave = useCallback(async () => {
-        if (!form.centerId) { await Swal.fire({ icon: 'warning', text: '지역을 선택해 주세요' }); return; }
-        if (!form.mediaId) { await Swal.fire({ icon: 'warning', text: 'Media를 선택해주세요.' }); return; }
-        if (!form.loginId) { await Swal.fire({ icon: 'warning', text: 'LoginId를 입력해주세요.' }); return; }
-        if (form.idCheck !== 'Y') { await Swal.fire({ icon: 'warning', text: '중복 체크를 해주세요.' }); return; }
-
-        const ok = await Swal.fire({
-            icon: 'question', title: 'LoginId 등록',
-            html: `loginId를 <b>등록</b> 하시겠습니까?`,
-            showCancelButton: true, confirmButtonText: '예', cancelButtonText: '아니요',
-            focusCancel: true,
-        });
-        if (!ok.isConfirmed) return;
-
-        try {
-            const res = await fnAjaxFetch({
-                url: URL.CTI_LOGIN_ID_UPDATE,
-                method: 'POST',
-                data: {
-                    mode: 'Ins',
-                    loginId: form.loginId,
-                    mediaId: form.mediaId,
-                    centerId: form.centerId,
-                    monitorFlag: form.monitorFlag,
-                },
-                withCredentials: true,
-            });
-            const json = res?.data;
-            if (json?.STATUS === 'SUCCESS' || json?.resultCodeInfo === 'SUCCESS') {
-                await Swal.fire({ icon: 'success', title: '등록', text: json?.MESSAGE || '등록되었습니다' });
-                onSuccess();
-            } else {
-                await Swal.fire({ icon: 'error', text: json?.MESSAGE || '처리 중 문제가 발생했습니다' });
-            }
-        } catch (e) {
-            await Swal.fire({ icon: 'error', text: e?.message || '처리 중 오류가 발생했습니다.' });
-        }
-    }, [form, onSuccess]);
+    const { handleSubmit } = useCommonSubmit({
+        form,
+        URL: URL.CTI_LOGIN_ID_UPDATE,
+        confirmMessage: 'LoginId',
+        checkField: [
+            { id: 'centerId', type: 'select', label: '지역' },
+            { id: 'mediaId',  type: 'select', label: 'Media' },
+            { id: 'loginId',  type: 'input',  label: 'LoginId' },
+        ],
+        idFieldMessage: 'LoginId',
+        callback: onSuccess,
+    });
 
     if (!open) return null;
     return (
@@ -212,7 +188,7 @@ const CtiLoginFormModal = ({ open, onClose, onSuccess }) => {
                             <div className="modal-footer__left" />
                             <div className="modal-footer__right">
                                 <button type="button" className="btn btn-action__lightblue" onClick={onClose}>취소</button>
-                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSave}>저장</button>
+                                <button type="button" className="btn btn-primary btn-action__blue" onClick={handleSubmit}>저장</button>
                             </div>
                         </div>
                     </div>
